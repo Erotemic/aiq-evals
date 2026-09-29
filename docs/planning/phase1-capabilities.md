@@ -12,7 +12,7 @@ No general upstream capability follows from a local fixture.
 | Multiple scorers/metrics | P (81 fresh MCQA statistics; multiple score names) | T | S (match, includes) |
 | Agent and tool execution | T | P (OpenAI Agents scaffold, `double`) | P (`use_tools`, `double`) |
 | Trajectories | P (fresh scenario state and per-instance statistics) | S (assistant/tool/assistant turns) | S (messages/events) |
-| Sandboxing | T | T | P (`local` sandbox: tool exec inside it; directory removed on completion and on aiq-magnet-evals cancellation. `docker` sandbox with the example compose (digest-pinned `ubuntu:24.04`, `network_mode: none`, no volumes): tool exec inside the container, no host files, loopback only; container removed on completion and on cancellation; see `phase7-evidence.md`) |
+| Sandboxing | T | T (unsupported in v1, scope revision R1) | P (`local` sandbox: tool exec inside it; directory removed on completion and on aiq-magnet-evals cancellation. `docker` sandbox with the example compose (digest-pinned `ubuntu:24.04`, `network_mode: none`, no volumes): tool exec inside the container, no host files, loopback only; container removed on completion and on cancellation; see `phase7-evidence.md`) |
 | Epochs/repetitions | S (train trials as epochs) | T | S (two epochs, mean/mode reducers) |
 | Native import | S (MAGNET reuse; aiq-evals adapter incl. MAGNET symlinked runs) | S | S (`.eval`, JSON, directory) |
 | Resume | T | T | T |

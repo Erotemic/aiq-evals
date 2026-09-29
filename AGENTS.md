@@ -12,7 +12,7 @@ engine when computation is required.
   (https://github.com/Erotemic/aiq-magnet-evals); import package `magnet_evals`;
   CLI `aiq-magnet-evals` (`aiq-evals` remains as an alias).
 - Some `aiq-evals` strings are deliberately unchanged because they are artifact
-  or identity inputs: the identity algorithm `aiq-evals-measurement-v2+sha256`,
+  or identity inputs: the identity algorithm prefix `aiq-evals-measurement-v*` (currently v3),
   HELM's suite name, OLMo's default harness name, and the `.aiq-evals-*` worker
   directories. Renaming them would change identities or orphan stored runs.
 - `aiq-magnet` is the MAGNET repository, the consumer of this package.

@@ -11,8 +11,8 @@ had been pushed when this was written.
 
 | Item | Value |
 | --- | --- |
-| aiq-magnet-evals | `main` through `6429b31` (ADR-0010, ADR-0011, worker isolation, rename, packaged examples, Docker sandbox, review fixes, `lock_held`, per-role Inspect endpoints), plus documentation commits |
-| aiq-magnet | branch `dev/aiq-evals-integration`: `c0f07a5` (fixes and tests), `40cb99a` (recipes), `ecf1bf6` (CI job), `27d8a51` and `c0a6a5d` (review fixes); `uv.lock` pending |
+| aiq-magnet-evals | `main` through `ece89b4` (ADR-0010 to ADR-0012, identity v3, worker isolation, rename, packaged examples, Docker sandbox, review fixes, `lock_held`, per-role Inspect endpoints, import snapshots), plus documentation commits |
+| aiq-magnet | branch `dev/aiq-evals-integration`: `c0f07a5` (fixes and tests), `40cb99a` (recipes), `ecf1bf6` (CI job), `27d8a51`, `c0a6a5d`, and the container-lease commit (review fixes); `uv.lock` pending |
 | HELM worker and MAGNET | CPython 3.12.3; `crfm-helm==0.5.14` with `dev/environments/phase1/helm-py312-constraints.txt`; kwdagger 0.4.1, cmd_queue 0.3.2 |
 | Inspect worker | CPython 3.11.15 (uv-managed); `inspect-ai==0.3.272` with `inspect-py311-constraints.txt` |
 | OLMo worker | olmo-eval `73ade80e24f796af55caeb8fd7b75a7f3fd607fd`, `uv sync --frozen --extra litellm --extra agents`, CPython 3.12.3 |
@@ -80,6 +80,20 @@ lease (the ledger holds exactly one). An Inspect primary and a separately
 leased grader share one lease claiming both endpoints. Requests name a dead
 `base_url`, so success proves the lease supplied the endpoint.
 
+A third review found the following, fixed in aiq-magnet-evals (ADR-0012,
+identity v3) and MAGNET:
+
+| Finding | Fix | Test |
+| --- | --- | --- |
+| an import read its live source twice (normalized 0.25, bundled 0.75) | one snapshot feeds identity, normalization, and publication; `expected_import_identity` refuses other content before anything is published | `test_an_import_normalizes_and_preserves_the_same_bytes`, `test_an_import_of_other_content_than_expected_publishes_nothing` (both fail on the old code); MAGNET passes its scheduled `import_identity` |
+| an explicit import became the canonical (executed) result | imports never seed the canonical run (ADR-0012) | `test_different_native_content_is_imported_not_reused`, `test_import_then_reuse_and_changed_artifact_identity` |
+| container + lease lost the served-model check | `INFER_STACK_ENDPOINT_<ALIAS>` forwarded into the container for each leased alias; a missing variable is an error, never assumed | `test_leasing_is_decided_by_a_gate_when_the_node_runs`; live `test_a_leased_container_verifies_the_served_model` (alias `example-lease` serves `gpt-4o-mini`; fails with forwarding disabled) |
+| operational fields in the identity | identity v3 drops `required_secrets` and `provider_options.base_url` (and adapter copies) | `test_operational_request_fields_do_not_change_the_measurement`, `test_endpoint_url_is_not_a_measurement_input` (Inspect, OLMo) |
+
+The review's plan-accounting points are now explicit scope revisions R1-R4 in
+`aiq-evals-plan.md`: OLMo sandboxing, OLMo judge errors, release smoke checks
+(release gate G10), and the MAGNET M1 migration.
+
 Two further defects found and fixed during this pass:
 
 - Workers received the caller's whole `site-packages` on `PYTHONPATH` when
@@ -92,7 +106,7 @@ Two further defects found and fixed during this pass:
 
 MAGNET's full suite, with every integration prerequisite required
 (`PATH=<helm-venv>/bin:$PATH MAGNET_REQUIRE_AIQ_EVALS=1 MAGNET_TEST_DOCKER=1 ... python -m pytest -q magnet tests`,
-Docker group): 469 passed, 16 skipped (MAGNET's own optional skips), 0 failed.
+Docker group): 470 passed, 16 skipped (MAGNET's own optional skips), 0 failed.
 The legacy evaluator, HELM loaders/materialization, predictor, and llama/theory
 card tests are unchanged and pass. (Card nodes run a bare `python`, so the venv
 must be on `PATH`; without it, 4 card tests fail on `main` too.)
@@ -214,7 +228,7 @@ evaluation, `NOT_EVALUATED`), `test_static_errors_surface_in_a_dry_run`, and
 
 Run: `python -m pytest -q tests/test_aiq_evals_integration.py` gives 37 passed;
 `tests/test_aiq_evals_examples.py` gives 19 passed; the container test gives
-1 passed (Docker group); `tests/test_aiq_evals_lease.py` gives 2 passed.
+1 passed (Docker group); `tests/test_aiq_evals_lease.py` gives 3 passed.
 
 ## CI
 
@@ -230,9 +244,9 @@ reproduction".
 
 `AIQ_MAGNET_EVALS_DIR=<aiq-magnet-evals checkout> dev/ci/aiq_evals_integration.sh <fresh dir>`
 (run with Docker group access) builds all four environments from scratch and
-runs the four files with `MAGNET_REQUIRE_AIQ_EVALS=1`: 59 passed, 0 skipped
-(37 integration, 19 examples, 1 container, 2 live leases), exit 0, at MAGNET
-`c0a6a5d` with aiq-magnet-evals `6429b31`.
+runs the four files with `MAGNET_REQUIRE_AIQ_EVALS=1`: 60 passed, 0 skipped
+(37 integration, 19 examples, 1 container, 3 live leases), exit 0, with
+aiq-magnet-evals `ece89b4`.
 
 ## Open
 

@@ -121,7 +121,9 @@ For OLMo Eval and Inspect:
   event loop;
 - [x] prove owned child workers are terminated on cancellation;
 - [x] prove engine-owned sandboxes/resources are cleaned up (Inspect `local`
-  sandbox on completion and cancellation; Docker and OLMo sandboxes untested);
+  sandbox on completion and cancellation. Docker was untested in Phase 1; Inspect's
+  Docker sandbox was verified on 2026-09-29 (`phase7-evidence.md`). OLMo sandboxes
+  remain untested; see scope revision R1);
 - [x] document which process owns each lifecycle boundary.
 
 ### P1-07 Initial capability matrix
@@ -328,11 +330,14 @@ review in `../security-review.md`.
 - [x] normalized trajectory access with explicit loss-of-detail metadata;
 - [x] turn/time/concurrency limits;
 - [x] secret handling/redaction;
-- [x] tool/judge error mapping (OLMo judge errors untested);
+- [x] tool/judge error mapping for Inspect (tool and judge) and OLMo (tool). OLMo
+  judge-error mapping is not claimed: scope revision R2;
 - [x] cancellation cleanup;
 - [x] isolated attempt retries;
 - [x] external endpoint support (local OpenAI-compatible endpoints);
-- [x] optional sandbox examples (Inspect `local`; Inspect `docker` added 2026-09-29, opt-in);
+- [x] optional sandbox examples for Inspect (`local`; `docker` added 2026-09-29, opt-in).
+  The original plan asked for one per new engine; OLMo's is not provided: scope
+  revision R1;
 - [x] security review of task loading, tool execution, sandbox boundaries, host
   mounts/network, secrets, cancellation, and artifact path handling.
 
@@ -364,6 +369,32 @@ Implementation status: DONE locally; hosted CI (G8 in `../release-gate.md`) pend
   constraint is enforced: the labels stay `experimental` until G8 (hosted CI on
   the release commit) passes, and `docs/release-gate.md` records the gate state.
   Flipping them is a release-time action for maintainers.
+
+## Scope revisions against the original plan
+
+The original plan (`archive/original-plan.md`) is the reference. Where this
+repository does less than it asked, the difference is recorded here as an
+explicit revision rather than a checked box. Revisions keep the affected
+capability unsupported until native evidence exists.
+
+- **R1 - OLMo Eval sandboxing (original P7-06, V-046).** OLMo's harness
+  sandboxes run through SWE-ReX, which is outside the verified OLMo extras
+  (`litellm`, `agents`). Adding it means a new, unverified worker environment.
+  v1 ships an opt-in sandbox example for Inspect only (`local` and `docker`);
+  OLMo sandboxing is unsupported (T in the capability matrix) until a pinned
+  environment passes native sandbox, cleanup, and isolation tests.
+- **R2 - OLMo judge-error mapping (original V-028).** No native fixture drives
+  an OLMo judge failure; tool-error mapping is verified. Judge errors are not
+  claimed for OLMo in v1.
+- **R3 - Release smoke checks (original P8-08).** Routine CI stays
+  deterministic and never needs Docker or network services. The supported
+  endpoint and sandbox configurations are still required *for a release*: gate
+  G10 in `../release-gate.md` runs them on the release candidate and they must
+  pass. This restores the original plan's requirement, which the phase-8 gate
+  had dropped.
+- **R4 - MAGNET M1 migration.** MAGNET's legacy HELM internals are not
+  rewired onto aiq-magnet-evals (see the integration plan); compatibility is
+  preserved without it.
 
 ## Validation groups
 
