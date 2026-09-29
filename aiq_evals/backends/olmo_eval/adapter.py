@@ -14,6 +14,11 @@ from dataclasses import fields, is_dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from aiq_evals.backends.olmo_eval.normalize import (
+    attach_prediction_files,
+    load_native_metrics,
+    normalize_olmo_results,
+)
 from aiq_evals.contracts import (
     EvaluationRequest,
     EvaluationResult,
@@ -27,12 +32,7 @@ from aiq_evals.errors import (
     RequestValidationError,
 )
 from aiq_evals.identity import build_measurement_identity
-from aiq_evals.jsonutil import normalize_json
-from aiq_evals.backends.olmo_eval.normalize import (
-    attach_prediction_files,
-    load_native_metrics,
-    normalize_olmo_results,
-)
+from aiq_evals.jsonutil import normalize_json, sha256_file
 
 ADAPTER_VERSION = '0.1.0'
 _FULL_GIT_SHA = re.compile(r'^[0-9a-fA-F]{40}$')
@@ -43,6 +43,7 @@ _ALLOWED_ENGINE_OPTIONS = {
     'save_requests',
     'shuffle_seed',
     'upstream_revision',
+    'task_modules',
 }
 
 
@@ -103,6 +104,11 @@ def _merge_native_config(request: EvaluationRequest) -> dict[str, Any]:
         raise RequestValidationError(
             'olmo_eval engine_options.upstream_revision must be a full 40-character git SHA'
         )
+    task_modules = options.get('task_modules', [])
+    if not isinstance(task_modules, list) or any(
+        not isinstance(module, str) or not module.strip() for module in task_modules
+    ):
+        raise RequestValidationError('olmo_eval task_modules must be a list of importable module names')
     raw_harness = options.get('harness_config') or {}
     if not isinstance(raw_harness, Mapping):
         raise RequestValidationError('olmo_eval engine_options.harness_config must be an object')
@@ -161,7 +167,22 @@ def _merge_native_config(request: EvaluationRequest) -> dict[str, Any]:
         'save_predictions': bool(options.get('save_predictions', True)),
         'save_requests': bool(options.get('save_requests', True)),
         'shuffle_seed': int(options.get('shuffle_seed', 42)),
+        'task_modules': task_modules,
     }
+
+
+def _load_task_modules(modules: list[str]) -> dict[str, str | None]:
+    """Import explicit task/tool registration modules in this process."""
+    digests: dict[str, str | None] = {}
+    for name in modules:
+        try:
+            module = importlib.import_module(name)
+        except Exception as ex:
+            raise RequestValidationError(f'cannot import OLMo registration module {name!r}: {ex}') from ex
+        source = getattr(module, '__file__', None)
+        path = Path(source).resolve() if source else None
+        digests[name] = sha256_file(path) if path is not None and path.is_file() else None
+    return digests
 
 
 def _expected_tasks(resolved: ResolvedEvaluation) -> set[str]:
@@ -273,6 +294,7 @@ class OlmoEvalBackend:
         self.validate_request(request)
         harness_cls, _runner_cls, sampling_cls, task_config_cls, expand_tasks = _native_symbols()
         native_config = _merge_native_config(request)
+        task_module_digests = _load_task_modules(native_config['task_modules'])
 
         task_fields = {item.name for item in fields(task_config_cls)}
         sampling_fields = {item.name for item in fields(sampling_cls)}
@@ -321,6 +343,7 @@ class OlmoEvalBackend:
             'engine_revision': engine_revision,
             'resolved_task_specs': expanded,
             'native_api': 'AsyncEvalRunner/HarnessConfig',
+            'task_module_digests': task_module_digests,
         }
         identity = build_measurement_identity(
             request,
@@ -355,6 +378,7 @@ class OlmoEvalBackend:
         native_dir = context.output_dir / 'native'
         native_dir.mkdir(parents=True, exist_ok=True)
         config = dict(resolved.native_config)
+        _load_task_modules(list(config.get('task_modules') or []))
         try:
             harness = harness_cls.from_dict(dict(config['harness_config']))
             runner = runner_cls(

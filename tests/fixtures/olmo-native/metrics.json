@@ -1,0 +1,93 @@
+{
+  "timestamp": "2026-09-29T10:53:11.006548",
+  "config": {
+    "name": "aiq-evals",
+    "provider": {
+      "kind": "mock",
+      "model": "mock",
+      "revision": "local-v1"
+    },
+    "tool_names": [],
+    "system_prompt": null,
+    "tool_choice": "auto",
+    "scaffold": null,
+    "required_secrets": [],
+    "model_hash": "23c2238c16ef5f35"
+  },
+  "tasks": [
+    {
+      "task": "aiq_p1_local",
+      "metrics": {
+        "contains_42": {
+          "substring_recall": 1.0
+        }
+      },
+      "num_instances": 1,
+      "primary_metric": "contains_42:substring_recall",
+      "config": {
+        "name": "aiq_p1_local",
+        "data_source": null,
+        "fewshot_source": null,
+        "formatter": null,
+        "metrics": [
+          {
+            "type": "AccuracyMetric",
+            "name": "contains_42",
+            "scorer": {
+              "type": "SubstringRecallScorer",
+              "name": "substring_recall",
+              "case_sensitive": false
+            }
+          }
+        ],
+        "num_fewshot": 0,
+        "fewshot_seed": 42,
+        "limit": null,
+        "seed": 42,
+        "split": "test",
+        "primary_metric": {
+          "type": "AccuracyMetric",
+          "name": "contains_42",
+          "scorer": {
+            "type": "SubstringRecallScorer",
+            "name": "substring_recall",
+            "case_sensitive": false
+          }
+        },
+        "sampling_params": {
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "top_p": null,
+          "top_k": null,
+          "stop_sequences": null,
+          "num_samples": 1,
+          "logprobs": null,
+          "do_sample": true,
+          "truncate_prompt_tokens": null,
+          "truncation_side": null
+        },
+        "output_score_aggregation": "max",
+        "max_length": null,
+        "answer_extractor": null,
+        "dependencies": null
+      },
+      "duration_seconds": 0.0043354034423828125,
+      "task_hash": "07bb8b9d61a337db",
+      "instances_saved": 1,
+      "instances_processed": 1,
+      "instances_failed": 0
+    }
+  ],
+  "summary": {
+    "aiq_p1_local": {
+      "metric": "contains_42:substring_recall",
+      "score": 1.0
+    }
+  },
+  "errors": [],
+  "experiment_id": "8acbbe2a01e2",
+  "experiment_duration_seconds": 1.7085990905761719,
+  "provider_init_seconds": {
+    "mock-w0": 0.0008594989776611328
+  }
+}
