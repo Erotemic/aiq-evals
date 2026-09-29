@@ -2,7 +2,7 @@
 
 
 class AiqEvalsError(Exception):
-    """Base class for aiq-evals errors."""
+    """Base class for aiq-magnet-evals errors."""
 
 
 class RequestValidationError(AiqEvalsError, ValueError):

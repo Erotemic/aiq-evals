@@ -11,7 +11,7 @@ Conflating those cases creates false successes and makes later auditing harder.
 
 ## Decision
 
-An `aiq-evals` run bundle records execution facts, native artifacts, normalized
+An `aiq-magnet-evals` run bundle records execution facts, native artifacts, normalized
 views, lineage, and integrity metadata. Its target shape is approximately:
 
 ```text
@@ -42,7 +42,7 @@ A native metrics/log file existing is never sufficient proof of success. Failed
 or cancelled attempts may retain diagnostics without receiving the successful
 terminal marker.
 
-MAGNET evidence eligibility is not stored as an `aiq-evals` execution truth.
+MAGNET evidence eligibility is not stored as an `aiq-magnet-evals` execution truth.
 MAGNET may wrap a completed run with a stronger evidence artifact and its own
 `DONE` semantics.
 

@@ -91,7 +91,7 @@ def native_source_identity(source: str | Path, *, allow_external_symlinks: bool 
 
 @dataclass(frozen=True)
 class RunBundle:
-    """Dependency-free view of one published aiq-evals run."""
+    """Dependency-free view of one published aiq-magnet-evals run."""
 
     path: Path
     resolved: ResolvedEvaluation

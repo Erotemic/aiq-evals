@@ -6,7 +6,7 @@ pins. This is a design and code review with targeted tests, not a penetration te
 
 **Trust model.** A request names task code, plugins, tools, and model endpoints.
 Resolving or executing a request runs that code as the invoking user, and can
-reach whatever that user can reach on the host. aiq-evals is not a sandbox. As the
+reach whatever that user can reach on the host. aiq-magnet-evals is not a sandbox. As the
 plan says, a worker process or container is not a security guarantee on its own.
 
 ## Findings fixed in this review
@@ -50,10 +50,10 @@ plan says, a worker process or container is not a security guarantee on its own.
 ### Sandbox boundaries
 - Inspect's `local` sandbox is only a temporary working directory. It gives no
   filesystem, network, or process isolation. It is cleaned up on completion and
-  on aiq-evals cancellation (native test).
+  on aiq-magnet-evals cancellation (native test).
 - Docker sandboxes are untested: the review host denies access to the Docker
   socket. Nothing here should be read as a claim that containers isolate tasks.
-  Containers an engine starts leave the worker's process group, so aiq-evals
+  Containers an engine starts leave the worker's process group, so aiq-magnet-evals
   cancellation cannot reach them. Their cleanup is the engine's job (SIGINT
   gives the engine that chance), and it is unverified.
 - OLMo and HELM sandboxes are not exercised.
@@ -63,7 +63,7 @@ plan says, a worker process or container is not a security guarantee on its own.
   the host network, and the host filesystem. The HELM adapter uses a per-run
   `prod_env`, so HELM's cache and credentials files stay hermetic.
 - Residual risk: the whole parent environment, including unrelated credentials,
-  reaches task code. To limit what task code sees, launch the aiq-evals caller
+  reaches task code. To limit what task code sees, launch the aiq-magnet-evals caller
   with a minimal environment (for example with `env -i`, keeping `PATH` and
   `HOME`), and pass required secrets through `ExecutionContext.env`.
 

@@ -4,7 +4,7 @@
 
 ## Core idea
 
-`aiq-evals` reproducibly obtains evaluation results across heterogeneous native
+`aiq-magnet-evals` reproducibly obtains evaluation results across heterogeneous native
 evaluation engines. A requested evaluation may be satisfied by a valid existing
 computation/import or by executing the native engine.
 
@@ -43,7 +43,7 @@ separate.
 
 ### Measurement identity
 
-Owned by `aiq-evals`. It covers facts that can change what the evaluation
+Owned by `aiq-magnet-evals`. It covers facts that can change what the evaluation
 actually computes:
 
 - engine and upstream version/revision;
@@ -64,14 +64,14 @@ disabled rather than hashing a mutable path and pretending it is immutable.
 
 ### Normalized artifact identity
 
-Owned by `aiq-evals`. It adds the native artifact digest, normalizer/converter
+Owned by `aiq-magnet-evals`. It adds the native artifact digest, normalizer/converter
 version, and normalized schema version to the measurement lineage.
 
 A changed native log or changed converter produces a new normalized artifact.
 
 ### Evidence-view identity
 
-Owned by MAGNET, not `aiq-evals`. It adds interpretation needed for a scientific
+Owned by MAGNET, not `aiq-magnet-evals`. It adds interpretation needed for a scientific
 claim:
 
 - selected task/model/scorer/metric/reducer;
@@ -85,7 +85,7 @@ execution. Asking the native engine to execute an additional scorer may.
 
 ## Execution status versus evidence eligibility
 
-`aiq-evals` reports facts such as:
+`aiq-magnet-evals` reports facts such as:
 
 ```text
 execution_status = succeeded
@@ -138,13 +138,13 @@ Phase 1/2 must evaluate EEE for:
 - stable native artifact references.
 
 If EEE is sufficient, use it as the normalized scientific payload and keep
-operational run metadata in `aiq-evals`. If it is not sufficient, document the
-gaps before creating an `aiq-evals` schema. Native source artifacts remain the
+operational run metadata in `aiq-magnet-evals`. If it is not sufficient, document the
+gaps before creating an `aiq-magnet-evals` schema. Native source artifacts remain the
 source of truth either way.
 
 ## Dependency boundary
 
-Core `aiq-evals`:
+Core `aiq-magnet-evals`:
 
 - Python >=3.11;
 - imports with no native engine installed;
@@ -157,7 +157,7 @@ OLMo Eval is expected to require this isolation at some supported revisions.
 
 ## Scheduler boundary
 
-`aiq-evals` owns execution *inside one evaluation*.
+`aiq-magnet-evals` owns execution *inside one evaluation*.
 
 MAGNET/kwdagger owns scheduling *across evaluations/nodes*.
 

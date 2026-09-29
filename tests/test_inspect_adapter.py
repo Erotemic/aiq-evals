@@ -173,7 +173,7 @@ def test_static_validation_and_native_mapping_do_not_need_inspect():
     assert config['eval_options']['epochs'] == 2
     assert config['eval_options']['log_samples'] is True
 
-    with pytest.raises(RequestValidationError, match='owned by aiq-evals'):
+    with pytest.raises(RequestValidationError, match='owned by aiq-magnet-evals'):
         backend.validate_request(
             make_request(engine_options={'eval_options': {'model': 'other'}})
         )

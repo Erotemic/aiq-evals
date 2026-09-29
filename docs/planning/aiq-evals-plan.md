@@ -1,10 +1,10 @@
-# aiq-evals implementation plan
+# aiq-magnet-evals implementation plan
 
 Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-8 implemented; all three engines pass the shared conformance suite; no API/schema freeze before a PyPI release (ADR-0010, superseding ADR-0009); release gate G1-G7 pass locally, G8 (hosted CI) pending.
 
 This is the standalone refinement of the earlier MAGNET backend-agnostic
 evaluation plan. It moves generic evaluation execution, import, identity, and
-result access into `aiq-evals` and leaves MAGNET evidence/kwdagger semantics in
+result access into `aiq-magnet-evals` and leaves MAGNET evidence/kwdagger semantics in
 a separate integration plan.
 
 ## Objective
@@ -152,7 +152,7 @@ Before freezing an `EvaluationResult` schema:
 - [x] attempt OLMo Eval fixtures (EEE has no OLMo converter);
 - [x] record demonstrated scientific-field losses and ambiguities;
 - [x] decide whether EEE is the normalized scientific payload, requires a small
-  extension, or is unsuitable for the first `aiq-evals` contract.
+  extension, or is unsuitable for the first `aiq-magnet-evals` contract.
 
 This replaces the earlier assumption that MAGNET should create its own complete
 cross-engine result schema immediately.
@@ -182,7 +182,7 @@ Phase 1 closes only when:
 - ~~MAGNET's separate cardinality spike has passed for representative native
   multi-result fixtures.~~ Moved on 2026-09-29 to integration gate M6 in
   `aiq-magnet-integration-plan.md`. MAGNET has no projection from an
-  `aiq-evals` bundle to a claim row yet, and that projection is scheduled after
+  `aiq-magnet-evals` bundle to a claim row yet, and that projection is scheduled after
   the adapters. Phase 1 supplied the representative inputs it needs:
   `tests/fixtures/inspect-native/multi/` and `tests/fixtures/olmo-native/multi/`.
 
@@ -216,7 +216,7 @@ integration requires until a PyPI release (ADR-0010).
   Withdrawn: ADR-0010 supersedes ADR-0009; nothing is frozen before a PyPI release.
 
 The dependency-free result structures are a provisional normalized envelope, not
-a declaration that `aiq-evals` should replace Every Eval Ever. P1-08 still decides
+a declaration that `aiq-magnet-evals` should replace Every Eval Ever. P1-08 still decides
 whether EEE becomes the long-term scientific payload. Native files remain authoritative.
 
 ## Phase 3 - OLMo Eval adapter
@@ -252,7 +252,7 @@ Verified API target: `inspect-ai==0.3.272`.
 - [x] Bind primary and auxiliary model roles; keep unsupported per-role provider options explicit.
 - [x] Map task arguments, generation settings, and typed native eval options with protected ownership boundaries.
 - [x] Use the public `inspect_ai.eval()` execution API rather than `eval_set()`.
-- [x] Automatically execute the synchronous Inspect API in an owned aiq-evals worker process.
+- [x] Automatically execute the synchronous Inspect API in an owned aiq-magnet-evals worker process.
 - [x] Collect and normalize every returned log.
 - [x] Preserve scorer, score-name, metric, group, reducer, and denominator identity.
 - [x] Preserve structured sample scores, sample IDs, epochs, usage, messages, events, timelines, and tool trajectories.
@@ -275,7 +275,7 @@ Verified API target: `inspect-ai==0.3.272`.
 Implementation status: PRESENT, EXPERIMENTAL; native acceptance at `crfm-helm==0.5.14`
 recorded in `phase5-evidence.md`.
 
-- [x] move/wrap generic HELM compute and import behavior behind the `aiq-evals`
+- [x] move/wrap generic HELM compute and import behavior behind the `aiq-magnet-evals`
   adapter contract (MAGNET-independent reimplementation; native RunSpec resolution);
 - [x] preserve native aggregate/per-instance records;
 - [x] preserve unknown coverage when native artifacts cannot establish it;

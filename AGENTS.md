@@ -1,10 +1,21 @@
-# aiq-evals agent guide
+# aiq-magnet-evals agent guide
 
 ## Purpose
 
-`aiq-evals` reproducibly obtains evaluation results across heterogeneous native
+`aiq-magnet-evals` reproducibly obtains evaluation results across heterogeneous native
 evaluation engines. It may reuse/import a valid result or execute the native
 engine when computation is required.
+
+## Names
+
+- Repository and distribution: `aiq-magnet-evals`
+  (https://github.com/Erotemic/aiq-magnet-evals); import package `magnet_evals`;
+  CLI `aiq-magnet-evals` (`aiq-evals` remains as an alias).
+- Some `aiq-evals` strings are deliberately unchanged because they are artifact
+  or identity inputs: the identity algorithm `aiq-evals-measurement-v2+sha256`,
+  HELM's suite name, OLMo's default harness name, and the `.aiq-evals-*` worker
+  directories. Renaming them would change identities or orphan stored runs.
+- `aiq-magnet` is the MAGNET repository, the consumer of this package.
 
 ## Architectural boundary
 

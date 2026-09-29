@@ -1,6 +1,6 @@
-# aiq-evals
+# aiq-magnet-evals
 
-`aiq-evals` is a backend-agnostic evaluation runtime and artifact interface.
+`aiq-magnet-evals` is a backend-agnostic evaluation runtime and artifact interface.
 Its intended high-level operation is:
 
 ```text
@@ -22,7 +22,7 @@ load / import                                 execute native engine
                   normalized evaluation result
 ```
 
-The initial engines are HELM, OLMo Eval, and Inspect. `aiq-evals` is not a
+The initial engines are HELM, OLMo Eval, and Inspect. `aiq-magnet-evals` is not a
 scheduler and is not a scientific claim system. MAGNET is expected to consume
 its results and decide how a selected metric becomes claim evidence.
 
@@ -67,9 +67,9 @@ Remaining work is tracked in `docs/planning/aiq-evals-plan.md`. MAGNET integrati
 ```bash
 python -m pip install -e '.[tests]'
 pytest -q
-aiq-evals phase1-status
-aiq-evals phase1-probe
-aiq-evals backends
+aiq-magnet-evals phase1-status
+aiq-magnet-evals phase1-probe
+aiq-magnet-evals backends
 ```
 
 A request is JSON-shaped and contains measurement inputs only. Credentials stay
@@ -101,8 +101,8 @@ in the execution environment rather than the persisted request. For example:
 Static validation does not import OLMo Eval or Inspect:
 
 ```bash
-aiq-evals validate request.json
-aiq-evals validate examples/inspect_ai_request.json
+aiq-magnet-evals validate request.json
+aiq-magnet-evals validate examples/inspect_ai_request.json
 ```
 
 To install the verified Inspect runtime in the same environment:
@@ -115,16 +115,16 @@ Resolution and execution require the native engine environment. A separate
 worker interpreter can be selected without adding the engine to core:
 
 ```bash
-aiq-evals resolve request.json
-aiq-evals run request.json --output run-dir --worker-python /path/to/worker/python
-aiq-evals ensure request.json --store results/ --worker-python /path/to/worker/python
-aiq-evals show run-dir
+aiq-magnet-evals resolve request.json
+aiq-magnet-evals run request.json --output run-dir --worker-python /path/to/worker/python
+aiq-magnet-evals ensure request.json --store results/ --worker-python /path/to/worker/python
+aiq-magnet-evals show run-dir
 ```
 
 To inspect exact upstream source checkouts without importing them:
 
 ```bash
-aiq-evals phase1-probe \
+aiq-magnet-evals phase1-probe \
     --checkout olmo_eval=/path/to/olmo-eval \
     --checkout inspect_ai=/path/to/inspect_ai \
     --checkout helm=/path/to/helm \

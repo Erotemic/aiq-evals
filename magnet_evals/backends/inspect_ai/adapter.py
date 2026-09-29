@@ -65,7 +65,7 @@ _PROTECTED_EVAL_OPTIONS = {
     'log_format',
     'display',
     'metadata',
-    # JSON requests cannot safely serialize callbacks. aiq-evals owns the
+    # JSON requests cannot safely serialize callbacks. aiq-magnet-evals owns the
     # task/run boundary and does not let callbacks enqueue hidden extra work.
     'sample_complete',
     'task_complete',
@@ -89,7 +89,7 @@ def _native_symbols() -> tuple[Any, Any, Any, Any]:
     except ImportError as ex:
         raise MissingDependencyError(
             'Inspect execution/import requires the optional inspect_ai runtime. '
-            'Install aiq-evals[inspect] in the native worker; engine-free result '
+            'Install aiq-magnet-evals[inspect] in the native worker; engine-free result '
             'reading does not require Inspect.'
         ) from ex
     eval_fn = getattr(api, 'eval', None)
@@ -244,7 +244,7 @@ def _merge_native_config(request: EvaluationRequest) -> dict[str, Any]:
     protected = set(eval_options) & _PROTECTED_EVAL_OPTIONS
     if protected:
         raise RequestValidationError(
-            'Inspect eval options are owned by aiq-evals and cannot be overridden: '
+            'Inspect eval options are owned by aiq-magnet-evals and cannot be overridden: '
             f'{sorted(protected)}'
         )
     for key, value in request.generation.items():
@@ -383,7 +383,7 @@ class InspectAIBackend:
             # passed only for the combinations in docs/planning/phase1-capabilities.md.
             'implementation_status': 'phase1-native-accepted',
             # Inspect's public evaluation entry point is synchronous. Running it
-            # in an owned process gives aiq-evals hard cancellation semantics.
+            # in an owned process gives aiq-magnet-evals hard cancellation semantics.
             'requires_worker_process': True,
             'capability_scope': 'request/task/model/solver combination; validate natively',
             'candidate_version': CANDIDATE_INSPECT_VERSION,

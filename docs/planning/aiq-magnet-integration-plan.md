@@ -1,11 +1,11 @@
-# aiq-magnet integration plan for aiq-evals
+# aiq-magnet integration plan for aiq-magnet-evals
 
 This file contains work that should happen in `aiq-magnet`, not in the core
-`aiq-evals` package.
+`aiq-magnet-evals` package.
 
 ## Goal
 
-MAGNET should delegate native evaluation acquisition to `aiq-evals` while
+MAGNET should delegate native evaluation acquisition to `aiq-magnet-evals` while
 retaining ownership of scheduling, evidence selection, claims, and dashboards.
 
 ```text
@@ -29,18 +29,18 @@ metrics.evaluate.* -> ClaimResultNamespace -> card/dashboard
 
 ## M1 - Dependency and compatibility seam
 
-- [ ] Add `aiq-evals` as a MAGNET dependency only after its phase-2 core contract
+- [ ] Add `aiq-magnet-evals` as a MAGNET dependency only after its phase-2 core contract
   is usable.
 - [ ] Keep `magnet evaluate` legacy behavior compatible.
 - [ ] Integrate through `magnet evaluate_new` first.
 - [ ] Preserve existing HELM commands/loaders while migrating their generic
-  execution/import implementation underneath to `aiq-evals`.
+  execution/import implementation underneath to `aiq-magnet-evals`.
 - [ ] Keep HELM-specific predictor/instance-predictor APIs in MAGNET until a
   separate migration is justified.
 
 ## M2 - Generic EvaluationNode
 
-Create a MAGNET/kwdagger node whose job is to invoke one `aiq-evals` evaluation
+Create a MAGNET/kwdagger node whose job is to invoke one `aiq-magnet-evals` evaluation
 request.
 
 The node owns:
@@ -58,7 +58,7 @@ kwdagger/cmd_queue scheduler (`serial`, `tmux`, etc.).
 
 ## M3 - Resolve identity before cache assignment
 
-MAGNET/kwdagger cache keys must consume a resolved `aiq-evals` measurement
+MAGNET/kwdagger cache keys must consume a resolved `aiq-magnet-evals` measurement
 identity rather than hashing unresolved mutable task paths.
 
 Requirements:
@@ -67,7 +67,7 @@ Requirements:
   assigned;
 - [ ] an unresolved mutable input disables reuse;
 - [ ] engine/upstream/adapter changes cannot collide;
-- [ ] a stale result marker cannot hide a failed/incomplete `aiq-evals` run;
+- [ ] a stale result marker cannot hide a failed/incomplete `aiq-magnet-evals` run;
 - [ ] changing a MAGNET evidence selector does not rerun an unchanged native
   evaluation unless it changes native computation.
 
@@ -86,7 +86,7 @@ MAGNET defines a separate evidence-view record containing at least:
 Strict default evidence eligibility should continue to require the policy MAGNET
 chooses (for example successful execution, sufficient coverage, and a finite
 selected scalar metric), but that judgment must not mutate the underlying
-`aiq-evals` run.
+`aiq-magnet-evals` run.
 
 ## M5 - One artifact -> one evidence row
 
@@ -99,7 +99,7 @@ records. The MAGNET loader still returns one flat row.
 A selector must identify exactly one claim-facing task/model/scorer/metric (and
 reducer where required), or select one explicit native suite aggregate.
 
-Nonselected records remain available from `aiq-evals` readers but do not create
+Nonselected records remain available from `aiq-magnet-evals` readers but do not create
 additional MAGNET claim votes.
 
 Examples:
@@ -112,9 +112,9 @@ Examples:
 ## M6 - Cardinality acceptance experiment
 
 This remains an early MAGNET integration gate even though native fixture capture
-happens in `aiq-evals`. On 2026-09-29 it moved here from the `aiq-evals` P1-10
+happens in `aiq-magnet-evals`. On 2026-09-29 it moved here from the `aiq-magnet-evals` P1-10
 acceptance gate, because it needs the M4/M5 projection, which does not exist
-yet. Representative native inputs are committed in `aiq-evals`:
+yet. Representative native inputs are committed in `aiq-magnet-evals`:
 `tests/fixtures/inspect-native/multi/` (three task logs, two epochs, auxiliary
 role) and `tests/fixtures/olmo-native/multi/` (one suite expanded to two
 prefix-overlapping task names). Engine-free `json/` renderings of the Inspect
@@ -152,11 +152,11 @@ All should use a stable result node such as `evaluate` and expose
 ## M8 - Scheduling and resource ownership
 
 kwdagger continues to own campaign scheduling and node attempt/cache policy.
-`aiq-evals` owns execution inside the node.
+`aiq-magnet-evals` owns execution inside the node.
 
 For MAGNET leasing/container integration:
 
-- [ ] pass leased endpoints/model role bindings into `aiq-evals` execution
+- [ ] pass leased endpoints/model role bindings into `aiq-magnet-evals` execution
   context;
 - [ ] avoid duplicate model startup;
 - [ ] propagate cancellation to engine workers/sandboxes;

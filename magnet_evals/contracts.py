@@ -1,4 +1,4 @@
-"""Versioned, dependency-free public contracts for aiq-evals.
+"""Versioned, dependency-free public contracts for aiq-magnet-evals.
 
 These dataclasses intentionally contain only JSON-shaped scientific inputs and
 outputs. Native engine objects never cross this boundary.

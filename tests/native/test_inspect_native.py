@@ -272,7 +272,7 @@ def test_native_signal_log_imports_without_success(
 
 def test_active_event_loop_boundary(tmp_path: Path) -> None:
     # P1-06: Inspect's public sync eval() cannot run on a thread with an active
-    # loop; the adapter must never call it there, and the aiq-evals sync facade
+    # loop; the adapter must never call it there, and the aiq-magnet-evals sync facade
     # must refuse rather than nest asyncio.run.
     import inspect_ai
 

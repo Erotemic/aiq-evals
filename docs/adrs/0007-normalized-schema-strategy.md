@@ -21,14 +21,14 @@ analysis against real HELM, OLMo Eval, and Inspect fixtures.
 Regardless of that outcome:
 
 - native artifacts remain retained source material;
-- operational run metadata/identity/attempt state remains an `aiq-evals` concern;
+- operational run metadata/identity/attempt state remains an `aiq-magnet-evals` concern;
 - engine-free readers remain required;
 - missing information is represented explicitly rather than synthesized.
 
 If EEE represents the required scientific information without unacceptable loss,
 prefer it (possibly with a small upstream extension) for the normalized scientific
 payload. If not, document concrete fixture-backed gaps before adopting a distinct
-`aiq-evals` payload schema.
+`aiq-magnet-evals` payload schema.
 
 The current `EvaluationResult`/`MetricRecord`/sample structures are therefore a
 provisional internal contract, not proof that a permanent ecosystem schema has

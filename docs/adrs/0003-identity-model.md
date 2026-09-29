@@ -13,7 +13,7 @@ reason about.
 
 Maintain three distinct identity layers.
 
-### Measurement identity — owned by `aiq-evals`
+### Measurement identity — owned by `aiq-magnet-evals`
 
 Contains inputs that can change what the native evaluation computes, including
 as applicable:
@@ -32,7 +32,7 @@ as applicable:
 Secrets are never identity inputs. Secret *names* or required capabilities may
 be persisted where needed; secret values may not.
 
-### Normalized-artifact identity — owned by `aiq-evals`
+### Normalized-artifact identity — owned by `aiq-magnet-evals`
 
 Adds to measurement lineage the native artifact content digest, normalization
 logic/schema version, and related conversion lineage. Editing an imported native

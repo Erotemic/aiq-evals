@@ -41,7 +41,7 @@ ENGINE_SPECS: dict[str, EngineSpec] = {
             'Verified 2026-09-29 through MAGNET 7bb105ab1c85bfaa01bf68c97ff7523332479ee4.',
             'Fresh execution proven with the local simple model only; import/reuse of historical runs.',
             'Constraints: dev/environments/phase1/helm-py312-constraints.txt.',
-            'aiq-evals HELM adapter (phase 5) runs `python -m helm.benchmark.run` in a worker.',
+            'aiq-magnet-evals HELM adapter (phase 5) runs `python -m helm.benchmark.run` in a worker.',
         ),
     ),
     'olmo_eval': EngineSpec(

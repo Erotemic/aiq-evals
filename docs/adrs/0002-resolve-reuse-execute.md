@@ -37,7 +37,7 @@ system must disable reuse instead of manufacturing a stable-looking identity.
 
 ## Consequences
 
-`aiq-evals` is closer to a content-addressed build/runtime system for evaluations
+`aiq-magnet-evals` is closer to a content-addressed build/runtime system for evaluations
 than to a leaderboard database. Search/indexing of accumulated runs may be useful,
 but it is secondary to reproducibly obtaining a requested evaluation.
 

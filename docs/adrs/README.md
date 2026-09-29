@@ -1,6 +1,6 @@
 # Architecture decision records
 
-This directory is the reviewer-facing architecture contract for `aiq-evals`.
+This directory is the reviewer-facing architecture contract for `aiq-magnet-evals`.
 
 The planning documents under `docs/planning/` describe implementation sequence,
 current status, evidence, and open gates. They may change as work progresses.
@@ -34,17 +34,17 @@ validate and reuse                          execute native engine
                     EvaluationRun bundle
 ```
 
-The result is a record of what the evaluation engine did. `aiq-evals` does not
+The result is a record of what the evaluation engine did. `aiq-magnet-evals` does not
 turn that record into a MAGNET claim or verdict.
 
 ## Accepted decisions
 
-- [ADR-0001](0001-package-boundary.md): `aiq-evals` is an independent evaluation runtime and artifact layer.
+- [ADR-0001](0001-package-boundary.md): `aiq-magnet-evals` is an independent evaluation runtime and artifact layer.
 - [ADR-0002](0002-resolve-reuse-execute.md): the central operation is resolve -> reuse/import or execute -> publish.
 - [ADR-0003](0003-identity-model.md): measurement, normalized-artifact, and MAGNET evidence identities are distinct.
 - [ADR-0004](0004-run-artifacts-and-status.md): execution status, coverage, and evidence eligibility are distinct; native artifacts are retained.
 - [ADR-0005](0005-backend-contract-and-workers.md): adapters preserve native semantics behind a small contract and may run in isolated workers.
-- [ADR-0006](0006-scheduler-and-magnet-boundary.md): `aiq-evals` owns one evaluation; MAGNET/kwdagger owns campaign scheduling and claim projection.
+- [ADR-0006](0006-scheduler-and-magnet-boundary.md): `aiq-magnet-evals` owns one evaluation; MAGNET/kwdagger owns campaign scheduling and claim projection.
 - [ADR-0007](0007-normalized-schema-strategy.md): retain native truth and decide EEE from fixture evidence.
 - [ADR-0008](0008-normalized-schema-fixture-decision.md): fixture gaps require the independent normalized result schema for Phase 1.
 - [ADR-0011](0011-single-flight-and-content-keyed-imports.md): acquiring a reusable measurement is single-flight in the store; explicit imports are keyed by native content.
@@ -63,7 +63,7 @@ explicit replacement ADR:
 2. makes selecting a MAGNET claim metric alter the native measurement identity;
 3. treats a failed, cancelled, or incomplete native attempt as a successful run
    because a metrics/log file exists;
-4. treats MAGNET evidence eligibility as an `aiq-evals` execution fact;
+4. treats MAGNET evidence eligibility as an `aiq-magnet-evals` execution fact;
 5. imports heavy native engine packages merely to read normalized run metadata;
 6. hashes secrets into identities or persists secret values in run metadata;
 7. hashes unresolved mutable aliases/paths and then reuses them as if immutable;

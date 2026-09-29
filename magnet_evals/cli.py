@@ -27,7 +27,7 @@ from magnet_evals.runner import (
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog='aiq-evals',
+        prog='aiq-magnet-evals',
         description='Backend-agnostic evaluation runtime and artifact tooling.',
     )
     sub = parser.add_subparsers(dest='command', required=True)

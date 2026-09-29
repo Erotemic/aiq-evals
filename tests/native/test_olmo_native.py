@@ -228,7 +228,7 @@ def test_native_multi_task_suite(tmp_path: Path) -> None:
 def test_active_event_loop_boundary(tmp_path: Path) -> None:
     # P1-06: AsyncEvalRunner.run() is asyncio.run(run_async()) at the pin and
     # fails inside an active loop; the adapter awaits run_async() instead, and
-    # the aiq-evals sync facade refuses rather than nesting asyncio.run.
+    # the aiq-magnet-evals sync facade refuses rather than nesting asyncio.run.
     import inspect
 
     from magnet_evals.backends.olmo_eval import adapter as olmo_adapter
@@ -295,7 +295,7 @@ def test_max_turns_limit_changes_native_trajectory(tmp_path: Path) -> None:
 def test_crashing_tool_is_reported_to_the_model(tmp_path: Path) -> None:
     # P7 error mapping at this pin: the OpenAI Agents scaffold turns a tool
     # exception into an ordinary tool result string the model sees, with
-    # is_error False. The failure survives only as text; aiq-evals keeps the
+    # is_error False. The failure survives only as text; aiq-magnet-evals keeps the
     # native record and does not invent an error flag. The sample completes.
     pytest.importorskip("agents")
     with _chat_server("crash") as port:

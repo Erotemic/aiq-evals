@@ -26,7 +26,7 @@ Errors derive from `magnet_evals.errors.AiqEvalsError`. The main ones are
 `RequestValidationError`, `MissingDependencyError`, `EngineCompatibilityError`,
 `ExecutionError`, `ArtifactError`, and `ActiveEventLoopError`.
 
-## CLI (`aiq-evals`)
+## CLI (`aiq-magnet-evals`)
 
 | Command | Purpose |
 | --- | --- |

@@ -36,10 +36,12 @@ dev = [
 ]
 
 [project.scripts]
+aiq-magnet-evals = "magnet_evals.cli:main"
+# Original command name, kept as an alias.
 aiq-evals = "magnet_evals.cli:main"
 
 [project.urls]
-Repository = "https://github.com/AIQ-Kitware/aiq-evals/"
+Repository = "https://github.com/Erotemic/aiq-magnet-evals"
 
 [tool.setuptools.packages.find]
 include = ["magnet_evals*"]
@@ -74,7 +76,8 @@ show_missing = true
 [tool.xcookie]
 tags = ["github", "purepy"]
 mod_name = "magnet_evals"
-repo_name = "aiq-evals"
+repo_name = "aiq-magnet-evals"
+url = "https://github.com/Erotemic/aiq-magnet-evals"
 pkg_name = "aiq-magnet-evals"
 typed = true
 os = ["linux"]

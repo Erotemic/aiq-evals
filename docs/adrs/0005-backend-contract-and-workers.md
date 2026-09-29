@@ -37,7 +37,7 @@ Blocking/synchronous runtimes may execute in an owned subprocess or isolated
 worker interpreter/container. Cancellation must terminate resources owned by
 that execution boundary and allow native cleanup paths to run.
 
-Core `aiq-evals` remains Python >=3.11 and importable with no engine installed.
+Core `aiq-magnet-evals` remains Python >=3.11 and importable with no engine installed.
 A backend worker may require a newer Python or incompatible dependency set.
 
 ## Backend-specific constraints

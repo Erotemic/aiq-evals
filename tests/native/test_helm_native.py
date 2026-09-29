@@ -105,7 +105,7 @@ def test_helm_fresh_scored_generation(tmp_path: Path, monkeypatch: pytest.Monkey
 
 
 def test_aiq_evals_imports_magnet_materialized_symlinked_run(tmp_path: Path) -> None:
-    """Phase-5 compatibility seam: MAGNET HELM outputs import through aiq-evals."""
+    """Phase-5 compatibility seam: MAGNET HELM outputs import through aiq-magnet-evals."""
     from magnet_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
     from magnet_evals.errors import ArtifactError
     from magnet_evals.runner import import_evaluation, resolve_evaluation

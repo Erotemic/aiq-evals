@@ -13,7 +13,7 @@ new package boundary.
 
 ## Decision
 
-`aiq-evals` is an independent package whose responsibility is to reproducibly
+`aiq-magnet-evals` is an independent package whose responsibility is to reproducibly
 obtain and describe evaluation results across heterogeneous native evaluation
 engines.
 
@@ -31,11 +31,11 @@ It owns:
 - schema/version compatibility for its own run bundle;
 - cross-backend conformance tests.
 
-Core `aiq-evals` must not depend on MAGNET or kwdagger.
+Core `aiq-magnet-evals` must not depend on MAGNET or kwdagger.
 
 ## Consequences
 
-MAGNET consumes `aiq-evals`; `aiq-evals` does not import MAGNET. A future audit,
+MAGNET consumes `aiq-magnet-evals`; `aiq-magnet-evals` does not import MAGNET. A future audit,
 reporting, or benchmark service may consume the same package without inheriting
 MAGNET claim semantics.
 

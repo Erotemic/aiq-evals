@@ -25,7 +25,7 @@ scientific payload.
 
 ## Decision
 
-Keep `aiq-evals`' independent `EvaluationResult`, result, metric, and sample
+Keep `aiq-magnet-evals`' independent `EvaluationResult`, result, metric, and sample
 structures as the Phase 1 normalized contract. Retain original native files and
 explicit status, coverage, and lineage alongside them. Readers must remain usable
 without any evaluation engine installed. EEE interoperability may be added later
