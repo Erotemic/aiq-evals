@@ -53,6 +53,8 @@ _ALLOWED_ENGINE_OPTIONS = {
     'shuffle_seed',
     'upstream_revision',
     'task_modules',
+    # Engine-independent: names checked by the runner, never passed natively.
+    'required_secrets',
 }
 
 

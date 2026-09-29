@@ -1,6 +1,6 @@
 # aiq-evals implementation plan
 
-Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-6 implemented; all three engines pass the shared conformance suite; first public API/schema frozen (ADR-0009).
+Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-7 implemented; all three engines pass the shared conformance suite; first public API/schema frozen (ADR-0009).
 
 This is the standalone refinement of the earlier MAGNET backend-agnostic
 evaluation plan. It moves generic evaluation execution, import, identity, and
@@ -316,16 +316,19 @@ Requirements:
 
 ## Phase 7 - Agentic operational/security behavior
 
-- deterministic multi-turn/tool fixtures for both new engines;
-- normalized trajectory access with explicit loss-of-detail metadata;
-- turn/time/concurrency limits;
-- secret handling/redaction;
-- tool/judge error mapping;
-- cancellation cleanup;
-- isolated attempt retries;
-- external endpoint support;
-- optional sandbox examples;
-- security review of task loading, tool execution, sandbox boundaries, host
+Implementation status: DONE for the tested combinations; evidence in `phase7-evidence.md`,
+review in `../security-review.md`.
+
+- [x] deterministic multi-turn/tool fixtures for both new engines;
+- [x] normalized trajectory access with explicit loss-of-detail metadata;
+- [x] turn/time/concurrency limits;
+- [x] secret handling/redaction;
+- [x] tool/judge error mapping (OLMo judge errors untested);
+- [x] cancellation cleanup;
+- [x] isolated attempt retries;
+- [x] external endpoint support (local OpenAI-compatible endpoints);
+- [x] optional sandbox examples;
+- [x] security review of task loading, tool execution, sandbox boundaries, host
   mounts/network, secrets, cancellation, and artifact path handling.
 
 A worker container alone is not a security guarantee.

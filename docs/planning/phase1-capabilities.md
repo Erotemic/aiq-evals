@@ -19,6 +19,9 @@ No general upstream capability follows from a local fixture.
 | Rescore | T | T | T |
 | Failure and partial coverage | S (native scenario failure; missing per-instance/stats files) | S (hard failure after metrics) | S (sample error; run-level `error`; native SIGINT `cancelled` and SIGKILL `started` logs import as non-success with partial coverage) |
 | Cancellation and owned process cleanup | S (owned child; SIGINT honored in 2.8 s) | S (owned child; fixture blocks its loop, so cleanup comes via SIGTERM escalation) | S (owned child; SIGINT-first cancellation yields Inspect's own `cancelled` log) |
+| Turn/time limits | T | S (`max_turns`) | S (`message_limit`, `time_limit`) |
+| Tool/judge error mapping | T (no tools) | P (tool exception becomes text with `is_error=False`; judge untested) | S (`ToolError` model-visible; tool crash or judge failure is a sample failure) |
+| External OpenAI-compatible endpoint (local) | T | S (LiteLLM/OpenAI Agents) | S (`openai` provider; needs the `openai` package) |
 
 HELM fresh generation is demonstrated only with its local simple model. Engine-owned
 sandbox cleanup is demonstrated only for Inspect's `local` sandbox; Docker (socket

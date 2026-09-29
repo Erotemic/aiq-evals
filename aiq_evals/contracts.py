@@ -11,7 +11,12 @@ from pathlib import Path
 from typing import Any, Literal, Mapping
 
 from aiq_evals.errors import RequestValidationError
-from aiq_evals.jsonutil import JSONValue, find_secret_paths, normalize_json
+from aiq_evals.jsonutil import (
+    JSONValue,
+    check_secret_name_list,
+    find_secret_paths,
+    normalize_json,
+)
 
 REQUEST_SCHEMA_VERSION = 1
 RESULT_SCHEMA_VERSION = 1
@@ -123,6 +128,13 @@ class EvaluationRequest:
                     'credential-bearing values must be supplied through ExecutionContext.env; '
                     f'found request keys: {", ".join(secret_paths)}'
                 )
+        if 'required_secrets' in self.engine_options:
+            try:
+                check_secret_name_list(
+                    self.engine_options['required_secrets'], label='engine_options.required_secrets'
+                )
+            except ValueError as ex:
+                raise RequestValidationError(str(ex)) from ex
 
     @property
     def primary_model(self) -> ModelBinding:

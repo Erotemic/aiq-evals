@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -113,6 +114,14 @@ def omitted_fields(native: Mapping[str, Any], retained: set[str]) -> list[str]:
         str(key) for key, value in native.items()
         if str(key) not in retained and value not in (None, '', [], {}, ())
     )
+
+
+def check_secret_name_list(value: Any, *, label: str) -> None:
+    """``required_secrets`` must be a list of environment-variable names."""
+    if not isinstance(value, list) or any(
+        not isinstance(name, str) or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', name) for name in value
+    ):
+        raise ValueError(f'{label} must be a list of environment variable names')
 
 
 def required_secret_names(value: Any) -> list[str]:

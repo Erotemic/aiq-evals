@@ -52,6 +52,8 @@ _ALLOWED_ENGINE_OPTIONS = {
     'log_format',
     'registration_modules',
     'upstream_revision',
+    # Engine-independent: names checked by the runner, never passed natively.
+    'required_secrets',
 }
 _PROTECTED_EVAL_OPTIONS = {
     'tasks',

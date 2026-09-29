@@ -54,7 +54,8 @@ VERIFIED_HELM_VERSION = '0.5.14'
 SUITE = 'aiq-evals'
 
 _FULL_GIT_SHA = re.compile(r'^[0-9a-fA-F]{40}$')
-_ALLOWED_ENGINE_OPTIONS = {'upstream_revision', 'plugins'}
+# required_secrets is engine-independent: names checked by the runner, never passed to HELM.
+_ALLOWED_ENGINE_OPTIONS = {'upstream_revision', 'plugins', 'required_secrets'}
 _ALLOWED_TASK_OPTIONS = {'max_eval_instances', 'num_train_trials'}
 _MODEL_ARG = re.compile(r'(^|[:,])model(_deployment)?=')
 
