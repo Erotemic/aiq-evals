@@ -11,8 +11,8 @@ had been pushed when this was written.
 
 | Item | Value |
 | --- | --- |
-| aiq-magnet-evals | `main` after `8086431` (ADR-0010, ADR-0011, worker isolation, rename, packaged examples, Docker sandbox), plus this documentation commit |
-| aiq-magnet | branch `dev/aiq-evals-integration`: `c0f07a5` (fixes and tests), `40cb99a` (recipes), `ecf1bf6` (CI job); `uv.lock` pending |
+| aiq-magnet-evals | `main` through `df97604` (ADR-0010, ADR-0011, worker isolation, rename, packaged examples, Docker sandbox, review fixes), plus documentation commits |
+| aiq-magnet | branch `dev/aiq-evals-integration`: `c0f07a5` (fixes and tests), `40cb99a` (recipes), `ecf1bf6` (CI job), `27d8a51` (review fixes); `uv.lock` pending |
 | HELM worker and MAGNET | CPython 3.12.3; `crfm-helm==0.5.14` with `dev/environments/phase1/helm-py312-constraints.txt`; kwdagger 0.4.1, cmd_queue 0.3.2 |
 | Inspect worker | CPython 3.11.15 (uv-managed); `inspect-ai==0.3.272` with `inspect-py311-constraints.txt` |
 | OLMo worker | olmo-eval `73ade80e24f796af55caeb8fd7b75a7f3fd607fd`, `uv sync --frozen --extra litellm --extra agents`, CPython 3.12.3 |
@@ -39,6 +39,27 @@ than skips). `dev/ci/aiq_evals_integration.sh` builds all of this from scratch.
 | 8 unfinished examples | recipes use installed `magnet_evals.examples`, ship as package data, have end-to-end tests | `tests/test_aiq_evals_examples.py` |
 | 9 rename incomplete | metadata, CLI (`aiq-magnet-evals`, alias `aiq-evals`), docs; identity strings kept | `AGENTS.md` "Names" |
 
+An independent review of this pass then found, with reproductions, and these
+were fixed (regression tests in `tests/test_single_flight.py` and MAGNET's
+`test_aiq_evals_integration.py`):
+
+- Imports of different content raced to seed the shared canonical run: a raw
+  `OSError` escaped in 81-97 of 200 trials. Seeding now happens under the
+  measurement lock, and a lost rename is a `PublicationError`.
+- Cancelling the lock holder during promotion released the lock early, so the
+  engine ran twice. Promotion now finishes first.
+- A failed holder-note write leaked the lock. The note is now best-effort.
+- Sibling directory symlink cycles recursed until `ELOOP`.
+- Row loading trusted the selector and policy in `evaluation.json`. Rows are
+  now pinned to kwdagger's scheduling record for that directory (`invoke.sh`:
+  the done-check's `--expected` and the `--request`).
+- kwdagger's mtime-keyed row cache could serve a row after its run changed. It
+  is bypassed for pipelines with an `EvaluationNode`.
+- One invalid node aborted loading of every row. It now yields an ineligible
+  row with the reason.
+- Preflight required secret values that only a later lease provides.
+  Resolution now uses `require_secrets=False`.
+
 Two further defects found and fixed during this pass:
 
 - Workers received the caller's whole `site-packages` on `PYTHONPATH` when
@@ -51,7 +72,7 @@ Two further defects found and fixed during this pass:
 
 MAGNET's full suite, with every integration prerequisite required
 (`PATH=<helm-venv>/bin:$PATH MAGNET_REQUIRE_AIQ_EVALS=1 MAGNET_TEST_DOCKER=1 ... python -m pytest -q magnet tests`,
-Docker group): 457 passed, 16 skipped (MAGNET's own optional skips), 0 failed.
+Docker group): 461 passed, 16 skipped (MAGNET's own optional skips), 0 failed.
 The legacy evaluator, HELM loaders/materialization, predictor, and llama/theory
 card tests are unchanged and pass. (Card nodes run a bare `python`, so the venv
 must be on `PATH`; without it, 4 card tests fail on `main` too.)
@@ -75,9 +96,21 @@ the integration code.
 
 The view (`projection.evidence_view`) is computed on every load from a run that
 passed full checksum validation and matches the recorded measurement,
-normalized-artifact, and import identities. Values written into
-`evaluation.json` are ignored. A changed run reference or identity makes the
-node invalid, and a changed payload fails validation. See the finding-4 tests.
+normalized-artifact, and import identities. The recorded selector, coverage
+policy, identities, and request must also match the directory's scheduling
+record, the `invoke.sh` that kwdagger rendered. Values written into
+`evaluation.json` are ignored. A changed run, projection, or request yields an
+ineligible row with the reason, and the done-check reruns the node.
+Tests: `test_edited_evaluation_json_cannot_change_the_evidence`,
+`test_edited_projection_is_rejected_when_rows_load`,
+`test_a_run_of_another_request_is_rejected_when_rows_load`,
+`test_edited_run_payload_invalidates_the_node`,
+`test_done_check_pins_the_scheduled_projection`, and
+`test_rows_are_never_served_from_a_stale_cache` (HELM).
+
+Residual: `invoke.sh`, `evaluation.json`, and the run are local files. Someone
+who can rewrite all of them consistently can still substitute evidence. These
+are integrity checks, not authentication.
 
 ## E-M6 Cardinality (production adapters)
 
@@ -159,7 +192,7 @@ evaluation, `NOT_EVALUATED`), `test_static_errors_surface_in_a_dry_run`, and
 | dashboard/card compatibility | `test_one_helm_evaluation_becomes_one_claim_row`: `card.yaml`, log, `results/*/verdict.json` with concrete symbols, `verdict.json` (the eval-card-viz upload contract; the viewer itself was not run) |
 | HELM legacy regression | E-M1 |
 
-Run: `python -m pytest -q tests/test_aiq_evals_integration.py` gives 27 passed;
+Run: `python -m pytest -q tests/test_aiq_evals_integration.py` gives 31 passed;
 `tests/test_aiq_evals_examples.py` gives 19 passed; the container test gives
 1 passed (Docker group).
 
@@ -177,8 +210,9 @@ reproduction".
 
 `AIQ_MAGNET_EVALS_DIR=<aiq-magnet-evals checkout> dev/ci/aiq_evals_integration.sh <fresh dir>`
 (run with Docker group access) builds all four environments from scratch and
-runs the three files with `MAGNET_REQUIRE_AIQ_EVALS=1`: 47 passed, 0 skipped
-(27 integration, 19 examples, 1 container), exit 0.
+runs the three files with `MAGNET_REQUIRE_AIQ_EVALS=1`: 51 passed, 0 skipped
+(31 integration, 19 examples, 1 container), exit 0, at MAGNET `27d8a51`
+with aiq-magnet-evals `df97604`.
 
 ## Open
 
