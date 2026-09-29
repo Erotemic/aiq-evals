@@ -14,6 +14,7 @@ from aiq_evals.ensure import EnsureOutcome, ensure_evaluation, ensure_evaluation
 from aiq_evals.outputs import load_run
 from aiq_evals.runner import (
     import_evaluation,
+    import_evaluation_async,
     resolve_evaluation,
     resolve_evaluation_async,
     run_evaluation,
@@ -37,6 +38,7 @@ __all__ = [
     'ensure_evaluation',
     'ensure_evaluation_async',
     'import_evaluation',
+    'import_evaluation_async',
     'load_run',
     'resolve_evaluation',
     'resolve_evaluation_async',

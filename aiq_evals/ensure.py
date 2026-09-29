@@ -18,7 +18,7 @@ from aiq_evals.artifacts import RunBundle
 from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ResolvedEvaluation
 from aiq_evals.errors import ActiveEventLoopError
 from aiq_evals.runner import (
-    import_evaluation,
+    import_evaluation_async,
     resolve_evaluation_async,
     run_evaluation_async,
 )
@@ -85,9 +85,8 @@ async def ensure_evaluation_async(
     )
     if import_source is not None:
         action: EnsureAction = 'imported'
-        attempt = await asyncio.to_thread(
-            import_evaluation, resolved, import_source, context,
-            allow_external_symlinks=allow_external_symlinks,
+        attempt = await import_evaluation_async(
+            resolved, import_source, context, allow_external_symlinks=allow_external_symlinks,
         )
     else:
         action = 'executed'

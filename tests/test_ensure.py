@@ -19,6 +19,7 @@ def fake_engine():
     if 'fake' not in registrations():
         register_backend(BackendRegistration(key='fake', module='tests.fake_backend', factory='FakeBackend'))
     fake_backend.EXECUTIONS.clear()
+    fake_backend.RESOLUTIONS.clear()
     yield
     clear_backend_cache()
 
@@ -136,3 +137,61 @@ def test_concurrent_ensures_converge_on_one_canonical_run(tmp_path):
     one, two = asyncio.run(both())
     assert one.run.path == two.run.path
     assert store.lookup(one.resolved) is not None
+
+
+def test_declared_secret_inherited_from_environment_is_redacted(tmp_path, monkeypatch):
+    monkeypatch.setenv('AIQ_DECLARED_TOKEN', 'inherited-secret-value')
+    store = ResultStore(tmp_path / 'store')
+    outcome = ensure_evaluation(
+        make_request('leak', engine_options={'required_secrets': ['AIQ_DECLARED_TOKEN']}), store
+    )
+    assert outcome.run.result.diagnostics['native_error'] == '401 for token <redacted:AIQ_DECLARED_TOKEN>'
+    for path in (tmp_path / 'store').rglob('*'):
+        if path.is_file():
+            assert 'inherited-secret-value' not in path.read_text(errors='ignore'), path
+
+
+def test_secret_preflight_runs_before_resolution(tmp_path, monkeypatch):
+    from aiq_evals.errors import RequestValidationError
+
+    monkeypatch.delenv('AIQ_DECLARED_TOKEN', raising=False)
+    request = make_request('ok', engine_options={'required_secrets': ['AIQ_DECLARED_TOKEN']})
+    with pytest.raises(RequestValidationError, match='AIQ_DECLARED_TOKEN'):
+        ensure_evaluation(request, ResultStore(tmp_path / 'store'))
+    assert fake_backend.RESOLUTIONS['ok'] == 0
+
+
+def test_in_process_timeout_is_enforced(tmp_path):
+    outcome = ensure_evaluation(make_request('slow'), ResultStore(tmp_path / 'store'), timeout_seconds=0.01)
+    assert outcome.run.result.status == 'failed'
+    assert 'TimeoutError' in outcome.run.result.diagnostics['runner_error']
+
+
+def test_run_and_import_resolve_through_the_worker_when_given(tmp_path, monkeypatch):
+    from aiq_evals import runner
+    from aiq_evals.contracts import ExecutionContext
+
+    seen = []
+
+    async def fake_resolve(request, context=None):
+        seen.append(context.worker_python if context else None)
+        return fake_backend.FakeBackend().resolve(request)
+
+    async def fake_worker_import(resolved, source, context, secrets):
+        seen.append(('import-worker', context.worker_python))
+        return fake_backend.FakeBackend().import_results(resolved, source, context)
+
+    async def fake_execute(resolved, context, work_dir):
+        return await fake_backend.FakeBackend().execute(resolved, ExecutionContext(output_dir=work_dir))
+
+    monkeypatch.setattr(runner, 'resolve_evaluation_async', fake_resolve)
+    monkeypatch.setattr(runner, '_import_in_worker', fake_worker_import)
+    monkeypatch.setattr(runner, '_execute_resolved', fake_execute)
+    runner.run_evaluation(make_request(), ExecutionContext(output_dir=tmp_path / 'run', worker_python='/engine/python'))
+    source = tmp_path / 'native'
+    source.mkdir()
+    (source / 'value.txt').write_text('0.5\n')
+    runner.import_evaluation(
+        make_request('imp'), source, ExecutionContext(output_dir=tmp_path / 'imp', worker_python='/engine/python')
+    )
+    assert seen == ['/engine/python', '/engine/python', ('import-worker', '/engine/python')]

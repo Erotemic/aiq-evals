@@ -18,6 +18,11 @@ def _parser() -> argparse.ArgumentParser:
     execute.add_argument('--resolved', type=Path, required=True)
     execute.add_argument('--output-dir', type=Path, required=True)
     execute.add_argument('--result', type=Path, required=True)
+    imp = sub.add_parser('import')
+    imp.add_argument('--resolved', type=Path, required=True)
+    imp.add_argument('--source', type=Path, required=True)
+    imp.add_argument('--output-dir', type=Path, required=True)
+    imp.add_argument('--result', type=Path, required=True)
     resolve = sub.add_parser('resolve')
     resolve.add_argument('--request', type=Path, required=True)
     resolve.add_argument('--result', type=Path, required=True)
@@ -32,6 +37,18 @@ def _resolve(args: argparse.Namespace) -> int:
         payload = {'resolved': backend.resolve(request).to_dict()}
     except AiqEvalsError as ex:
         # Typed errors cross the process boundary; anything else is a crash.
+        payload = {'error': {'type': type(ex).__name__, 'message': str(ex)}}
+    args.result.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+    return 0
+
+
+def _import(args: argparse.Namespace) -> int:
+    resolved = ResolvedEvaluation.from_dict(json.loads(args.resolved.read_text()))
+    try:
+        backend = get_backend(resolved.request.engine)
+        result = backend.import_results(resolved, str(args.source), ExecutionContext(output_dir=args.output_dir))
+        payload = {'result': result.to_dict()}
+    except AiqEvalsError as ex:
         payload = {'error': {'type': type(ex).__name__, 'message': str(ex)}}
     args.result.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
     return 0
@@ -59,6 +76,8 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == 'execute':
         return _execute(args)
+    if args.command == 'import':
+        return _import(args)
     if args.command == 'resolve':
         return _resolve(args)
     raise AssertionError(args.command)

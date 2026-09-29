@@ -95,6 +95,7 @@ def _parser() -> argparse.ArgumentParser:
     imp.add_argument('request', type=Path)
     imp.add_argument('source', type=Path)
     imp.add_argument('--output', type=Path, required=True)
+    imp.add_argument('--worker-python', help='Resolve and read native artifacts in this engine interpreter.')
     imp.add_argument(
         '--allow-external-symlinks', action='store_true',
         help='Follow symlinks leaving the import source (trusted sources only).',
@@ -238,7 +239,7 @@ def _run(args: argparse.Namespace) -> int:
 
 def _import_native(args: argparse.Namespace) -> int:
     request = _load_request(args.request)
-    context = ExecutionContext(output_dir=args.output)
+    context = ExecutionContext(output_dir=args.output, worker_python=args.worker_python)
     bundle = import_evaluation(
         request, args.source, context, allow_external_symlinks=args.allow_external_symlinks
     )

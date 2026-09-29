@@ -9,7 +9,7 @@ import signal
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 from aiq_evals import errors as errors_module
 from aiq_evals.artifacts import RunBundle, publish_run
@@ -123,6 +123,7 @@ async def _run_worker(
     context: ExecutionContext,
     stdout_path: Path,
     stderr_path: Path,
+    secrets: Mapping[str, str],
 ) -> int:
     """Run ``python -m aiq_evals.worker ...`` in its own process group.
 
@@ -149,8 +150,8 @@ async def _run_worker(
                 await _terminate_process_tree(process)
                 raise
     finally:
-        _redact_file(stdout_path, context.env)
-        _redact_file(stderr_path, context.env)
+        _redact_file(stdout_path, secrets)
+        _redact_file(stderr_path, secrets)
     assert process.returncode is not None
     return process.returncode
 
@@ -180,6 +181,7 @@ async def _execute_in_worker(
         context,
         worker_log_dir / 'stdout.log',
         stderr_path,
+        effective_secrets(resolved.request, context),
     )
     if returncode != 0:
         detail = stderr_path.read_text(errors='replace')[-4000:]
@@ -201,6 +203,9 @@ async def resolve_evaluation_async(
     in the engine's worker environment (ADR-0002). Errors raised there keep
     their aiq-evals error type.
     """
+    if context is not None:
+        # Before any task/plugin code runs, in-process or in the worker.
+        check_required_secrets(request, context)
     if context is None or context.worker_python is None:
         return resolve_evaluation(request)
     validate_request(request)
@@ -215,6 +220,7 @@ async def resolve_evaluation_async(
             context,
             scratch_dir / 'stdout.log',
             stderr_path,
+            effective_secrets(request, context),
         )
         try:
             payload = json.loads(result_path.read_text())
@@ -223,12 +229,17 @@ async def resolve_evaluation_async(
             raise ExecutionError(
                 f'resolution worker exited with code {returncode} without a result: {detail}'
             ) from ex
-    if 'error' in payload:
-        error_cls = getattr(errors_module, str(payload['error'].get('type')), None)
-        if not (isinstance(error_cls, type) and issubclass(error_cls, errors_module.AiqEvalsError)):
-            error_cls = ExecutionError
-        raise error_cls(str(payload['error'].get('message')))
+    _raise_worker_error(payload)
     return ResolvedEvaluation.from_dict(payload['resolved'])
+
+
+def _raise_worker_error(payload: Mapping[str, Any]) -> None:
+    if 'error' not in payload:
+        return
+    error_cls = getattr(errors_module, str(payload['error'].get('type')), None)
+    if not (isinstance(error_cls, type) and issubclass(error_cls, errors_module.AiqEvalsError)):
+        error_cls = ExecutionError
+    raise error_cls(str(payload['error'].get('message')))
 
 
 def _cancelled_result(resolved: ResolvedEvaluation, work_dir: Path, detail: str) -> EvaluationResult:
@@ -275,15 +286,32 @@ async def _execute_resolved(
         worker_python=None,
         timeout_seconds=context.timeout_seconds,
     )
-    return await backend.execute(resolved, direct_context)
+    if context.timeout_seconds is None:
+        return await backend.execute(resolved, direct_context)
+    # Same semantics as the worker path: on expiry the adapter task is
+    # cancelled (running its cleanup) and TimeoutError becomes a failed run.
+    return await asyncio.wait_for(backend.execute(resolved, direct_context), context.timeout_seconds)
 
 
-def _redacted_exception_text(ex: BaseException, env: dict[str, str] | Any) -> str:
+def _redacted_exception_text(ex: BaseException, env: Mapping[str, str]) -> str:
     text = f'{type(ex).__name__}: {ex}'
     for key, value in dict(env).items():
         if value:
             text = text.replace(value, f'<redacted:{key}>')
     return text
+
+
+def effective_secrets(request: EvaluationRequest, context: ExecutionContext) -> dict[str, str]:
+    """Secret values to scrub: ``ExecutionContext.env`` plus declared secrets inherited.
+
+    Workers inherit the parent environment, so a ``required_secrets`` name set
+    only in ``os.environ`` is as sensitive as one passed explicitly.
+    """
+    secrets = {name: value for name, value in context.env.items() if value}
+    for name in required_secret_names(request.to_dict()):
+        if name not in secrets and os.environ.get(name):
+            secrets[name] = os.environ[name]
+    return secrets
 
 
 def check_required_secrets(request: EvaluationRequest, context: ExecutionContext) -> None:
@@ -302,15 +330,15 @@ def check_required_secrets(request: EvaluationRequest, context: ExecutionContext
         )
 
 
-def _redact_result(result: EvaluationResult, context: ExecutionContext) -> EvaluationResult:
+def _redact_result(result: EvaluationResult, secrets: Mapping[str, str]) -> EvaluationResult:
     # Adapters retain native exception text/tracebacks, which can quote
     # credentials supplied through the environment; never publish those values.
-    if not any(context.env.values()):
+    if not any(secrets.values()):
         return result
-    redacted = EvaluationResult.from_dict(redact_values(result.to_dict(), context.env))
+    redacted = EvaluationResult.from_dict(redact_values(result.to_dict(), secrets))
     diagnostics = dict(redacted.diagnostics)
     short = sorted(
-        name for name, value in context.env.items()
+        name for name, value in secrets.items()
         if value and len(value) < MIN_REDACTED_VALUE_LENGTH
     )
     if short:
@@ -349,29 +377,29 @@ async def run_evaluation_async(
     request_or_resolved: EvaluationRequest | ResolvedEvaluation,
     context: ExecutionContext,
 ) -> RunBundle:
-    """Execute and atomically publish one evaluation run.
+    """Execute once and atomically publish the run bundle at ``context.output_dir``.
 
-    This is intentionally *not* ``ensure`` yet: phase 6 owns cache lookup/reuse
-    semantics. Phase 2 provides the content-addressed store primitives separately.
+    Always executes; use ``ensure_evaluation`` for store lookup and reuse. A
+    request is resolved in ``context.worker_python`` when given.
     """
-    resolved = (
-        resolve_evaluation(request_or_resolved)
-        if isinstance(request_or_resolved, EvaluationRequest)
-        else request_or_resolved
-    )
-    check_required_secrets(resolved.request, context)
+    if isinstance(request_or_resolved, EvaluationRequest):
+        resolved = await resolve_evaluation_async(request_or_resolved, context)
+    else:
+        resolved = request_or_resolved
+        check_required_secrets(resolved.request, context)
+    secrets = effective_secrets(resolved.request, context)
     destination = context.output_dir
     destination.parent.mkdir(parents=True, exist_ok=True)
     work_dir = Path(tempfile.mkdtemp(prefix='.aiq-evals-work-', dir=destination.parent))
     try:
         try:
-            result = _redact_result(await _execute_resolved(resolved, context, work_dir), context)
+            result = _redact_result(await _execute_resolved(resolved, context, work_dir), secrets)
         except asyncio.CancelledError as ex:
             # Preserve an inspectable terminal attempt, but do not consume task
             # cancellation: callers still receive CancelledError.
             cancelled = _redact_result(
-                _cancelled_result(resolved, work_dir, _redacted_exception_text(ex, context.env)),
-                context,
+                _cancelled_result(resolved, work_dir, _redacted_exception_text(ex, secrets)),
+                secrets,
             )
             try:
                 publish_run(
@@ -391,7 +419,7 @@ async def run_evaluation_async(
                 resolved,
                 status='failed',
                 kind='execution',
-                detail=_redacted_exception_text(ex, context.env),
+                detail=_redacted_exception_text(ex, secrets),
             )
         return publish_run(
             destination,
@@ -419,7 +447,7 @@ def run_evaluation(
     )
 
 
-def import_evaluation(
+async def import_evaluation_async(
     request_or_resolved: EvaluationRequest | ResolvedEvaluation,
     source: str | Path,
     context: ExecutionContext,
@@ -428,22 +456,84 @@ def import_evaluation(
 ) -> RunBundle:
     """Import native artifacts and atomically publish an engine-free run bundle.
 
-    Symlinks in ``source`` that point outside it are refused unless
-    ``allow_external_symlinks`` is set for a trusted source (for example MAGNET's
-    symlinked HELM materializations); followed links are listed in the manifest.
+    Resolution and native reading happen in ``context.worker_python`` when given,
+    so an engine-free caller can import, e.g., Inspect ``.eval`` logs. Symlinks in
+    ``source`` that leave it are refused unless ``allow_external_symlinks`` is set
+    for a trusted source; followed links are listed in the manifest.
     """
-    resolved = (
-        resolve_evaluation(request_or_resolved)
-        if isinstance(request_or_resolved, EvaluationRequest)
-        else request_or_resolved
-    )
-    backend = get_backend(resolved.request.engine)
-    result = backend.import_results(resolved, str(Path(source).expanduser().resolve()), context)
+    if isinstance(request_or_resolved, EvaluationRequest):
+        resolved = await resolve_evaluation_async(request_or_resolved, context)
+    else:
+        resolved = request_or_resolved
+        check_required_secrets(resolved.request, context)
+    secrets = effective_secrets(resolved.request, context)
+    source_path = Path(source).expanduser().resolve()
+    if context.worker_python is None:
+        backend = get_backend(resolved.request.engine)
+        result = backend.import_results(resolved, str(source_path), context)
+    else:
+        result = await _import_in_worker(resolved, source_path, context, secrets)
     return publish_run(
         context.output_dir,
         resolved=resolved,
-        result=result,
+        result=_redact_result(result, secrets),
         context=context,
         native_dir=source,
         external_symlinks='follow' if allow_external_symlinks else 'raise',
+    )
+
+
+async def _import_in_worker(
+    resolved: ResolvedEvaluation,
+    source: Path,
+    context: ExecutionContext,
+    secrets: Mapping[str, str],
+) -> EvaluationResult:
+    with tempfile.TemporaryDirectory(prefix='aiq-evals-import-') as scratch:
+        scratch_dir = Path(scratch)
+        resolved_path = scratch_dir / 'resolved.json'
+        result_path = scratch_dir / 'result.json'
+        stderr_path = scratch_dir / 'stderr.log'
+        resolved_path.write_text(json.dumps(resolved.to_dict(), sort_keys=True))
+        returncode = await _run_worker(
+            [
+                'import',
+                '--resolved', str(resolved_path),
+                '--source', str(source),
+                '--output-dir', str(context.output_dir),
+                '--result', str(result_path),
+            ],
+            context,
+            scratch_dir / 'stdout.log',
+            stderr_path,
+            secrets,
+        )
+        try:
+            payload = json.loads(result_path.read_text())
+        except (FileNotFoundError, json.JSONDecodeError) as ex:
+            detail = stderr_path.read_text(errors='replace')[-4000:]
+            raise ExecutionError(f'import worker exited with code {returncode} without a result: {detail}') from ex
+    _raise_worker_error(payload)
+    return EvaluationResult.from_dict(payload['result'])
+
+
+def import_evaluation(
+    request_or_resolved: EvaluationRequest | ResolvedEvaluation,
+    source: str | Path,
+    context: ExecutionContext,
+    *,
+    allow_external_symlinks: bool = False,
+) -> RunBundle:
+    """Synchronous facade for :func:`import_evaluation_async`."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(
+            import_evaluation_async(
+                request_or_resolved, source, context, allow_external_symlinks=allow_external_symlinks
+            )
+        )
+    raise ActiveEventLoopError(
+        'import_evaluation() cannot be called from an active event loop; '
+        'await import_evaluation_async() instead'
     )

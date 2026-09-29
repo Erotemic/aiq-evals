@@ -41,6 +41,12 @@ ensure examples/inspect_generation_request.json "$INSPECT_PY" executed
 ensure examples/olmo_local_request.json "$OLMO_PY" executed
 ensure examples/olmo_local_request.json "$OLMO_PY" reused
 
+# One-shot run and native import, also resolved/read only inside the worker.
+"$CLI" run examples/inspect_generation_request.json --output "$WORK/inspect-run" --worker-python "$INSPECT_PY" > /dev/null
+"$CLI" import-native examples/inspect_generation_request.json "$WORK/inspect-run/native/inspect_ai/logs" \
+  --output "$WORK/inspect-import" --worker-python "$INSPECT_PY" > /dev/null
+echo "inspect run + import-native through the worker: succeeded"
+
 # Agentic / tools.
 ensure examples/inspect_local_sandbox_request.json "$INSPECT_PY" executed
 "$WORK/core/bin/python" -m tests.native.chat_server --port-file "$WORK/port" &

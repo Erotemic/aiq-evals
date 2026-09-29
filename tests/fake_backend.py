@@ -6,6 +6,7 @@ resolves to a non-reusable identity. Executions are counted per task.
 from __future__ import annotations
 
 import asyncio
+import os
 from collections import Counter
 from pathlib import Path
 
@@ -20,6 +21,7 @@ from aiq_evals.contracts import (
 from aiq_evals.identity import build_measurement_identity
 
 EXECUTIONS: Counter = Counter()
+RESOLUTIONS: Counter = Counter()
 
 
 class FakeBackend:
@@ -33,6 +35,7 @@ class FakeBackend:
         pass
 
     def resolve(self, request):
+        RESOLUTIONS[request.task] += 1
         facts = {'engine_version': '1.0'}
         if request.task == 'unknown':
             facts['identity_unknown_reasons'] = ['mutable alias']
@@ -51,8 +54,9 @@ class FakeBackend:
         native = context.output_dir / 'native'
         native.mkdir(parents=True, exist_ok=True)
         (native / 'log.txt').write_text(f'attempt {EXECUTIONS[task]}\n')
-        await asyncio.sleep(0)
-        failed = task == 'fail' or (task == 'flaky' and EXECUTIONS[task] < 3)
+        await asyncio.sleep(0.5 if task == 'slow' else 0)
+        leak = os.environ.get('AIQ_DECLARED_TOKEN', '')
+        failed = task in ('fail', 'leak') or (task == 'flaky' and EXECUTIONS[task] < 3)
         return EvaluationResult(
             engine='fake',
             identity=resolved.identity,
@@ -65,6 +69,7 @@ class FakeBackend:
                 ),
             ),
             samples=(SampleRecord(task=task, model_role='primary', sample_id='s1'),),
+            diagnostics={'native_error': f'401 for token {leak}'} if task == 'leak' else {},
         )
 
     def import_results(self, resolved, source, context):
