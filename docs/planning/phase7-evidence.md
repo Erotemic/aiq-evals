@@ -13,7 +13,7 @@ The security review is `docs/security-review.md`.
 | cancellation cleanup | done | P1-06 and phase-5 records; conformance check 4 for all three engines |
 | isolated attempt retries | done | every `ensure` attempt is a separate bundle under `attempts/`; retry policy is the caller's (ADR-0006) |
 | external endpoint support | done (local OpenAI-compatible endpoint) | OLMo LiteLLM/OpenAI Agents (Phase 1). Inspect's real `openai` provider: 2 HTTP calls, tool round trip, key absent from the bundle (`test_openai_compatible_external_endpoint`). That test needs `openai`, which the verified pin set lacks; it ran in a variant environment, see below. The endpoint identity comes from the binding's `revision`/`cache_token`: without one, identity is non-reusable. |
-| optional sandbox examples | done | `examples/inspect_local_sandbox_request.json`; native sandbox tests |
+| optional sandbox examples | done | `examples/inspect_local_sandbox_request.json`; native sandbox tests. Added 2026-09-29: `examples/inspect_docker_sandbox_request.json` (Docker, opt-in) and `tests/native/test_inspect_docker_sandbox.py` (isolation and cleanup on completion and cancellation; see below). OLMo sandboxes stay untested. |
 | security review | done | `docs/security-review.md` (S1–S6 fixed; residual risks listed) |
 
 ## Commands
@@ -28,6 +28,23 @@ The security review is `docs/security-review.md`.
   gives 16 passed.
 - OLMo: `PYTHONPATH=$PWD /tmp/olmo-eval-p1/.venv/bin/python -m pytest -q tests/native/test_olmo_native.py tests/native/test_conformance.py`
   gives 12 passed, 8 skipped.
+
+## Docker sandbox (added 2026-09-29)
+
+Environment: Inspect `0.3.272` (verified pin set, CPython 3.11.15), Docker
+client 29.1.3, Docker Compose 2.40.3, image
+`ubuntu:24.04@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33ca3`.
+Command: `<inspect-venv>/bin/python -m pytest -q tests/native/test_inspect_docker_sandbox.py tests/native/test_examples_native.py`
+(run with the Docker group) gives 8 passed, 4 skipped (the other engines' and
+the `openai` examples). `docker ps -a` is empty afterwards.
+
+- The tool executes inside the container: a host marker file is absent there,
+  and `/sys/class/net` lists only `lo`.
+- The container is gone after completion, and after aiq-magnet-evals cancels the
+  run while the sandboxed tool is blocked in `sleep 120`. The attempt is
+  published as `cancelled`.
+- The compose configuration is defined in the task module's source, so its
+  pinned image digest is part of the measurement identity.
 
 ## Observations recorded without a capability claim
 

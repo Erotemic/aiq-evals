@@ -51,12 +51,24 @@ plan says, a worker process or container is not a security guarantee on its own.
 - Inspect's `local` sandbox is only a temporary working directory. It gives no
   filesystem, network, or process isolation. It is cleaned up on completion and
   on aiq-magnet-evals cancellation (native test).
-- Docker sandboxes are untested: the review host denies access to the Docker
-  socket. Nothing here should be read as a claim that containers isolate tasks.
-  Containers an engine starts leave the worker's process group, so aiq-magnet-evals
-  cancellation cannot reach them. Their cleanup is the engine's job (SIGINT
-  gives the engine that chance), and it is unverified.
-- OLMo and HELM sandboxes are not exercised.
+- Inspect's Docker sandbox was exercised on 2026-09-29, once Docker was reachable,
+  with one configuration only: `magnet_evals.examples.inspect_tasks` compose
+  (image `ubuntu:24.04` pinned by digest, `network_mode: none`, `init`, no
+  volumes). With that configuration the sandboxed tool saw no host file (a
+  marker file on the host was absent) and only the loopback interface, and
+  Inspect removed the container both on completion and when aiq-magnet-evals
+  cancelled the run (SIGINT to the worker group gives Inspect its cleanup)
+  (`tests/native/test_inspect_docker_sandbox.py`). This is evidence for that
+  compose file, not for containers in general: a task's own compose file can
+  mount host paths, enable networking, or run privileged.
+- Docker access is root-equivalent on the host. A worker that can start
+  sandboxes can start any container; grant Docker to evaluation users only as
+  deliberately as root.
+- Containers an engine starts leave the worker's process group, so
+  aiq-magnet-evals cannot kill them directly; for Inspect the engine's own cleanup
+  was verified above.
+- OLMo sandboxes (SWE-ReX, outside the verified OLMo extras) and HELM sandboxes
+  are not exercised.
 
 ### Host mounts and network
 - Workers inherit the parent process environment plus `ExecutionContext.env`,

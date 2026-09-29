@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "engine": "inspect_ai",
+  "task": "python:magnet_evals.examples.inspect_tasks:docker_sandbox_task",
+  "task_revision": null,
+  "data_revision": "example-v1",
+  "models": [
+    {
+      "role": "primary",
+      "model": "local",
+      "provider": "aiq_example",
+      "revision": "local-v1",
+      "cache_token": null,
+      "provider_options": {}
+    }
+  ],
+  "task_options": {},
+  "generation": {},
+  "engine_options": {
+    "registration_modules": [
+      "magnet_evals.examples.inspect_tasks"
+    ]
+  }
+}

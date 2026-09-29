@@ -11,7 +11,14 @@ from inspect_ai.model import ModelAPI, ModelOutput, modelapi
 from inspect_ai.scorer import includes, match
 from inspect_ai.solver import generate, use_tools
 from inspect_ai.tool import tool
-from inspect_ai.util import sandbox
+from inspect_ai.util import ComposeConfig, ComposeService, sandbox
+
+#: The Docker sandbox image, pinned by digest. It is defined in this module's
+#: source, so the measurement identity (which hashes the task source) changes
+#: whenever the sandbox image does.
+DOCKER_SANDBOX_IMAGE = (
+    "ubuntu:24.04@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33ca3"
+)
 
 
 @modelapi(name="aiq_example")
@@ -84,4 +91,26 @@ def sandbox_task():
         solver=[use_tools(aiq_example_sandbox_double()), generate()],
         scorer=match(),
         sandbox="local",
+    )
+
+
+@task
+def docker_sandbox_task():
+    """The same tool, executing inside a Docker container (opt-in; needs Docker).
+
+    The container has no network and no host mounts; Inspect creates it for
+    the sample and removes it afterwards.
+    """
+    compose = ComposeConfig(services={"default": ComposeService(
+        image=DOCKER_SANDBOX_IMAGE,
+        command="tail -f /dev/null",
+        init=True,
+        network_mode="none",
+        stop_grace_period="1s",
+    )})
+    return Task(
+        dataset=[Sample(input="Use aiq_example_sandbox_double on two.", target="4")],
+        solver=[use_tools(aiq_example_sandbox_double()), generate()],
+        scorer=match(),
+        sandbox=("docker", compose),
     )
