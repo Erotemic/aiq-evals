@@ -1,0 +1,2584 @@
+{
+  "adapter_spec": {
+    "method": "generation",
+    "global_prefix": "",
+    "global_suffix": "",
+    "instructions": "Please solve the following problem.\n",
+    "input_prefix": "Input: ",
+    "input_suffix": "\n",
+    "reference_prefix": "A. ",
+    "reference_suffix": "\n",
+    "chain_of_thought_prefix": "",
+    "chain_of_thought_suffix": "\n",
+    "output_prefix": "Output: ",
+    "output_suffix": "\n",
+    "instance_prefix": "\n",
+    "substitutions": [],
+    "max_train_instances": 5,
+    "max_eval_instances": 10,
+    "num_outputs": 3,
+    "num_train_trials": 3,
+    "num_trials": 1,
+    "sample_train": true,
+    "model_deployment": "simple/model1",
+    "model": "simple/model1",
+    "temperature": 1,
+    "max_tokens": 100,
+    "stop_sequences": [
+      "."
+    ],
+    "multi_label": false
+  },
+  "request_states": [
+    {
+      "instance": {
+        "input": {
+          "text": "12 18 1 15 7"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "15"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id10"
+      },
+      "train_trial_index": 0,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 12 18 1 15 7\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "7",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "7",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "15",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "15",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 1.1205673217773438e-05,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "13 5 11 17 11"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "13"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id11"
+      },
+      "train_trial_index": 0,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 13 5 11 17 11\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "11",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "11",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 1.4066696166992188e-05,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "14 16 3 5 16"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "5"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id12"
+      },
+      "train_trial_index": 0,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 16 3 5 16\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "16",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "16",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "5",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "5",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 9.298324584960938e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "11 15 0 15 1"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "0"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id13"
+      },
+      "train_trial_index": 0,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 11 15 0 15 1\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "1",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "1",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "15",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "15",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 7.3909759521484375e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "19 18 18 12 5"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "18"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id14"
+      },
+      "train_trial_index": 0,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 19 18 18 12 5\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "5",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "5",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "12",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "12",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 4.5299530029296875e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "16 7 0 6 17"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "17"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id15"
+      },
+      "train_trial_index": 0,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 16 7 0 6 17\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "6",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "6",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 4.76837158203125e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "7 12 16 11 18"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "16"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id16"
+      },
+      "train_trial_index": 0,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 7 12 16 11 18\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "18",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "18",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "11",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "11",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 5.4836273193359375e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "14 8 17 19 0"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "19"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id17"
+      },
+      "train_trial_index": 0,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 8 17 19 0\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "0",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "0",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "19",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "19",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 1.1682510375976562e-05,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "16 4 16 17 6"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "17"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id18"
+      },
+      "train_trial_index": 0,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 16 4 16 17 6\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "6",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "6",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 9.059906005859375e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "1 15 11 18 17"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "15"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id19"
+      },
+      "train_trial_index": 0,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 1 15 11 18 17\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "18",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "18",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 4.76837158203125e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "12 18 1 15 7"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "15"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id10"
+      },
+      "train_trial_index": 1,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 6 9 9 18 15\nOutput: 15\n\nInput: 12 18 1 15 7\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "7",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "7",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "15",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "15",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 4.76837158203125e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "13 5 11 17 11"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "13"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id11"
+      },
+      "train_trial_index": 1,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 6 9 9 18 15\nOutput: 15\n\nInput: 13 5 11 17 11\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "11",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "11",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 4.5299530029296875e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "14 16 3 5 16"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "5"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id12"
+      },
+      "train_trial_index": 1,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 6 9 9 18 15\nOutput: 15\n\nInput: 14 16 3 5 16\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "16",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "16",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "5",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "5",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 6.4373016357421875e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "11 15 0 15 1"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "0"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id13"
+      },
+      "train_trial_index": 1,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 6 9 9 18 15\nOutput: 15\n\nInput: 11 15 0 15 1\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "1",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "1",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "15",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "15",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 1.239776611328125e-05,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "19 18 18 12 5"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "18"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id14"
+      },
+      "train_trial_index": 1,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 6 9 9 18 15\nOutput: 15\n\nInput: 19 18 18 12 5\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "5",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "5",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "12",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "12",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 9.775161743164062e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "16 7 0 6 17"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "17"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id15"
+      },
+      "train_trial_index": 1,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 6 9 9 18 15\nOutput: 15\n\nInput: 16 7 0 6 17\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "6",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "6",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 4.76837158203125e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "7 12 16 11 18"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "16"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id16"
+      },
+      "train_trial_index": 1,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 6 9 9 18 15\nOutput: 15\n\nInput: 7 12 16 11 18\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "18",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "18",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "11",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "11",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 5.4836273193359375e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "14 8 17 19 0"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "19"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id17"
+      },
+      "train_trial_index": 1,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 6 9 9 18 15\nOutput: 15\n\nInput: 14 8 17 19 0\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "0",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "0",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "19",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "19",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 7.3909759521484375e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "16 4 16 17 6"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "17"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id18"
+      },
+      "train_trial_index": 1,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 6 9 9 18 15\nOutput: 15\n\nInput: 16 4 16 17 6\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "6",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "6",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 1.2874603271484375e-05,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "1 15 11 18 17"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "15"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id19"
+      },
+      "train_trial_index": 1,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 9 0 13 17 3\nOutput: 0\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 6 9 9 18 15\nOutput: 15\n\nInput: 1 15 11 18 17\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "18",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "18",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 7.867813110351562e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "12 18 1 15 7"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "15"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id10"
+      },
+      "train_trial_index": 2,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 0 0 17 0 12\nOutput: 0\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 12 18 1 15 7\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "7",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "7",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "15",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "15",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 6.198883056640625e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "13 5 11 17 11"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "13"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id11"
+      },
+      "train_trial_index": 2,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 0 0 17 0 12\nOutput: 0\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 13 5 11 17 11\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "11",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "11",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 5.4836273193359375e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "14 16 3 5 16"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "5"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id12"
+      },
+      "train_trial_index": 2,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 0 0 17 0 12\nOutput: 0\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 14 16 3 5 16\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "16",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "16",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "5",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "5",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 5.245208740234375e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "11 15 0 15 1"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "0"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id13"
+      },
+      "train_trial_index": 2,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 0 0 17 0 12\nOutput: 0\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 11 15 0 15 1\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "1",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "1",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "15",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "15",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 1.7881393432617188e-05,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "19 18 18 12 5"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "18"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id14"
+      },
+      "train_trial_index": 2,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 0 0 17 0 12\nOutput: 0\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 19 18 18 12 5\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "5",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "5",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "12",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "12",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 8.344650268554688e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "16 7 0 6 17"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "17"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id15"
+      },
+      "train_trial_index": 2,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 0 0 17 0 12\nOutput: 0\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 16 7 0 6 17\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "6",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "6",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 8.821487426757812e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "7 12 16 11 18"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "16"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id16"
+      },
+      "train_trial_index": 2,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 0 0 17 0 12\nOutput: 0\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 7 12 16 11 18\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "18",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "18",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "11",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "11",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 4.76837158203125e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "14 8 17 19 0"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "19"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id17"
+      },
+      "train_trial_index": 2,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 0 0 17 0 12\nOutput: 0\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 14 8 17 19 0\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "0",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "0",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "19",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "19",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 6.9141387939453125e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "16 4 16 17 6"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "17"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id18"
+      },
+      "train_trial_index": 2,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 0 0 17 0 12\nOutput: 0\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 16 4 16 17 6\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "6",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "6",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 1.1682510375976562e-05,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    },
+    {
+      "instance": {
+        "input": {
+          "text": "1 15 11 18 17"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "15"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "-1"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id19"
+      },
+      "train_trial_index": 2,
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Please solve the following problem.\n\nInput: 17 7 11 7 7\nOutput: 7\n\nInput: 8 7 18 3 10\nOutput: 8\n\nInput: 0 0 17 0 12\nOutput: 0\n\nInput: 0 12 13 19 0\nOutput: 19\n\nInput: 14 15 12 6 3\nOutput: 6\n\nInput: 1 15 11 18 17\nOutput:",
+        "temperature": 1,
+        "num_completions": 3,
+        "top_k_per_token": 1,
+        "max_tokens": 100,
+        "stop_sequences": [
+          "."
+        ],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Output:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Output:",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "17",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "17",
+                "logprob": 0
+              }
+            ]
+          },
+          {
+            "text": "18",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "18",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 8.58306884765625e-06,
+        "request_datetime": 1790695504
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "simple1",
+  "description": "A simple scenario",
+  "tags": [
+    "simple"
+  ],
+  "definition_path": "https://github.com/stanford-crfm/helm/blob/main/src/helm/benchmark/scenarios/simple_scenarios.py"
+}
