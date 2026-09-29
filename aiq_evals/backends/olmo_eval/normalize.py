@@ -15,6 +15,7 @@ from aiq_evals.contracts import (
     SampleRecord,
 )
 from aiq_evals.errors import ArtifactError
+from aiq_evals.jsonutil import omitted_fields
 
 
 def _numeric(value: Any) -> float | None:
@@ -213,28 +214,49 @@ def _extract_trajectory(prediction: Mapping[str, Any]) -> Any:
     return None
 
 
+# Prediction keys carried into SampleRecord fields or ``native``.
+_PREDICTION_RETAINED = {
+    'sample_id', 'instance_id', 'id', 'index', 'doc_id', 'native_id', 'instance',
+    'scores', 'instance_metrics', 'usage', 'trajectory', 'request_trace', 'error',
+    'label', 'final_output', 'model_output',
+}
+
+
 def _prediction_samples(task: str, predictions: list[Any]) -> list[SampleRecord]:
     samples: list[SampleRecord] = []
     for index, raw in enumerate(predictions):
         if not isinstance(raw, Mapping):
             continue
+        # OLMo writes per-instance scores as instance_metrics {metric: {scorer: value}}.
         scores = raw.get('scores')
+        if not isinstance(scores, Mapping):
+            scores = raw.get('instance_metrics')
         if not isinstance(scores, Mapping):
             scores = {}
         usage = raw.get('usage')
         if not isinstance(usage, Mapping):
             usage = {}
+        trajectory = _extract_trajectory(raw)
         samples.append(
             SampleRecord(
                 task=task,
                 model_role='primary',
                 sample_id=_sample_id(raw, index),
                 scores=dict(scores),
-                trajectory=_extract_trajectory(raw),
+                trajectory=trajectory,
                 usage=dict(usage),
                 native={
+                    'kind': 'sample',
+                    'native_id': raw.get('native_id'),
+                    'label': raw.get('label'),
+                    'final_output': raw.get('final_output'),
+                    'model_output': raw.get('model_output'),
                     'request_trace': raw.get('request_trace'),
                     'error': raw.get('error'),
+                    'trajectory_detail': {
+                        'source': 'olmo_eval prediction trajectory (turns)' if trajectory is not None else None,
+                        'omitted_native_fields': omitted_fields(raw, _PREDICTION_RETAINED),
+                    },
                 },
             )
         )

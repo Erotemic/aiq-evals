@@ -21,7 +21,7 @@ from aiq_evals.contracts import (
     ResultRecord,
     SampleRecord,
 )
-from aiq_evals.jsonutil import normalize_json
+from aiq_evals.jsonutil import normalize_json, omitted_fields
 
 
 def _get(value: Any, key: str, default: Any = None) -> Any:
@@ -230,6 +230,28 @@ def _primary_metric(log: Any, metrics: tuple[MetricRecord, ...]) -> str | None:
     return None
 
 
+# EvalSample fields carried into SampleRecord fields or ``native``.
+_SAMPLE_RETAINED = {
+    'id', 'uuid', 'epoch', 'scores', 'messages', 'events', 'timelines', 'model_usage',
+    'role_usage', 'error', 'error_retries', 'limit', 'total_time', 'working_time',
+    'output', 'metadata',
+}
+
+
+def _trajectory_detail(sample: Any) -> dict[str, Any]:
+    fields = _jsonable(sample)
+    fields = fields if isinstance(fields, Mapping) else {}
+    detail: dict[str, Any] = {
+        'source': 'inspect_ai EvalSample messages/events/timelines',
+        'omitted_native_fields': omitted_fields(fields, _SAMPLE_RETAINED),
+    }
+    if fields.get('attachments'):
+        # Messages/events may hold attachment:// references whose content lives
+        # only in the native log's attachments table.
+        detail['unresolved_attachments'] = len(fields['attachments'])
+    return detail
+
+
 def _sample_records(log: Any, task: str, location: str | None = None) -> list[SampleRecord]:
     eval_spec = _get(log, 'eval')
     eval_id = _get(eval_spec, 'eval_id')
@@ -260,11 +282,16 @@ def _sample_records(log: Any, task: str, location: str | None = None) -> list[Sa
             'kind': 'sample',
             'uuid': _get(sample, 'uuid'),
             'error': _jsonable(_get(sample, 'error')),
+            'error_retries': _jsonable(_get(sample, 'error_retries')),
+            'limit': _jsonable(_get(sample, 'limit')),
+            'total_time': _get(sample, 'total_time'),
+            'working_time': _get(sample, 'working_time'),
             'output': _jsonable(_get(sample, 'output')),
             'metadata': _jsonable(_get(sample, 'metadata') or {}),
             'eval_id': eval_id,
             'task_id': task_id,
             'log_location': location,
+            'trajectory_detail': _trajectory_detail(sample),
         }
         out.append(
             SampleRecord(

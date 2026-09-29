@@ -222,6 +222,29 @@ def test_editing_task_file_changes_measurement_identity(monkeypatch, tmp_path):
     assert before.digest != after.digest
 
 
+def test_base_url_goes_to_model_base_url_not_model_args(monkeypatch, tmp_path):
+    captured = {}
+
+    def capturing_eval(**kwargs):
+        captured.update(kwargs)
+        return [make_log()]
+
+    patch_runtime(monkeypatch, eval_fn=capturing_eval)
+    request = make_request()
+    primary = request.models[0]
+    request = EvaluationRequest.from_dict({
+        **request.to_dict(),
+        'models': [
+            {**primary.to_dict(), 'provider_options': {'base_url': 'http://127.0.0.1:9/v1', 'responses_api': False}},
+            *[m.to_dict() for m in request.models[1:]],
+        ],
+    })
+    backend = InspectAIBackend()
+    asyncio.run(backend.execute(backend.resolve(request), ExecutionContext(output_dir=tmp_path / 'w')))
+    assert captured['model_base_url'] == 'http://127.0.0.1:9/v1'
+    assert captured['model_args'] == {'responses_api': False}
+
+
 def test_execute_multi_log_preserves_metric_identity_and_trajectories(monkeypatch, tmp_path):
     CALLS.clear()
     patch_runtime(monkeypatch)

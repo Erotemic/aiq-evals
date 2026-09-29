@@ -73,3 +73,16 @@ def normalized_artifact_identity(run: RunBundle) -> str:
     if not isinstance(value, str):
         raise ValueError('run manifest has no normalized artifact identity')
     return value
+
+
+def trajectory_detail(sample: SampleRecord) -> dict:
+    """What an adapter kept of a native trajectory, and which native fields it left out.
+
+    Returns ``{'source': ..., 'omitted_native_fields': [...]}``; the native
+    artifacts in the bundle remain the complete record. Samples normalized
+    before this metadata existed report ``source=None`` and unknown omissions.
+    """
+    detail = sample.native.get('trajectory_detail')
+    if isinstance(detail, dict):
+        return dict(detail)
+    return {'source': None, 'omitted_native_fields': None}

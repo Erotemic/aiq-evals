@@ -371,3 +371,102 @@ def test_cancellation_lets_inspect_clean_up_its_sandbox(tmp_path: Path) -> None:
     # Inspect's own cancelled log was written and its facts retained.
     assert [record.native_status for record in bundle.result.records] == ["cancelled"]
     assert list((root / "native" / "inspect_ai" / "logs").glob("*.eval"))
+
+
+def _agentic(task: str, *, primary: str = "local", grader: str | None = None) -> EvaluationRequest:
+    models = [ModelBinding(role="primary", model=primary, provider="fixture", revision="local-v1")]
+    if grader:
+        models.append(ModelBinding(role="grader", model=grader, provider="fixture", revision="local-v1"))
+    return EvaluationRequest(
+        engine="inspect_ai",
+        task=f"python:tests.native.inspect_agentic_fixture:{task}",
+        models=tuple(models),
+        engine_options={"registration_modules": ["tests.native.inspect_fixture"]},
+    )
+
+
+def _only_sample(bundle):
+    (sample,) = [s for s in bundle.result.samples if s.native.get("kind") == "sample"]
+    return sample
+
+
+def test_native_message_and_time_limits_are_not_errors(tmp_path: Path) -> None:
+    # P7: turn/time limits are native measurement inputs; hitting one ends the
+    # sample with a recorded limit, which is not a failure.
+    bundle = run_evaluation(
+        _agentic("message_limit_task"),
+        ExecutionContext(output_dir=tmp_path / "msg", worker_python=sys.executable),
+    )
+    assert bundle.result.status == "succeeded", bundle.result.diagnostics
+    assert bundle.result.records[0].coverage.status == "complete"
+    assert _only_sample(bundle).native["limit"]["type"] == "message"
+
+    pid_file = tmp_path / "child.pid"
+    try:
+        timed = run_evaluation(
+            _agentic("time_limit_task", primary="slow"),
+            ExecutionContext(
+                output_dir=tmp_path / "time", worker_python=sys.executable,
+                env={"AIQ_P1_CHILD_PID_FILE": str(pid_file)},
+            ),
+        )
+    finally:
+        if pid_file.exists() and pid_file.read_text():
+            with contextlib.suppress(ProcessLookupError):
+                os.kill(int(pid_file.read_text()), signal.SIGKILL)
+    assert timed.result.status == "succeeded", timed.result.diagnostics
+    assert _only_sample(timed).native["limit"]["type"] == "time"
+
+
+def test_tool_and_judge_error_mapping(tmp_path: Path) -> None:
+    # A ToolError is returned to the model: part of the trajectory, not a failure.
+    soft = run_evaluation(
+        _agentic("tool_error_task"), ExecutionContext(output_dir=tmp_path / "soft", worker_python=sys.executable)
+    )
+    assert soft.result.records[0].coverage.status == "complete"
+    tool_messages = [m for m in _only_sample(soft).trajectory["messages"] if m["role"] == "tool"]
+    assert tool_messages and tool_messages[0]["error"]["message"] == "tool refused input"
+
+    # An uncaught tool exception or a failing judge model is a sample failure:
+    # the native log may still say success, but coverage is partial.
+    for task, grader, message in (
+        ("tool_crash_task", None, "tool crashed"),
+        ("judge_error_task", "broken", "judge model failure"),
+    ):
+        bundle = run_evaluation(
+            _agentic(task, grader=grader),
+            ExecutionContext(output_dir=tmp_path / task, worker_python=sys.executable),
+        )
+        record = bundle.result.records[0]
+        assert record.native_status == "success"
+        assert record.coverage.status == "partial" and record.coverage.failed == 1
+        assert message in _only_sample(bundle).native["error"]["message"]
+
+
+def test_openai_compatible_external_endpoint(tmp_path: Path) -> None:
+    # P7 external endpoint: Inspect's real OpenAI provider against a local
+    # OpenAI-compatible server. Needs `openai` (not in the verified pin set;
+    # see phase7-evidence.md for the variant environment).
+    pytest.importorskip("openai")
+    from tests.native.chat_server import DeterministicChatHandler, chat_server
+
+    with chat_server() as port:
+        request = EvaluationRequest(
+            engine="inspect_ai",
+            task="python:tests.native.inspect_fixture:tool_task",
+            models=(ModelBinding(
+                role="primary", model="gpt-4o-mini", provider="openai", revision="local-script-v1",
+                provider_options={"base_url": f"http://127.0.0.1:{port}/v1", "responses_api": False},
+            ),),
+        )
+        bundle = run_evaluation(
+            request,
+            ExecutionContext(output_dir=tmp_path / "run", worker_python=sys.executable,
+                             env={"OPENAI_API_KEY": "local-fixture-key"}),
+        )
+        calls = DeterministicChatHandler.calls
+    assert bundle.result.status == "succeeded", bundle.result.diagnostics
+    assert calls == 2
+    roles = [m["role"] for m in _only_sample(bundle).trajectory["messages"]]
+    assert roles == ["user", "assistant", "tool", "assistant"]
+    assert not any("local-fixture-key" in p.read_text(errors="ignore") for p in (tmp_path / "run").rglob("*.json"))

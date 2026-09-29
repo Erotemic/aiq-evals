@@ -36,7 +36,7 @@ from aiq_evals.contracts import (
     SampleRecord,
 )
 from aiq_evals.errors import ArtifactError
-from aiq_evals.jsonutil import normalize_json
+from aiq_evals.jsonutil import normalize_json, omitted_fields
 
 RUN_SPEC = 'run_spec.json'
 STATS = 'stats.json'
@@ -115,8 +115,30 @@ def _request_state_trajectories(scenario_state: Mapping[str, Any]) -> dict[tuple
             ],
             'success': result.get('success'),
             'error': result.get('error'),
+            'detail': {
+                'source': 'helm scenario_state request_state (prompt/completion)',
+                'omitted_native_fields': sorted(
+                    [f'request_state.{name}' for name in omitted_fields(state, {'instance', 'train_trial_index', 'request', 'result'})]
+                    + [f'request.{name}' for name in omitted_fields(request, {'prompt', 'model'})]
+                    + [f'result.{name}' for name in omitted_fields(result, {'completions', 'success', 'error'})]
+                    + [
+                        f'completion.{name}'
+                        for name in sorted({
+                            key
+                            for completion in result.get('completions') or []
+                            for key in omitted_fields(completion, {'text'})
+                        })
+                    ]
+                ),
+            },
         }
     return found
+
+
+def _trajectory_without_detail(trajectory: Mapping[str, Any] | None) -> Any:
+    if trajectory is None:
+        return None
+    return {key: value for key, value in trajectory.items() if key != 'detail'}
 
 
 def _usage(stats: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
@@ -189,12 +211,15 @@ def normalize_run_dir(
                         _stat_key(stat.get('name') or {}): stat.get('mean')
                         for stat in row_stats
                     },
-                    trajectory=trajectories.get((instance_id, trial)),
+                    trajectory=_trajectory_without_detail(trajectories.get((instance_id, trial))),
                     usage=_usage(row_stats),
                     native={
                         'kind': 'sample',
                         'train_trial_index': trial,
                         'perturbation': row.get('perturbation'),
+                        'trajectory_detail': (trajectories.get((instance_id, trial)) or {}).get(
+                            'detail', {'source': None, 'omitted_native_fields': []}
+                        ),
                     },
                 )
             )

@@ -107,6 +107,14 @@ def find_secret_paths(value: Any, *, path: str = '$') -> list[str]:
     return found
 
 
+def omitted_fields(native: Mapping[str, Any], retained: set[str]) -> list[str]:
+    """Names of non-empty native fields a normalizer did not carry over."""
+    return sorted(
+        str(key) for key, value in native.items()
+        if str(key) not in retained and value not in (None, '', [], {}, ())
+    )
+
+
 def required_secret_names(value: Any) -> list[str]:
     """Collect environment-variable names listed under any ``required_secrets`` key."""
     names: list[str] = []

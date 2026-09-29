@@ -265,7 +265,12 @@ def _merge_native_config(request: EvaluationRequest) -> dict[str, Any]:
         'task_reference': request.task,
         'task_args': dict(request.task_options),
         'model': _qualify_model(primary),
-        'model_args': dict(primary.provider_options),
+        # Inspect takes the endpoint separately (eval(model_base_url=...)); left in
+        # model_args it collides with get_model(base_url=...).
+        'model_base_url': primary.provider_options.get('base_url'),
+        'model_args': {
+            key: value for key, value in primary.provider_options.items() if key != 'base_url'
+        },
         'model_roles': model_roles,
         'eval_options': eval_options,
         'log_format': log_format,
@@ -480,6 +485,7 @@ class InspectAIBackend:
             returned = eval_fn(
                 tasks=task,
                 model=str(config['model']),
+                model_base_url=config.get('model_base_url'),
                 model_args=dict(config.get('model_args') or {}),
                 model_roles=dict(config.get('model_roles') or {}) or None,
                 task_args=dict(config.get('task_args') or {}),

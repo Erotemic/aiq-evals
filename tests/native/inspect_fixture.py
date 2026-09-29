@@ -20,6 +20,8 @@ from inspect_ai.tool import tool
 class FixtureModel(ModelAPI):
     async def generate(self, input, tools, tool_choice, config):
         del tool_choice, config
+        if self.model_name == "broken":
+            raise RuntimeError("judge model failure")
         if self.model_name == "slow":
             child = subprocess.Popen(["sleep", "120"])
             with open(os.environ["AIQ_P1_CHILD_PID_FILE"], "w") as file:

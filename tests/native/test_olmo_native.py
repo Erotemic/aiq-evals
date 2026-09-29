@@ -1,14 +1,17 @@
 """OLMo runner probe; run in its upstream locked Python 3.12 environment."""
 
 import asyncio
-import json
 import sys
 import threading
-import time
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import ThreadingHTTPServer
 from pathlib import Path
 
 import pytest
+
+from tests.native.chat_server import (
+    DeterministicChatHandler as _DeterministicChatHandler,
+)
+from tests.native.chat_server import chat_server as _chat_server
 
 pytest.importorskip("olmo_eval")
 
@@ -96,59 +99,14 @@ def test_cancel_terminates_native_worker_tree(tmp_path: Path) -> None:
     asyncio.run(exercise())
 
 
-class _DeterministicChatHandler(BaseHTTPRequestHandler):
-    calls = 0
-    fail = False
-
-    def do_POST(self) -> None:
-        size = int(self.headers["Content-Length"])
-        request = json.loads(self.rfile.read(size))
-        type(self).calls += 1
-        if type(self).fail:
-            body = b'{"error":{"message":"intentional local failure","type":"server_error"}}'
-            self.send_response(500)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-            return
-        if not any(message.get("role") == "tool" for message in request["messages"]):
-            message = {
-                "role": "assistant",
-                "content": None,
-                "tool_calls": [{
-                    "id": "call_p1",
-                    "type": "function",
-                    "function": {"name": "double", "arguments": '{"value":2}'},
-                }],
-            }
-            finish_reason = "tool_calls"
-        else:
-            message = {"role": "assistant", "content": "4"}
-            finish_reason = "stop"
-        body = json.dumps({
-            "id": f"chatcmpl-p1-{self.calls}",
-            "object": "chat.completion",
-            "created": int(time.time()),
-            "model": request["model"],
-            "choices": [{"index": 0, "message": message, "finish_reason": finish_reason}],
-            "usage": {"prompt_tokens": 5, "completion_tokens": 2, "total_tokens": 7},
-        }).encode()
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
-
-    def log_message(self, format, *args):
-        pass
-
-
-def _tool_request(port: int, *, failure_gate: bool = False) -> EvaluationRequest:
+def _tool_request(
+    port: int, *, failure_gate: bool = False, tool: str = "double", **harness_extra
+) -> EvaluationRequest:
     harness = {
         "scaffold": "openai_agents",
-        "tools": ["double"],
+        "tools": [tool],
         "scaffold_kwargs": {"enable_compaction": False},
+        **harness_extra,
     }
     if failure_gate:
         harness["max_hard_failure_rate"] = 0.0
@@ -309,3 +267,46 @@ def test_active_event_loop_boundary(tmp_path: Path) -> None:
         assert bundle.result.status == "succeeded"
 
     asyncio.run(exercise())
+
+
+
+
+
+def test_max_turns_limit_changes_native_trajectory(tmp_path: Path) -> None:
+    # P7: max_turns is a native measurement input (it enters identity) and the
+    # scaffold stops after one model turn: assistant/tool, no final assistant turn.
+    pytest.importorskip("agents")
+    from aiq_evals.runner import resolve_evaluation
+
+    with _chat_server() as port:
+        unlimited = _tool_request(port)
+        limited = _tool_request(port, max_turns=1)
+        assert resolve_evaluation(unlimited).identity.digest != resolve_evaluation(limited).identity.digest
+        bundle = run_evaluation(
+            limited,
+            ExecutionContext(output_dir=tmp_path / "turns", worker_python=sys.executable,
+                             env={"OPENAI_API_KEY": "local-fixture"}),
+        )
+    assert bundle.result.status == "succeeded", bundle.result.diagnostics
+    roles = [turn["role"] for turn in bundle.result.samples[0].trajectory["turns"]]
+    assert roles == ["assistant", "tool"]
+
+
+def test_crashing_tool_is_reported_to_the_model(tmp_path: Path) -> None:
+    # P7 error mapping at this pin: the OpenAI Agents scaffold turns a tool
+    # exception into an ordinary tool result string the model sees, with
+    # is_error False. The failure survives only as text; aiq-evals keeps the
+    # native record and does not invent an error flag. The sample completes.
+    pytest.importorskip("agents")
+    with _chat_server("crash") as port:
+        bundle = run_evaluation(
+            _tool_request(port, tool="crash"),
+            ExecutionContext(output_dir=tmp_path / "crash", worker_python=sys.executable,
+                             env={"OPENAI_API_KEY": "local-fixture"}),
+        )
+    turns = bundle.result.samples[0].trajectory["turns"]
+    results = [result for turn in turns for result in turn.get("tool_results") or []]
+    assert results and results[0]["is_error"] is False
+    assert "An error occurred while running the tool" in results[0]["content"]
+    assert "tool crashed" in results[0]["content"]
+    assert bundle.result.records[0].coverage.status == "complete"

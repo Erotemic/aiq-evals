@@ -36,6 +36,11 @@ class SlowTask(LocalTask):
         return super().format_request(instance)
 
 
+@registered_tool(name="crash", description="Always raises")
+def crash(value: int) -> str:
+    raise RuntimeError("tool crashed")
+
+
 @registered_tool(name="double", description="Double an integer")
 def double(value: int) -> str:
     return str(value * 2)
