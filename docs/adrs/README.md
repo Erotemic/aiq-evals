@@ -45,7 +45,8 @@ turn that record into a MAGNET claim or verdict.
 - [ADR-0004](0004-run-artifacts-and-status.md): execution status, coverage, and evidence eligibility are distinct; native artifacts are retained.
 - [ADR-0005](0005-backend-contract-and-workers.md): adapters preserve native semantics behind a small contract and may run in isolated workers.
 - [ADR-0006](0006-scheduler-and-magnet-boundary.md): `aiq-evals` owns one evaluation; MAGNET/kwdagger owns campaign scheduling and claim projection.
-- [ADR-0007](0007-normalized-schema-strategy.md): do not prematurely create an ecosystem-wide schema; retain native truth and decide EEE from fixture evidence.
+- [ADR-0007](0007-normalized-schema-strategy.md): retain native truth and decide EEE from fixture evidence.
+- [ADR-0008](0008-normalized-schema-fixture-decision.md): fixture gaps require the independent normalized result schema for Phase 1.
 
 ## Reviewer invariants
 

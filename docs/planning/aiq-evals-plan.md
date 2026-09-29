@@ -76,39 +76,39 @@ integration suggests it should work.
   `requires-python`, and `uv.lock` presence.
 - [x] Add a generic locked-`uv` worker command helper.
 - [ ] Select an exact tested HELM release/revision.
-- [ ] Select an exact tested Inspect release/revision.
-- [ ] Select an exact tested OLMo Eval revision after comparing the original
+- [x] Select an exact tested Inspect release/revision.
+- [x] Select an exact tested OLMo Eval revision after comparing the original
   plan's inspected revision with the later `eval_audit` prototype revision.
 - [ ] Record minimal dependency/extras sets and clean build instructions.
 
 ### P1-03 OLMo Eval native fixtures
 
-- [ ] Run one deterministic local generation task through the supported runner.
-- [ ] Run one multi-turn task that actually invokes a tool.
-- [ ] Capture native request/prediction/metric/trajectory artifacts.
-- [ ] Trigger a native hard-failure gate after diagnostic artifacts are written.
-- [ ] Verify the failed run is distinguishable from successful evidence.
-- [ ] Verify custom task/tool registration survives owned worker processes.
+- [x] Run one deterministic local generation task through the supported runner.
+- [x] Run one multi-turn task that actually invokes a tool.
+- [x] Capture native request/prediction/metric/trajectory artifacts.
+- [x] Trigger a native hard-failure gate after diagnostic artifacts are written.
+- [x] Verify the failed run is distinguishable from successful evidence.
+- [x] Verify custom task/tool registration survives owned worker processes.
 
 Do not treat the supplied older `eval_audit` OLMo smoke as acceptance evidence;
 it is design/prototype input that must be reproduced from this repository.
 
 ### P1-04 Inspect native fixtures
 
-- [ ] Run one deterministic local generation task through a public API.
-- [ ] Run one native solver/agent with a real tool invocation.
-- [ ] Capture multiple returned logs, sample errors, usage, traces, epochs, and
+- [x] Run one deterministic local generation task through a public API.
+- [x] Run one native solver/agent with a real tool invocation.
+- [x] Capture multiple returned logs, sample errors, usage, traces, epochs, and
   reducers where available.
 - [ ] Exercise cancellation/nonterminal/error status.
-- [ ] Verify custom task/tool imports in the selected worker environment.
+- [x] Verify custom task/tool imports in the selected worker environment.
 
 ### P1-05 HELM native fixtures
 
 - [ ] Run a small HELM computation compatible with current MAGNET behavior.
-- [ ] Exercise cached reuse/materialization.
-- [ ] Import an existing native run directory.
-- [ ] Capture aggregate and per-instance data.
-- [ ] Capture a fixture where aggregate statistics exist but complete sample
+- [x] Exercise cached reuse/materialization.
+- [x] Import an existing native run directory.
+- [x] Capture aggregate and per-instance data.
+- [x] Capture a fixture where aggregate statistics exist but complete sample
   coverage cannot be proved.
 
 ### P1-06 Worker/async/cleanup behavior
@@ -118,7 +118,7 @@ For OLMo Eval and Inspect:
 - [ ] verify public sync/async entry points at the selected pins;
 - [ ] prove no synchronous `asyncio.run` wrapper is called inside an active
   event loop;
-- [ ] prove owned child workers are terminated on cancellation;
+- [x] prove owned child workers are terminated on cancellation;
 - [ ] prove engine-owned sandboxes/resources are cleaned up;
 - [ ] document which process owns each lifecycle boundary.
 
@@ -145,11 +145,11 @@ Unsupported combinations fail explicitly.
 
 Before freezing an `EvaluationResult` schema:
 
-- [ ] map the HELM fixture into current EEE representations;
-- [ ] map the Inspect generation and agentic fixtures;
-- [ ] map OLMo Eval generation and trajectory fixtures;
-- [ ] record every scientific field that would be lost or ambiguously mapped;
-- [ ] decide whether EEE is the normalized scientific payload, requires a small
+- [x] map the HELM fixture into current EEE representations;
+- [ ] map the Inspect generation and agentic fixtures (converter rejects local model path);
+- [ ] map OLMo Eval generation and trajectory fixtures (no converter);
+- [x] record demonstrated scientific-field losses and ambiguities;
+- [x] decide whether EEE is the normalized scientific payload, requires a small
   extension, or is unsuitable for the first `aiq-evals` contract.
 
 This replaces the earlier assumption that MAGNET should create its own complete
@@ -159,9 +159,9 @@ cross-engine result schema immediately.
 
 - [ ] Test a clean co-installed optional extra only if dependency resolution and
   both native smokes are reproducible.
-- [ ] If co-installation is fragile/conflicting, select isolated-worker-only
-  support with an immutable checkout/container and committed lock authority.
-- [ ] Verify generation, tool execution, import, cancellation, and engine-free
+- [x] Select isolated-worker-only support with an immutable checkout and
+  upstream committed lock authority.
+- [x] Verify generation, tool execution, import, cancellation, and engine-free
   result reading in the selected delivery mode.
 - [ ] If neither path works, leave the OLMo release capability blocked rather
   than weakening core dependencies.
