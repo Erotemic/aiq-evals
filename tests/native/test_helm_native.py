@@ -76,3 +76,28 @@ def test_helm_fresh_simple_model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     assert len(run.json.stats()) == 57
     assert len(run.json.per_instance_stats()) == 30  # Ten test IDs over three train trials.
     assert "30 computes" in (output / "helm-run.log").read_text()
+
+
+def test_helm_fresh_scored_generation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Score one native HELM MCQA sample using its local simple model."""
+    import os
+    import sys
+
+    monkeypatch.setenv("PATH", str(Path(sys.executable).parent) + os.pathsep + os.environ["PATH"])
+    output = tmp_path / "scored"
+    manifest = MaterializeHelmRunConfig.main(
+        [
+            "--run-entry", "simple_mcqa:model=simple/model1",
+            "--suite", "aiq-p1-scored",
+            "--max-eval-instances", "1",
+            "--num-threads", "1",
+            "--out-dpath", str(output),
+            "--mode", "compute_if_missing",
+        ]
+    )
+    assert manifest["status"] == "computed"
+    assert (output / "DONE").exists()
+    run = HelmRun(output / "benchmark_output" / "runs" / "aiq-p1-scored" / "simple_mcqa:model=simple_model1")
+    assert len(run.json.per_instance_stats()) == 1
+    assert any(stat["name"]["name"] == "exact_match" and stat["count"] == 1 for stat in run.json.stats())
+    assert "1 computes" in (output / "helm-run.log").read_text()

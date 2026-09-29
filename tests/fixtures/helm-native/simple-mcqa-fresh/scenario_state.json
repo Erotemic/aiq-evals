@@ -1,0 +1,101 @@
+{
+  "adapter_spec": {
+    "method": "multiple_choice_joint",
+    "global_prefix": "",
+    "global_suffix": "",
+    "instructions": "Answer the following questions with a single letter only.\n",
+    "input_prefix": "Question: ",
+    "input_suffix": "\n",
+    "reference_prefix": "A. ",
+    "reference_suffix": "\n",
+    "chain_of_thought_prefix": "",
+    "chain_of_thought_suffix": "\n",
+    "output_prefix": "Answer: ",
+    "output_suffix": "\n",
+    "instance_prefix": "\n",
+    "substitutions": [],
+    "max_train_instances": 5,
+    "max_eval_instances": 1,
+    "num_outputs": 5,
+    "num_train_trials": 1,
+    "num_trials": 1,
+    "sample_train": true,
+    "model_deployment": "simple/model1",
+    "model": "simple/model1",
+    "temperature": 0.0,
+    "max_tokens": 5,
+    "stop_sequences": [
+      "\n"
+    ],
+    "multi_label": false
+  },
+  "request_states": [
+    {
+      "instance": {
+        "input": {
+          "text": "Is 70 even or odd?"
+        },
+        "references": [
+          {
+            "output": {
+              "text": "Even"
+            },
+            "tags": [
+              "correct"
+            ]
+          },
+          {
+            "output": {
+              "text": "Odd"
+            },
+            "tags": []
+          }
+        ],
+        "split": "test",
+        "id": "id60"
+      },
+      "train_trial_index": 0,
+      "output_mapping": {
+        "A": "Even",
+        "B": "Odd"
+      },
+      "request": {
+        "model_deployment": "simple/model1",
+        "model": "simple/model1",
+        "embedding": false,
+        "prompt": "Answer the following questions with a single letter only.\n\nQuestion: Is 16 even or odd?\nA. Even\nB. Odd\nAnswer: A\n\nQuestion: Is 17 even or odd?\nA. Even\nB. Odd\nAnswer: B\n\nQuestion: Is 10 even or odd?\nA. Even\nB. Odd\nAnswer: A\n\nQuestion: Is 15 even or odd?\nA. Even\nB. Odd\nAnswer: B\n\nQuestion: Is 20 even or odd?\nA. Even\nB. Odd\nAnswer: A\n\nQuestion: Is 70 even or odd?\nA. Even\nB. Odd\nAnswer:",
+        "temperature": 0.0,
+        "num_completions": 1,
+        "top_k_per_token": 5,
+        "max_tokens": 5,
+        "stop_sequences": [],
+        "echo_prompt": false,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "result": {
+        "success": true,
+        "embedding": [],
+        "completions": [
+          {
+            "text": "Answer:",
+            "logprob": 0,
+            "tokens": [
+              {
+                "text": "Answer:",
+                "logprob": 0
+              }
+            ]
+          }
+        ],
+        "cached": false,
+        "request_time": 1.33514404296875e-05,
+        "request_datetime": 1790695621
+      },
+      "num_train_instances": 5,
+      "prompt_truncated": false,
+      "num_conditioning_tokens": 0
+    }
+  ]
+}

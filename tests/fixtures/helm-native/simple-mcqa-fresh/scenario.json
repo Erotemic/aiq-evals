@@ -1,0 +1,8 @@
+{
+  "name": "simple_mcqa",
+  "description": "Answer if two-digit numbers are even or odd.",
+  "tags": [
+    "question answering"
+  ],
+  "definition_path": "https://github.com/stanford-crfm/helm/blob/main/src/helm/benchmark/scenarios/simple_scenarios.py"
+}
