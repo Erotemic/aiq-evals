@@ -193,11 +193,12 @@ def _primary_metric(log: Any, metrics: tuple[MetricRecord, ...]) -> str | None:
     return None
 
 
-def _sample_records(log: Any, task: str) -> list[SampleRecord]:
+def _sample_records(log: Any, task: str, location: str | None = None) -> list[SampleRecord]:
     eval_spec = _get(log, 'eval')
     eval_id = _get(eval_spec, 'eval_id')
     task_id = _get(eval_spec, 'task_id')
-    location = _get(log, 'location')
+    if location is None:
+        location = _get(log, 'location')
     out: list[SampleRecord] = []
     for sample in _get(log, 'samples', ()) or ():
         sample_id = _get(sample, 'id')
@@ -305,6 +306,8 @@ def normalize_inspect_logs(
     fallback_task: str,
     forced_status: str | None = None,
     failure: str | None = None,
+    location_root: Path | None = None,
+    location_prefix: str = 'native',
 ) -> EvaluationResult:
     """Normalize one or more public Inspect ``EvalLog`` objects."""
     records: list[ResultRecord] = []
@@ -312,6 +315,14 @@ def normalize_inspect_logs(
     warnings: list[str] = []
     log_summaries: list[dict[str, Any]] = []
     for log in logs:
+        location = _get(log, 'location')
+        if location_root is not None and location:
+            try:
+                relative = Path(location).resolve().relative_to(location_root.resolve())
+            except ValueError:
+                pass
+            else:
+                location = str(Path(location_prefix) / relative)
         task = _task_name(log, fallback_task)
         metrics, metric_warnings = _metric_records(log, task)
         warnings.extend(metric_warnings)
@@ -329,14 +340,14 @@ def normalize_inspect_logs(
                 native_config=_record_native_config(log),
             )
         )
-        samples.extend(_sample_records(log, task))
+        samples.extend(_sample_records(log, task, location))
         samples.extend(_reduction_records(log, task))
         eval_spec = _get(log, 'eval')
         log_summaries.append(
             {
                 'task': task,
                 'status': native_status,
-                'location': _get(log, 'location'),
+                'location': location,
                 'eval_id': _get(eval_spec, 'eval_id'),
                 'task_id': _get(eval_spec, 'task_id'),
                 'model': _get(eval_spec, 'model'),

@@ -442,6 +442,8 @@ class InspectAIBackend:
                 logs,
                 identity=resolved.identity,
                 fallback_task=resolved.request.task,
+                location_root=log_dir,
+                location_prefix='native/inspect_ai/logs',
             )
         except Exception as ex:
             if isinstance(ex, (KeyboardInterrupt, SystemExit)):
@@ -457,6 +459,8 @@ class InspectAIBackend:
                 fallback_task=resolved.request.task,
                 forced_status='failed',
                 failure=failure,
+                location_root=log_dir,
+                location_prefix='native/inspect_ai/logs',
             )
             diagnostics = dict(result.diagnostics)
             diagnostics['traceback'] = ''.join(
@@ -500,6 +504,7 @@ class InspectAIBackend:
             logs,
             identity=resolved.identity,
             fallback_task=resolved.request.task,
+            location_root=root if root.is_dir() else root.parent,
         )
         result = _validate_native_logs(resolved, logs, result)
         diagnostics = dict(result.diagnostics)
