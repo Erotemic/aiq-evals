@@ -20,7 +20,7 @@ from aiq_evals.contracts import (
     ResolvedEvaluation,
 )
 from aiq_evals.errors import ActiveEventLoopError, ExecutionError
-from aiq_evals.jsonutil import redact_values
+from aiq_evals.jsonutil import MIN_REDACTED_VALUE_LENGTH, redact_values
 
 
 def validate_request(request: EvaluationRequest) -> None:
@@ -35,27 +35,67 @@ def resolve_evaluation(request: EvaluationRequest) -> ResolvedEvaluation:
     return backend.resolve(request)
 
 
-async def _terminate_process_tree(process: asyncio.subprocess.Process) -> None:
+# Seconds a worker gets after SIGINT to run native cleanup (sandbox teardown,
+# cancelled logs) before escalation to SIGTERM and then SIGKILL.
+CANCEL_GRACE_SECONDS = 15.0
+_TERM_GRACE_SECONDS = 5.0
+
+
+async def _terminate_process_tree(
+    process: asyncio.subprocess.Process,
+    *,
+    grace_seconds: float = CANCEL_GRACE_SECONDS,
+) -> None:
+    """Interrupt, then terminate, then kill the worker's process group.
+
+    SIGINT first gives the engine its own interruption path (Inspect handles it
+    and runs sandbox cleanup; OLMo's runner sees task cancellation through
+    asyncio.run). Escalation keeps cancellation bounded if the engine hangs.
+    """
     if process.returncode is not None:
         return
-    if os.name == 'posix':
-        try:
-            os.killpg(process.pid, signal.SIGTERM)
-        except ProcessLookupError:
-            return
-    else:
+    if os.name != 'posix':
         process.terminate()
-    try:
-        await asyncio.wait_for(process.wait(), timeout=5)
-    except TimeoutError:
-        if os.name == 'posix':
-            try:
-                os.killpg(process.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                return
-        else:
+        try:
+            await asyncio.wait_for(process.wait(), timeout=_TERM_GRACE_SECONDS)
+        except TimeoutError:
             process.kill()
-        await process.wait()
+            await process.wait()
+        return
+    for sig, wait in (
+        (signal.SIGINT, grace_seconds),
+        (signal.SIGTERM, _TERM_GRACE_SECONDS),
+        (signal.SIGKILL, None),
+    ):
+        try:
+            os.killpg(process.pid, sig)
+        except ProcessLookupError:
+            break
+        try:
+            await asyncio.wait_for(process.wait(), timeout=wait)
+            break
+        except TimeoutError:
+            continue
+    # The leader may have exited while other group members linger.
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    await process.wait()
+
+
+def _redact_file(path: Path, env: Any) -> None:
+    if not path.is_file():
+        return
+    data = path.read_bytes()
+    for key, value in dict(env).items():
+        if value:
+            data = data.replace(value.encode(), f'<redacted:{key}>'.encode())
+    path.write_bytes(data)
+
+
+def _worker_result_path(work_dir: Path) -> Path:
+    return work_dir / '.aiq-evals-worker' / 'result.json'
 
 
 async def _execute_in_worker(
@@ -67,7 +107,7 @@ async def _execute_in_worker(
     protocol_dir = work_dir / '.aiq-evals-worker'
     protocol_dir.mkdir(parents=True, exist_ok=True)
     resolved_path = protocol_dir / 'resolved.json'
-    result_path = protocol_dir / 'result.json'
+    result_path = _worker_result_path(work_dir)
     # Worker diagnostics must survive publication, especially when a native
     # runner fails after writing partial artifacts.
     worker_log_dir = work_dir / 'native' / 'aiq_worker'
@@ -94,31 +134,30 @@ async def _execute_in_worker(
     package_parent = str(Path(__file__).resolve().parent.parent)
     old_pythonpath = env.get('PYTHONPATH')
     env['PYTHONPATH'] = package_parent if not old_pythonpath else package_parent + os.pathsep + old_pythonpath
-    process = await asyncio.create_subprocess_exec(
-        *command,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-        env=env,
-        start_new_session=(os.name == 'posix'),
-    )
+    # Files rather than pipes: a worker that keeps writing during the
+    # cancellation grace period can never block on an unread pipe.
     try:
-        communicate = process.communicate()
-        if context.timeout_seconds is None:
-            stdout, stderr = await communicate
-        else:
-            stdout, stderr = await asyncio.wait_for(communicate, context.timeout_seconds)
-    except (asyncio.CancelledError, TimeoutError):
-        await _terminate_process_tree(process)
-        raise
-    for key, value in context.env.items():
-        if value:
-            replacement = f'<redacted:{key}>'.encode()
-            stdout = stdout.replace(value.encode(), replacement)
-            stderr = stderr.replace(value.encode(), replacement)
-    stdout_path.write_bytes(stdout)
-    stderr_path.write_bytes(stderr)
+        with stdout_path.open('wb') as stdout_file, stderr_path.open('wb') as stderr_file:
+            process = await asyncio.create_subprocess_exec(
+                *command,
+                stdout=stdout_file,
+                stderr=stderr_file,
+                env=env,
+                start_new_session=(os.name == 'posix'),
+            )
+            try:
+                if context.timeout_seconds is None:
+                    await process.wait()
+                else:
+                    await asyncio.wait_for(process.wait(), context.timeout_seconds)
+            except (asyncio.CancelledError, TimeoutError):
+                await _terminate_process_tree(process)
+                raise
+    finally:
+        _redact_file(stdout_path, context.env)
+        _redact_file(stderr_path, context.env)
     if process.returncode != 0:
-        detail = stderr.decode('utf8', errors='replace')[-4000:]
+        detail = stderr_path.read_text(errors='replace')[-4000:]
         raise ExecutionError(
             f'evaluation worker exited with code {process.returncode}: {detail}'
         )
@@ -127,6 +166,28 @@ async def _execute_in_worker(
     except (FileNotFoundError, json.JSONDecodeError) as ex:
         raise ExecutionError('evaluation worker did not produce a valid result protocol file') from ex
     return EvaluationResult.from_dict(payload)
+
+
+def _cancelled_result(resolved: ResolvedEvaluation, work_dir: Path, detail: str) -> EvaluationResult:
+    """Terminal cancelled result, keeping native facts a worker wrote while interrupted."""
+    fallback = _terminal_error_result(resolved, status='cancelled', kind='cancelled', detail=detail)
+    try:
+        native = EvaluationResult.from_dict(json.loads(_worker_result_path(work_dir).read_text()))
+    except (OSError, ValueError, KeyError, TypeError):
+        return fallback
+    diagnostics = dict(native.diagnostics)
+    diagnostics.update(fallback.diagnostics)
+    # Whatever the engine reported, this attempt was cancelled by its caller.
+    diagnostics['worker_reported_status'] = native.status
+    return EvaluationResult(
+        engine=native.engine,
+        identity=resolved.identity,
+        status='cancelled',
+        records=native.records,
+        samples=native.samples,
+        artifacts=native.artifacts,
+        diagnostics=diagnostics,
+    )
 
 
 async def _execute_resolved(
@@ -167,7 +228,23 @@ def _redact_result(result: EvaluationResult, context: ExecutionContext) -> Evalu
     # credentials supplied through the environment; never publish those values.
     if not any(context.env.values()):
         return result
-    return EvaluationResult.from_dict(redact_values(result.to_dict(), context.env))
+    redacted = EvaluationResult.from_dict(redact_values(result.to_dict(), context.env))
+    diagnostics = dict(redacted.diagnostics)
+    short = sorted(
+        name for name, value in context.env.items()
+        if value and len(value) < MIN_REDACTED_VALUE_LENGTH
+    )
+    if short:
+        diagnostics['env_values_not_redacted_as_too_short'] = short
+    return EvaluationResult(
+        engine=redacted.engine,
+        identity=result.identity,
+        status=redacted.status,
+        records=redacted.records,
+        samples=redacted.samples,
+        artifacts=redacted.artifacts,
+        diagnostics=diagnostics,
+    )
 
 
 def _terminal_error_result(
@@ -212,11 +289,9 @@ async def run_evaluation_async(
         except asyncio.CancelledError as ex:
             # Preserve an inspectable terminal attempt, but do not consume task
             # cancellation: callers still receive CancelledError.
-            cancelled = _terminal_error_result(
-                resolved,
-                status='cancelled',
-                kind='cancelled',
-                detail=_redacted_exception_text(ex, context.env),
+            cancelled = _redact_result(
+                _cancelled_result(resolved, work_dir, _redacted_exception_text(ex, context.env)),
+                context,
             )
             try:
                 publish_run(

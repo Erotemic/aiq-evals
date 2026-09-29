@@ -28,7 +28,7 @@ class FixtureModel(ModelAPI):
         if tools and not any(message.role == "tool" for message in input):
             return ModelOutput.for_tool_call(
                 model=self.model_name,
-                tool_name="double",
+                tool_name=tools[0].name,
                 tool_arguments={"value": 2},
             )
         return ModelOutput.from_content(model=self.model_name, content="4")

@@ -20,11 +20,19 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-async def _execute(args: argparse.Namespace) -> int:
+def _execute(args: argparse.Namespace) -> int:
     resolved = ResolvedEvaluation.from_dict(json.loads(args.resolved.read_text()))
     backend = get_backend(resolved.request.engine)
     context = ExecutionContext(output_dir=args.output_dir)
-    result = await backend.execute(resolved, context)
+    blocking = getattr(backend, 'execute_blocking', None)
+    if callable(blocking):
+        # Synchronous native APIs run on the main thread, where the runner's
+        # cancellation SIGINT reaches the engine's own interruption handling.
+        result = blocking(resolved, context)
+    else:
+        # asyncio.run turns SIGINT into cancellation of this task, so native
+        # async runners get their finally/cleanup paths.
+        result = asyncio.run(backend.execute(resolved, context))
     args.result.parent.mkdir(parents=True, exist_ok=True)
     args.result.write_text(json.dumps(result.to_dict(), indent=2, sort_keys=True) + '\n')
     return 0
@@ -33,7 +41,7 @@ async def _execute(args: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == 'execute':
-        return asyncio.run(_execute(args))
+        return _execute(args)
     raise AssertionError(args.command)
 
 

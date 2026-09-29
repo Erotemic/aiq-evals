@@ -80,9 +80,12 @@ def test_adapter_diagnostics_quoting_a_secret_are_redacted(monkeypatch, tmp_path
     bundle = asyncio.run(
         runner_mod.run_evaluation_async(
             resolved,
-            ExecutionContext(output_dir=destination, env={'API_KEY': 'sk-SECRET-123'}),
+            ExecutionContext(output_dir=destination, env={'API_KEY': 'sk-SECRET-123', 'FLAG': '1'}),
         )
     )
+    # Short non-credential values must not corrupt structured data.
+    assert bundle.result.identity == resolved.identity
+    assert bundle.result.diagnostics['env_values_not_redacted_as_too_short'] == ['FLAG']
     assert bundle.result.status == 'failed'
     for path in destination.rglob('*.json'):
         assert 'sk-SECRET-123' not in path.read_text(), path

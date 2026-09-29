@@ -449,11 +449,17 @@ class InspectAIBackend:
             resolved_facts=resolved_facts,
         )
 
-    def _execute_sync(
+    def execute_blocking(
         self,
         resolved: ResolvedEvaluation,
         context: ExecutionContext,
     ) -> EvaluationResult:
+        """Run Inspect's synchronous public ``eval()`` on the calling thread.
+
+        The owned worker calls this on its main thread so that the runner's
+        cancellation SIGINT reaches Inspect's own interruption handling, which
+        cleans up sandboxes and writes a ``cancelled`` log.
+        """
         _api, eval_fn, list_logs, read_log = _native_symbols()
         if context.env:
             raise RequestValidationError(
@@ -536,7 +542,7 @@ class InspectAIBackend:
         # Inspect exposes a synchronous public eval API at the candidate release.
         # The shared runner executes this adapter in an owned process; to_thread
         # keeps that worker's asyncio protocol responsive while the native call runs.
-        return await asyncio.to_thread(self._execute_sync, resolved, context)
+        return await asyncio.to_thread(self.execute_blocking, resolved, context)
 
     def import_results(
         self,

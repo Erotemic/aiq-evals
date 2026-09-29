@@ -2,6 +2,7 @@
 
 import asyncio
 import contextlib
+import inspect
 import os
 import signal
 import subprocess
@@ -13,6 +14,7 @@ import pytest
 
 pytest.importorskip("inspect_ai")
 
+from aiq_evals.artifacts import RunBundle
 from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
 from aiq_evals.runner import import_evaluation, run_evaluation, run_evaluation_async
 
@@ -266,3 +268,106 @@ def test_native_signal_log_imports_without_success(
     assert record.metrics == ()
     assert record.coverage.status == "partial"
     assert (record.coverage.expected, record.coverage.processed, record.coverage.failed) == (1, processed, failed)
+
+
+def test_active_event_loop_boundary(tmp_path: Path) -> None:
+    # P1-06: Inspect's public sync eval() cannot run on a thread with an active
+    # loop; the adapter must never call it there, and the aiq-evals sync facade
+    # must refuse rather than nest asyncio.run.
+    import inspect_ai
+
+    from aiq_evals.backends.inspect_ai.adapter import InspectAIBackend
+    from aiq_evals.errors import ActiveEventLoopError
+    from tests.native.inspect_fixture import generation
+
+    req = request("generation")
+
+    async def exercise() -> None:
+        assert inspect.iscoroutinefunction(inspect_ai.eval_async)
+        with pytest.raises(RuntimeError, match="Already running asyncio"):
+            inspect_ai.eval(generation(), model="fixture/local", log_dir=str(tmp_path / "raw"), display="none")
+        with pytest.raises(ActiveEventLoopError):
+            run_evaluation(req, ExecutionContext(output_dir=tmp_path / "facade"))
+        backend = InspectAIBackend()
+        direct = await backend.execute(backend.resolve(req), ExecutionContext(output_dir=tmp_path / "direct"))
+        assert direct.status == "succeeded", direct.diagnostics
+        bundle = await run_evaluation_async(
+            req, ExecutionContext(output_dir=tmp_path / "worker", worker_python=sys.executable)
+        )
+        assert bundle.result.status == "succeeded"
+
+    asyncio.run(exercise())
+
+
+def sandbox_request() -> EvaluationRequest:
+    return EvaluationRequest(
+        engine="inspect_ai",
+        task="python:tests.native.inspect_sandbox_fixture:sandbox_task",
+        models=(ModelBinding(role="primary", model="local", provider="fixture", revision="local-v1"),),
+        engine_options={"registration_modules": ["tests.native.inspect_fixture"]},
+    )
+
+
+def test_local_sandbox_is_removed_after_completion(tmp_path: Path) -> None:
+    record = tmp_path / "sandboxes.txt"
+    bundle = run_evaluation(
+        sandbox_request(),
+        ExecutionContext(
+            output_dir=tmp_path / "run",
+            worker_python=sys.executable,
+            env={"AIQ_P1_SANDBOX_RECORD": str(record)},
+        ),
+    )
+    assert bundle.result.status == "succeeded", bundle.result.diagnostics
+    assert any(
+        message["role"] == "tool" and message["content"] == "4"
+        for sample in bundle.result.samples
+        if sample.native.get("kind") == "sample"
+        for message in sample.trajectory["messages"]
+    )
+    sandboxes = record.read_text().split()
+    assert sandboxes
+    assert not any(Path(directory).exists() for directory in sandboxes)
+
+
+def test_cancellation_lets_inspect_clean_up_its_sandbox(tmp_path: Path) -> None:
+    # Before the SIGINT-first protocol, SIGTERM killed Inspect before
+    # sample_cleanup and the local sandbox directory leaked.
+    record = tmp_path / "sandboxes.txt"
+
+    async def exercise() -> tuple[Path, int]:
+        task = asyncio.create_task(
+            run_evaluation_async(
+                sandbox_request(),
+                ExecutionContext(
+                    output_dir=tmp_path / "cancelled",
+                    worker_python=sys.executable,
+                    env={"AIQ_P1_SANDBOX_RECORD": str(record), "AIQ_P1_SANDBOX_SLOW": "1"},
+                ),
+            )
+        )
+        for _ in range(150):
+            if record.exists() and record.read_text().strip():
+                sandbox_dir = Path(record.read_text().split()[0])
+                if (sandbox_dir / "child.pid").exists() and (sandbox_dir / "child.pid").read_text():
+                    break
+            await asyncio.sleep(0.1)
+        else:
+            pytest.fail("sandbox tool never started its child")
+        child_pid = int((sandbox_dir / "child.pid").read_text())
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+        return sandbox_dir, child_pid
+
+    sandbox_dir, child_pid = asyncio.run(exercise())
+    assert not sandbox_dir.exists(), "Inspect local sandbox directory leaked"
+    stat = Path(f"/proc/{child_pid}/stat")
+    assert not stat.exists() or stat.read_text().split()[2] == "Z"
+    root = tmp_path / "cancelled"
+    assert (root / "ATTEMPT_TERMINAL").read_text().strip() == "cancelled"
+    assert not (root / "RUN_COMPLETE").exists()
+    bundle = RunBundle.load(root)
+    # Inspect's own cancelled log was written and its facts retained.
+    assert [record.native_status for record in bundle.result.records] == ["cancelled"]
+    assert list((root / "native" / "inspect_ai" / "logs").glob("*.eval"))

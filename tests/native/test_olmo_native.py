@@ -263,3 +263,49 @@ def test_native_multi_task_suite(tmp_path: Path) -> None:
     # Task names prefix each other; samples must not fall back to file stems.
     for result in (bundle.result, imported.result):
         assert {sample.task for sample in result.samples} == {"aiq_p1_local", "aiq_p1_local_alt"}
+
+
+# The deliberately failing sync runner.run() leaves its run_async() coroutine unawaited.
+@pytest.mark.filterwarnings("ignore:coroutine 'AsyncEvalRunner.run_async' was never awaited")
+def test_active_event_loop_boundary(tmp_path: Path) -> None:
+    # P1-06: AsyncEvalRunner.run() is asyncio.run(run_async()) at the pin and
+    # fails inside an active loop; the adapter awaits run_async() instead, and
+    # the aiq-evals sync facade refuses rather than nesting asyncio.run.
+    import inspect
+
+    from aiq_evals.backends.olmo_eval import adapter as olmo_adapter
+    from aiq_evals.errors import ActiveEventLoopError
+
+    request = EvaluationRequest(
+        engine="olmo_eval",
+        task="aiq_p1_local",
+        models=(ModelBinding(role="primary", model="mock", provider="mock", revision="local-v1"),),
+        engine_options={
+            "upstream_revision": "73ade80e24f796af55caeb8fd7b75a7f3fd607fd",
+            "task_modules": ["tests.native.olmo_fixture"],
+        },
+    )
+    backend = olmo_adapter.OlmoEvalBackend()
+    resolved = backend.resolve(request)
+    harness_cls, runner_cls, *_ = olmo_adapter._native_symbols()
+    assert inspect.iscoroutinefunction(runner_cls.run_async)
+    assert not inspect.iscoroutinefunction(runner_cls.run)
+
+    async def exercise() -> None:
+        runner = runner_cls(
+            harness_config=harness_cls.from_dict(dict(resolved.native_config["harness_config"])),
+            task_specs=list(resolved.native_config["task_specs"]),
+            output_dir=str(tmp_path / "raw"),
+        )
+        with pytest.raises(RuntimeError, match="cannot be called from a running event loop"):
+            runner.run()
+        with pytest.raises(ActiveEventLoopError):
+            run_evaluation(request, ExecutionContext(output_dir=tmp_path / "facade"))
+        direct = await backend.execute(resolved, ExecutionContext(output_dir=tmp_path / "direct"))
+        assert direct.status == "succeeded", direct.diagnostics
+        bundle = await run_evaluation_async(
+            request, ExecutionContext(output_dir=tmp_path / "worker", worker_python=sys.executable)
+        )
+        assert bundle.result.status == "succeeded"
+
+    asyncio.run(exercise())

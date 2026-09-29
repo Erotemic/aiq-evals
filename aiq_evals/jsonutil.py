@@ -107,14 +107,26 @@ def find_secret_paths(value: Any, *, path: str = '$') -> list[str]:
     return found
 
 
+# Environment values shorter than this are not scrubbed from structured data:
+# replacing e.g. "1" would corrupt sample IDs and digests, and a value that short
+# is not a credential. Free-text worker logs are still scrubbed of every value.
+MIN_REDACTED_VALUE_LENGTH = 8
+
+
 def redact_values(value: Any, secrets: Mapping[str, str]) -> Any:
     """Replace every occurrence of a secret value in JSON-shaped data.
+
+    Values shorter than ``MIN_REDACTED_VALUE_LENGTH`` are left in place.
 
     Keys and string leaves are both scrubbed; each occurrence becomes
     ``<redacted:NAME>``. Used for worker-returned results, whose native
     exception text and tracebacks can quote credentials from the environment.
     """
-    replacements = [(secret, f'<redacted:{name}>') for name, secret in secrets.items() if secret]
+    replacements = [
+        (secret, f'<redacted:{name}>')
+        for name, secret in secrets.items()
+        if secret and len(secret) >= MIN_REDACTED_VALUE_LENGTH
+    ]
     # Longest first so a secret containing another secret is fully replaced.
     replacements.sort(key=lambda item: len(item[0]), reverse=True)
     if not replacements:
