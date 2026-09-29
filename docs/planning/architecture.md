@@ -1,5 +1,7 @@
 # Architecture boundary
 
+> Reviewer note: this document is explanatory planning material. The normative architecture decisions and reviewer invariants live in `../adrs/README.md` and the ADRs it indexes.
+
 ## Core idea
 
 `aiq-evals` reproducibly obtains evaluation results across heterogeneous native

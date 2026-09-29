@@ -8,6 +8,8 @@ engine when computation is required.
 
 ## Architectural boundary
 
+Before architectural review or broad refactoring, read `docs/adrs/README.md` and the accepted ADRs it indexes. Those records are authoritative for the target architecture; planning checkboxes and the current implementation do not override them.
+
 This repository owns evaluation facts and execution mechanics. It does **not**
 own MAGNET claim semantics.
 

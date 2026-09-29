@@ -130,6 +130,10 @@ aiq-evals phase1-probe \
 The probe is deliberately non-executing. Native generation/tool/cancellation
 fixtures are the next phase-1 acceptance work.
 
+## Architecture review target
+
+Reviewers should start with `docs/adrs/README.md`. The ADRs define the intended architecture and reviewer invariants independently of roadmap status. `docs/planning/` tracks implementation progress and evidence.
+
 ## Planning
 
 - `docs/planning/aiq-evals-plan.md`: work owned by this repository.
