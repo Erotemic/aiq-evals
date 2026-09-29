@@ -9,7 +9,6 @@ from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBindin
 from aiq_evals.errors import ArtifactError, RequestValidationError
 from aiq_evals.runner import import_evaluation
 
-
 CALLS = []
 
 

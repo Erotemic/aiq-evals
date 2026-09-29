@@ -2,6 +2,7 @@ import asyncio
 
 import pytest
 
+from aiq_evals import runner as runner_mod
 from aiq_evals.artifacts import ATTEMPT_TERMINAL, RUN_COMPLETE, RunBundle
 from aiq_evals.contracts import (
     EvaluationRequest,
@@ -11,7 +12,6 @@ from aiq_evals.contracts import (
     ResolvedEvaluation,
 )
 from aiq_evals.errors import ExecutionError
-from aiq_evals import runner as runner_mod
 
 
 def make_resolved():

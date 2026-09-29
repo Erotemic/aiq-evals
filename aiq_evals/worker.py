@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 
 from aiq_evals.backends.registry import get_backend
-from aiq_evals.contracts import EvaluationResult, ExecutionContext, ResolvedEvaluation
+from aiq_evals.contracts import ExecutionContext, ResolvedEvaluation
 
 
 def _parser() -> argparse.ArgumentParser:

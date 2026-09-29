@@ -5,8 +5,8 @@ outputs. Native engine objects never cross this boundary.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import math
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal, Mapping
 

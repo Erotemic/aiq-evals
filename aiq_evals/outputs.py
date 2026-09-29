@@ -4,7 +4,12 @@ from __future__ import annotations
 from pathlib import Path
 
 from aiq_evals.artifacts import RunBundle
-from aiq_evals.contracts import ArtifactReference, MetricRecord, ResultRecord, SampleRecord
+from aiq_evals.contracts import (
+    ArtifactReference,
+    MetricRecord,
+    ResultRecord,
+    SampleRecord,
+)
 
 
 def load_run(path: str | Path, *, verify_checksums: bool = True) -> RunBundle:

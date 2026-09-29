@@ -5,8 +5,6 @@ from inspect_ai.dataset import Sample
 from inspect_ai.scorer import match
 from inspect_ai.solver import generate, solver
 
-from tests.native import inspect_fixture  # Registers the local provider.
-
 
 @solver
 def fail_one():

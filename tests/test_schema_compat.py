@@ -7,7 +7,6 @@ import pytest
 from aiq_evals.artifacts import RunBundle
 from aiq_evals.errors import ArtifactError, RequestValidationError
 
-
 FIXTURE = Path(__file__).parent / 'fixtures' / 'run-v1'
 
 
@@ -54,7 +53,11 @@ def test_normalized_payload_tamper_is_detected(tmp_path):
 
 
 def test_engine_free_output_accessors():
-    from aiq_evals.outputs import native_artifacts, normalized_artifact_identity, sample_records
+    from aiq_evals.outputs import (
+        native_artifacts,
+        normalized_artifact_identity,
+        sample_records,
+    )
 
     bundle = RunBundle.load(FIXTURE)
     assert sample_records(bundle) == ()
