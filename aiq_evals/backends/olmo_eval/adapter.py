@@ -11,6 +11,7 @@ import importlib.metadata
 import re
 import traceback
 from dataclasses import fields, is_dataclass
+from functools import partial
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -18,6 +19,9 @@ from aiq_evals.backends.olmo_eval.normalize import (
     attach_prediction_files,
     load_native_metrics,
     normalize_olmo_results,
+)
+from aiq_evals.backends.olmo_eval.worker_bootstrap import (
+    inference_worker_with_registration,
 )
 from aiq_evals.contracts import (
     EvaluationRequest,
@@ -379,6 +383,7 @@ class OlmoEvalBackend:
         native_dir.mkdir(parents=True, exist_ok=True)
         config = dict(resolved.native_config)
         _load_task_modules(list(config.get('task_modules') or []))
+        modules = tuple(config.get('task_modules') or [])
         try:
             harness = harness_cls.from_dict(dict(config['harness_config']))
             runner = runner_cls(
@@ -395,7 +400,18 @@ class OlmoEvalBackend:
             )
             # Explicit validation is part of the supported adapter contract.
             runner.validate()
-            raw = await runner.run_async()
+            if modules:
+                worker_module = importlib.import_module('olmo_eval.runners.asynq.workers')
+                original_worker = worker_module.inference_worker
+                worker_module.inference_worker = partial(
+                    inference_worker_with_registration, modules
+                )
+                try:
+                    raw = await runner.run_async()
+                finally:
+                    worker_module.inference_worker = original_worker
+            else:
+                raw = await runner.run_async()
             if not isinstance(raw, Mapping):
                 raise EngineCompatibilityError(
                     f'OLMo AsyncEvalRunner.run_async() returned {type(raw).__name__}, expected mapping'

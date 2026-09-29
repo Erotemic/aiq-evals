@@ -1,0 +1,95 @@
+{
+  "timestamp": "2026-09-29T11:10:06.804312",
+  "config": {
+    "name": "aiq-evals",
+    "provider": {
+      "kind": "litellm",
+      "model": "gpt-4o-mini",
+      "base_url": "http://127.0.0.1:39171/v1",
+      "revision": "local-script-v1"
+    },
+    "tool_names": [
+      "double"
+    ],
+    "system_prompt": null,
+    "tool_choice": "auto",
+    "scaffold": "openai_agents",
+    "required_secrets": [],
+    "scaffold_kwargs": {
+      "enable_compaction": false
+    },
+    "max_hard_failure_rate": 0.0,
+    "model_hash": "dd912003a0ec8bfe"
+  },
+  "tasks": [
+    {
+      "task": "aiq_p1_tool",
+      "metrics": {},
+      "num_instances": 0,
+      "config": {
+        "name": "aiq_p1_tool",
+        "data_source": null,
+        "fewshot_source": null,
+        "formatter": null,
+        "metrics": [
+          {
+            "type": "AccuracyMetric",
+            "name": "contains_42",
+            "scorer": {
+              "type": "SubstringRecallScorer",
+              "name": "substring_recall",
+              "case_sensitive": false
+            }
+          }
+        ],
+        "num_fewshot": 0,
+        "fewshot_seed": 42,
+        "limit": null,
+        "seed": 42,
+        "split": "test",
+        "primary_metric": {
+          "type": "AccuracyMetric",
+          "name": "contains_42",
+          "scorer": {
+            "type": "SubstringRecallScorer",
+            "name": "substring_recall",
+            "case_sensitive": false
+          }
+        },
+        "sampling_params": {
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "top_p": null,
+          "top_k": null,
+          "stop_sequences": null,
+          "num_samples": 1,
+          "logprobs": null,
+          "do_sample": true,
+          "truncate_prompt_tokens": null,
+          "truncation_side": null
+        },
+        "output_score_aggregation": "max",
+        "max_length": null,
+        "answer_extractor": null,
+        "dependencies": null
+      },
+      "task_hash": "463d5ef63d4c8cf8",
+      "instances_saved": 0,
+      "instances_processed": 1,
+      "instances_failed": 1,
+      "error_summary": "Instance 0 failed: type: InternalServerError | status_code: 500 | url: http://127.0.0.1:39171/v1/chat/completions | message: Error code: 500 - {'error': {'message': 'intentional local failure', 'type': 'server_error'}}"
+    }
+  ],
+  "summary": {},
+  "errors": [
+    {
+      "task": "aiq_p1_tool",
+      "error": "No instances were saved out of 1: the task produced no metrics (1 hard-failed), which fails at any hard failure rate budget. First failure: type: InternalServerError | status_code: 500 | url: http://127.0.0.1:39171/v1/chat/completions | message: Error code: 500 - {'error': {'message': 'intentional local failure', 'type': 'server_error'}}"
+    }
+  ],
+  "experiment_id": "9dd928167a9a",
+  "experiment_duration_seconds": 6.013627767562866,
+  "provider_init_seconds": {
+    "gpt-4o-mini-w0": 2.1778995990753174
+  }
+}

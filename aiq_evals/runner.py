@@ -67,8 +67,12 @@ async def _execute_in_worker(
     protocol_dir.mkdir(parents=True, exist_ok=True)
     resolved_path = protocol_dir / 'resolved.json'
     result_path = protocol_dir / 'result.json'
-    stdout_path = protocol_dir / 'stdout.log'
-    stderr_path = protocol_dir / 'stderr.log'
+    # Worker diagnostics must survive publication, especially when a native
+    # runner fails after writing partial artifacts.
+    worker_log_dir = work_dir / 'native' / 'aiq_worker'
+    worker_log_dir.mkdir(parents=True, exist_ok=True)
+    stdout_path = worker_log_dir / 'stdout.log'
+    stderr_path = worker_log_dir / 'stderr.log'
     resolved_path.write_text(json.dumps(resolved.to_dict(), indent=2, sort_keys=True) + '\n')
     command = [
         context.worker_python,
@@ -105,6 +109,11 @@ async def _execute_in_worker(
     except (asyncio.CancelledError, TimeoutError):
         await _terminate_process_tree(process)
         raise
+    for key, value in context.env.items():
+        if value:
+            replacement = f'<redacted:{key}>'.encode()
+            stdout = stdout.replace(value.encode(), replacement)
+            stderr = stderr.replace(value.encode(), replacement)
     stdout_path.write_bytes(stdout)
     stderr_path.write_bytes(stderr)
     if process.returncode != 0:

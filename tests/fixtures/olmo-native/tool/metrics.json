@@ -1,0 +1,99 @@
+{
+  "timestamp": "2026-09-29T11:08:26.030281",
+  "config": {
+    "name": "aiq-evals",
+    "provider": {
+      "kind": "litellm",
+      "model": "gpt-4o-mini",
+      "base_url": "http://127.0.0.1:41929/v1",
+      "revision": "local-script-v1"
+    },
+    "tool_names": [
+      "double"
+    ],
+    "system_prompt": null,
+    "tool_choice": "auto",
+    "scaffold": "openai_agents",
+    "required_secrets": [],
+    "scaffold_kwargs": {
+      "enable_compaction": false
+    },
+    "model_hash": "dd912003a0ec8bfe"
+  },
+  "tasks": [
+    {
+      "task": "aiq_p1_tool",
+      "metrics": {
+        "contains_42": {
+          "substring_recall": 1.0
+        }
+      },
+      "num_instances": 1,
+      "primary_metric": "contains_42:substring_recall",
+      "config": {
+        "name": "aiq_p1_tool",
+        "data_source": null,
+        "fewshot_source": null,
+        "formatter": null,
+        "metrics": [
+          {
+            "type": "AccuracyMetric",
+            "name": "contains_42",
+            "scorer": {
+              "type": "SubstringRecallScorer",
+              "name": "substring_recall",
+              "case_sensitive": false
+            }
+          }
+        ],
+        "num_fewshot": 0,
+        "fewshot_seed": 42,
+        "limit": null,
+        "seed": 42,
+        "split": "test",
+        "primary_metric": {
+          "type": "AccuracyMetric",
+          "name": "contains_42",
+          "scorer": {
+            "type": "SubstringRecallScorer",
+            "name": "substring_recall",
+            "case_sensitive": false
+          }
+        },
+        "sampling_params": {
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "top_p": null,
+          "top_k": null,
+          "stop_sequences": null,
+          "num_samples": 1,
+          "logprobs": null,
+          "do_sample": true,
+          "truncate_prompt_tokens": null,
+          "truncation_side": null
+        },
+        "output_score_aggregation": "max",
+        "max_length": null,
+        "answer_extractor": null,
+        "dependencies": null
+      },
+      "duration_seconds": 0.3956325054168701,
+      "task_hash": "463d5ef63d4c8cf8",
+      "instances_saved": 1,
+      "instances_processed": 1,
+      "instances_failed": 0
+    }
+  ],
+  "summary": {
+    "aiq_p1_tool": {
+      "metric": "contains_42:substring_recall",
+      "score": 1.0
+    }
+  },
+  "errors": [],
+  "experiment_id": "4c5dbe006bc0",
+  "experiment_duration_seconds": 4.6220550537109375,
+  "provider_init_seconds": {
+    "gpt-4o-mini-w0": 2.2344789505004883
+  }
+}

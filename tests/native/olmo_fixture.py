@@ -8,6 +8,7 @@ from olmo_eval.common.metrics import AccuracyMetric
 from olmo_eval.common.scorers.substring import SubstringRecallScorer
 from olmo_eval.common.types import Instance, LMRequest, RequestType
 from olmo_eval.evals.tasks.common import Task, register
+from olmo_eval.harness.tools import registered_tool
 
 
 @register("aiq_p1_local")
@@ -31,3 +32,21 @@ class SlowTask(LocalTask):
             file.write(str(child.pid))
         time.sleep(120)
         return super().format_request(instance)
+
+
+@registered_tool(name="double", description="Double an integer")
+def double(value: int) -> str:
+    return str(value * 2)
+
+
+@register("aiq_p1_tool")
+class ToolTask(LocalTask):
+    @property
+    def instances(self):
+        yield Instance(question="Use double on two.", gold_answer="4")
+
+    def format_request(self, instance):
+        return LMRequest(
+            request_type=RequestType.CHAT,
+            messages=({"role": "user", "content": "Use double on two. Return only the result."},),
+        )
