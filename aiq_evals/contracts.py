@@ -327,6 +327,9 @@ class MetricRecord:
             raise RequestValidationError('metric task, model_role, and metric must be non-empty')
         if isinstance(self.value, bool) or not isinstance(self.value, (int, float)) or not math.isfinite(float(self.value)):
             raise RequestValidationError('metric value must be a finite number')
+        # Canonical float, so serialization round-trips (int 1 would reload as
+        # 1.0 and break the normalized-artifact identity check).
+        object.__setattr__(self, 'value', float(self.value))
         if self.denominator is not None:
             _nonnegative_int(self.denominator, label='metric denominator')
 

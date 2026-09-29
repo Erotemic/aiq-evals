@@ -20,6 +20,7 @@ from aiq_evals.errors import ArtifactError, PublicationError
 from aiq_evals.jsonutil import JSONValue, normalize_json, sha256_file, sha256_json
 
 RUN_COMPLETE = 'RUN_COMPLETE'
+METADATA_FILES = ('resolved_request.json', 'results.json', 'attempt.json')
 ATTEMPT_TERMINAL = 'ATTEMPT_TERMINAL'
 
 
@@ -93,6 +94,11 @@ class RunBundle:
         if not (root / ATTEMPT_TERMINAL).is_file():
             raise ArtifactError('run is missing ATTEMPT_TERMINAL marker')
         if verify_checksums:
+            for name, digest in dict(manifest.get('metadata_checksums') or {}).items():
+                if name not in METADATA_FILES:
+                    raise ArtifactError(f'unexpected metadata checksum entry {name!r}')
+                if sha256_file(root / name) != digest:
+                    raise ArtifactError(f'bundle metadata file {name} does not match its manifest checksum')
             refs: list[ArtifactReference] = []
             for row in manifest.get('native_artifacts', []):
                 ref = ArtifactReference.from_dict(row)
@@ -102,6 +108,16 @@ class RunBundle:
                     raise ArtifactError(f'missing native artifact {ref.path!r}')
                 if artifact.stat().st_size != ref.size_bytes or sha256_file(artifact) != ref.sha256:
                     raise ArtifactError(f'native artifact checksum mismatch: {ref.path!r}')
+            listed = {ref.path for ref in refs}
+            native_root = root / 'native'
+            present = {
+                path.relative_to(native_root).as_posix()
+                for path in native_root.rglob('*')
+                if path.is_file() or path.is_symlink()
+            } if native_root.is_dir() else set()
+            extra = sorted(present - listed)
+            if extra:
+                raise ArtifactError(f'native files not in the manifest inventory: {extra[:5]}')
             native_identity = sha256_json([ref.to_dict() for ref in refs])
             if manifest.get('native_artifact_identity') != native_identity:
                 raise ArtifactError('native artifact identity does not match manifest inventory')
@@ -178,6 +194,8 @@ def publish_run(
     native_dir: str | Path | None = None,
     replace: bool = False,
     external_symlinks: str = 'exclude',
+    attempt_metadata: Mapping[str, Any] | None = None,
+    manifest_notes: Mapping[str, Any] | None = None,
 ) -> RunBundle:
     """Atomically publish one terminal run bundle.
 
@@ -186,6 +204,11 @@ def publish_run(
     and ``'follow'`` copies their content. Copying an arbitrary link target
     into a bundle could publish unrelated host files. Whatever happens is
     recorded in the manifest.
+
+    ``attempt_metadata`` extends (and may override) ``attempt.json``; the store
+    uses it to carry the producing attempt's execution context and a
+    ``source_attempt`` pointer into a promoted canonical run. ``manifest_notes``
+    carries symlink notes recorded when the native files were first published.
 
     Failed/cancelled/incomplete attempts are terminal and inspectable but do not
     receive ``RUN_COMPLETE`` and are therefore never reusable as successful
@@ -219,6 +242,7 @@ def publish_run(
             'diagnostics': result.diagnostics,
             'execution_context': context.public_dict(),
         }
+        attempt.update(dict(attempt_metadata or {}))
         _write_json(staging / 'attempt.json', attempt)
         native_artifact_identity = sha256_json([ref.to_dict() for ref in native_refs])
         normalized_artifact_identity = sha256_json(
@@ -242,9 +266,15 @@ def publish_run(
             'native_artifacts': [ref.to_dict() for ref in native_refs],
             'native_artifact_identity': native_artifact_identity,
             'normalized_artifact_identity': normalized_artifact_identity,
+            # Integrity of the bundle's own metadata files (added after the v1
+            # freeze as an optional field; bundles without it still load).
+            'metadata_checksums': {
+                name: sha256_file(staging / name) for name in METADATA_FILES
+            },
         }
         # Optional (ADR-0009 allows additions): symlink handling is recorded so
         # a reader can tell which native paths were followed or left out.
+        manifest.update({key: value for key, value in dict(manifest_notes or {}).items() if value})
         manifest.update({key: value for key, value in link_notes.items() if value})
         _write_json(staging / 'run_manifest.json', manifest)
         (staging / ATTEMPT_TERMINAL).write_text(result.status + '\n')

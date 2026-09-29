@@ -195,3 +195,61 @@ def test_run_and_import_resolve_through_the_worker_when_given(tmp_path, monkeypa
         make_request('imp'), source, ExecutionContext(output_dir=tmp_path / 'imp', worker_python='/engine/python')
     )
     assert seen == ['/engine/python', '/engine/python', ('import-worker', '/engine/python')]
+
+
+def test_promotion_keeps_attempt_provenance(tmp_path):
+    store = ResultStore(tmp_path / 'store')
+    outcome = ensure_evaluation(
+        make_request(), store, timeout_seconds=33, env={'TOKEN': 'token-value-123'}
+    )
+    canonical = outcome.run
+    assert canonical.path == store.run_path(outcome.resolved.identity.digest)
+    context = canonical.attempt['execution_context']
+    assert context['timeout_seconds'] == 33 and context['env_keys'] == ['TOKEN']
+    source = canonical.attempt['source_attempt']
+    assert source['path'] == str(outcome.attempt.path)
+    assert source['relative_path'].startswith('attempts/')
+    assert source['normalized_artifact_identity'] == outcome.attempt.manifest['normalized_artifact_identity']
+
+
+def test_promotion_keeps_symlink_notes(tmp_path):
+    outside = tmp_path / 'outside.txt'
+    outside.write_text('trusted\n')
+    source = tmp_path / 'native'
+    source.mkdir()
+    (source / 'value.txt').write_text('0.5\n')
+    (source / 'linked.txt').symlink_to(outside)
+    outcome = ensure_evaluation(
+        make_request('imp'), ResultStore(tmp_path / 'store'), import_source=source,
+        allow_external_symlinks=True,
+    )
+    assert outcome.attempt.manifest['followed_external_symlinks'] == ['linked.txt']
+    assert outcome.run.manifest['followed_external_symlinks'] == ['linked.txt']
+
+
+def test_tampered_bundles_fail_validation(tmp_path):
+    import json
+
+    from aiq_evals.artifacts import RunBundle
+    from aiq_evals.errors import ArtifactError
+
+    store = ResultStore(tmp_path / 'store')
+    run = ensure_evaluation(make_request(generation={'temperature': 0.0}), store).run
+    assert set(run.manifest['metadata_checksums']) == {'resolved_request.json', 'results.json', 'attempt.json'}
+
+    injected = run.path / 'native' / 'injected.txt'
+    injected.write_text('not in the inventory\n')
+    with pytest.raises(ArtifactError, match='not in the manifest inventory'):
+        RunBundle.load(run.path)
+    injected.unlink()
+    RunBundle.load(run.path)
+
+    resolved_path = run.path / 'resolved_request.json'
+    data = json.loads(resolved_path.read_text())
+    data['request']['generation']['temperature'] = 0.999
+    resolved_path.write_text(json.dumps(data))
+    with pytest.raises(ArtifactError, match='resolved_request.json does not match'):
+        RunBundle.load(run.path)
+    # The store refuses it and re-executes.
+    again = ensure_evaluation(make_request(generation={'temperature': 0.0}), store)
+    assert again.action == 'executed'

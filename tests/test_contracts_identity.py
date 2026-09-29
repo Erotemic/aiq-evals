@@ -140,3 +140,30 @@ def test_adapter_source_digest_tracks_package_source(tmp_path, monkeypatch):
     before = adapter_source_digest('fake_adapter_pkg')
     (package / 'normalize.py').write_text('X = 2\n')
     assert adapter_source_digest('fake_adapter_pkg') != before
+
+
+def test_metric_record_int_value_round_trips(tmp_path):
+    from aiq_evals.artifacts import RunBundle, publish_run
+    from aiq_evals.contracts import (
+        EvaluationResult,
+        ExecutionContext,
+        MeasurementIdentity,
+        MetricRecord,
+        ResolvedEvaluation,
+        ResultRecord,
+    )
+
+    metric = MetricRecord(task='t', model_role='primary', metric='acc', value=1)
+    assert isinstance(metric.value, float)
+    assert MetricRecord.from_dict(metric.to_dict()) == metric
+    identity = MeasurementIdentity(algorithm='t', digest='0' * 64, reusable=False)
+    request = make_request()
+    resolved = ResolvedEvaluation(
+        request=request, adapter_version='a', engine_version=None, native_config={}, identity=identity
+    )
+    result = EvaluationResult(
+        engine='olmo_eval', identity=identity, status='succeeded',
+        records=(ResultRecord(task='t', model_role='primary', metrics=(metric,)),),
+    )
+    publish_run(tmp_path / 'r', resolved=resolved, result=result, context=ExecutionContext(output_dir=tmp_path / 'r'))
+    RunBundle.load(tmp_path / 'r')

@@ -18,12 +18,16 @@ import secrets
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Mapping
 
 from aiq_evals.artifacts import RunBundle, publish_run
 from aiq_evals.contracts import EvaluationResult, ExecutionContext, ResolvedEvaluation
 from aiq_evals.errors import ArtifactError, PublicationError
 
 _UNKEYED = '_unkeyed'
+_LINK_NOTE_KEYS = (
+    'excluded_external_symlinks', 'followed_external_symlinks', 'skipped_non_regular_files',
+)
 
 
 def _stamp() -> str:
@@ -106,6 +110,8 @@ class ResultStore:
         result: EvaluationResult,
         context: ExecutionContext,
         native_dir: str | Path | None = None,
+        attempt_metadata: Mapping[str, Any] | None = None,
+        manifest_notes: Mapping[str, Any] | None = None,
     ) -> RunBundle:
         """Publish a successful reusable result as the canonical run.
 
@@ -129,7 +135,10 @@ class ResultStore:
         if path.exists():
             self._quarantine(path)
         try:
-            return publish_run(path, resolved=resolved, result=result, context=context, native_dir=native_dir)
+            return publish_run(
+                path, resolved=resolved, result=result, context=context, native_dir=native_dir,
+                attempt_metadata=attempt_metadata, manifest_notes=manifest_notes,
+            )
         except PublicationError:
             existing = self.lookup(resolved)
             if existing is None:
@@ -147,10 +156,32 @@ class ResultStore:
         return target
 
     def promote(self, attempt: RunBundle) -> RunBundle:
-        """Promote a successful attempt bundle to the canonical run."""
+        """Promote a successful attempt bundle to the canonical run.
+
+        The canonical bundle keeps the producing attempt's sanitized execution
+        context and symlink notes, plus a ``source_attempt`` pointer, rather
+        than a context synthesized at promotion time.
+        """
         return self.publish(
             resolved=attempt.resolved,
             result=attempt.result,
             context=ExecutionContext(output_dir=self.run_path(attempt.resolved.identity.digest)),
             native_dir=attempt.path / 'native',
+            attempt_metadata={
+                'execution_context': attempt.attempt.get('execution_context'),
+                'source_attempt': {
+                    'path': str(attempt.path),
+                    'relative_path': _relative_or_none(attempt.path, self.root),
+                    'native_artifact_identity': attempt.manifest.get('native_artifact_identity'),
+                    'normalized_artifact_identity': attempt.manifest.get('normalized_artifact_identity'),
+                },
+            },
+            manifest_notes={key: attempt.manifest.get(key) for key in _LINK_NOTE_KEYS},
         )
+
+
+def _relative_or_none(path: Path, root: Path) -> str | None:
+    try:
+        return path.resolve().relative_to(root).as_posix()
+    except ValueError:
+        return None
