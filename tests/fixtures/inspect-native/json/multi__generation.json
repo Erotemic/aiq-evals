@@ -1,0 +1,854 @@
+{
+  "version": 2,
+  "status": "success",
+  "eval": {
+    "eval_id": "fPcrgNr6VZwXTzUBEa64MP",
+    "run_id": "JPBf7JbLg8QgjzSdzBK34L",
+    "created": "2026-09-29T15:14:30+00:00",
+    "task": "generation",
+    "task_id": "fsowtntnsT2bJJpLLkynBt",
+    "task_version": 0,
+    "task_file": "tests/native/inspect_fixture.py",
+    "task_display_name": "generation",
+    "task_registry_name": "generation",
+    "task_attribs": {},
+    "task_args": {},
+    "task_args_passed": {},
+    "solver_args_passed": {},
+    "dataset": {
+      "samples": 1,
+      "sample_ids": [
+        1
+      ],
+      "shuffled": false
+    },
+    "model": "fixture/local",
+    "model_generate_config": {},
+    "model_args": {},
+    "model_roles": {
+      "grader": {
+        "model": "fixture/grader",
+        "config": {},
+        "args": {}
+      }
+    },
+    "config": {
+      "epochs": 2,
+      "fail_on_error": true,
+      "continue_on_fail": false,
+      "score_on_error": false,
+      "sandbox_cleanup": true,
+      "sandbox_prebuilt": false,
+      "log_samples": true,
+      "log_realtime": true,
+      "log_images": true,
+      "score_display": true
+    },
+    "packages": {
+      "inspect_ai": "0.3.272"
+    },
+    "metadata": {
+      "aiq_evals_measurement_identity": "a7dd3502e040f1b0b28612899d3779ec20c6dea2023a83d208a5225053dec35d",
+      "aiq_evals_adapter_version": "0.1.0"
+    },
+    "scorers": [
+      {
+        "name": "match",
+        "options": {},
+        "metrics": [
+          {
+            "name": "inspect_ai/accuracy",
+            "options": {}
+          },
+          {
+            "name": "inspect_ai/stderr",
+            "options": {}
+          }
+        ],
+        "metadata": {}
+      },
+      {
+        "name": "includes",
+        "options": {},
+        "metrics": [
+          {
+            "name": "inspect_ai/accuracy",
+            "options": {}
+          },
+          {
+            "name": "inspect_ai/stderr",
+            "options": {}
+          }
+        ],
+        "metadata": {}
+      }
+    ]
+  },
+  "plan": {
+    "name": "plan",
+    "steps": [
+      {
+        "solver": "generate",
+        "params": {
+          "tool_calls": "loop"
+        },
+        "params_passed": {}
+      }
+    ],
+    "config": {}
+  },
+  "results": {
+    "total_samples": 2,
+    "completed_samples": 2,
+    "scores": [
+      {
+        "name": "match",
+        "scorer": "match",
+        "scored_samples": 1,
+        "unscored_samples": 0,
+        "params": {},
+        "metrics": {
+          "accuracy": {
+            "name": "accuracy",
+            "value": 1.0,
+            "params": {}
+          },
+          "stderr": {
+            "name": "stderr",
+            "value": 0.0,
+            "params": {}
+          }
+        }
+      },
+      {
+        "name": "includes",
+        "scorer": "includes",
+        "scored_samples": 1,
+        "unscored_samples": 0,
+        "params": {},
+        "metrics": {
+          "accuracy": {
+            "name": "accuracy",
+            "value": 1.0,
+            "params": {}
+          },
+          "stderr": {
+            "name": "stderr",
+            "value": 0.0,
+            "params": {}
+          }
+        }
+      }
+    ],
+    "headline": {
+      "scorer": "match",
+      "score": "match",
+      "metric": "accuracy"
+    }
+  },
+  "stats": {
+    "started_at": "2026-09-29T15:14:30+00:00",
+    "completed_at": "2026-09-29T15:14:30+00:00",
+    "model_usage": {},
+    "role_usage": {},
+    "connection_limit_history": []
+  },
+  "invalidated": false,
+  "tags": [],
+  "metadata": {
+    "aiq_evals_measurement_identity": "a7dd3502e040f1b0b28612899d3779ec20c6dea2023a83d208a5225053dec35d",
+    "aiq_evals_adapter_version": "0.1.0"
+  },
+  "samples": [
+    {
+      "id": 1,
+      "epoch": 1,
+      "input": "Two plus two?",
+      "target": "4",
+      "messages": [
+        {
+          "id": "GgmFKJxwzf4Lb7zCNiPUBU",
+          "content": "Two plus two?",
+          "source": "input",
+          "role": "user"
+        },
+        {
+          "id": "akbZyDYQ8h3keAbREvkewg",
+          "content": "4",
+          "source": "generate",
+          "role": "assistant",
+          "model": "local"
+        }
+      ],
+      "output": {
+        "model": "local",
+        "choices": [
+          {
+            "message": {
+              "id": "akbZyDYQ8h3keAbREvkewg",
+              "content": "4",
+              "source": "generate",
+              "role": "assistant",
+              "model": "local"
+            },
+            "stop_reason": "stop"
+          }
+        ],
+        "completion": "4",
+        "time": 0.00008018399239517748
+      },
+      "scores": {
+        "match": {
+          "value": "C",
+          "answer": "4",
+          "explanation": "4",
+          "history": []
+        },
+        "includes": {
+          "value": "C",
+          "answer": "4",
+          "explanation": "4",
+          "history": []
+        }
+      },
+      "metadata": {},
+      "store": {},
+      "events": [
+        {
+          "uuid": "7UQh7JTTms3cwKp8UNLzvm",
+          "span_id": "Ljt3nCy6AVkgLGPNCDYQGq",
+          "timestamp": "2026-09-29T15:14:30.703630+00:00",
+          "working_start": 150172.578106492,
+          "event": "span_begin",
+          "id": "Ljt3nCy6AVkgLGPNCDYQGq",
+          "type": "init",
+          "name": "init"
+        },
+        {
+          "uuid": "W6VyYSbM9zxtUHwrWjVuD3",
+          "span_id": "Ljt3nCy6AVkgLGPNCDYQGq",
+          "timestamp": "2026-09-29T15:14:30.704332+00:00",
+          "working_start": 150172.57880797,
+          "event": "sample_init",
+          "sample": {
+            "input": "Two plus two?",
+            "target": "4",
+            "id": 1
+          },
+          "state": {
+            "messages": [
+              {
+                "id": "GgmFKJxwzf4Lb7zCNiPUBU",
+                "content": "Two plus two?",
+                "source": "input",
+                "role": "user"
+              }
+            ],
+            "tools": [],
+            "tool_choice": null,
+            "store": {},
+            "output": {
+              "model": "fixture/local",
+              "choices": [],
+              "completion": ""
+            },
+            "completed": false,
+            "metadata": {}
+          }
+        },
+        {
+          "uuid": "iFkyqj84kurKUP9JGeNfiv",
+          "span_id": "Ljt3nCy6AVkgLGPNCDYQGq",
+          "timestamp": "2026-09-29T15:14:30.704660+00:00",
+          "working_start": 150172.579135628,
+          "event": "span_end",
+          "id": "Ljt3nCy6AVkgLGPNCDYQGq"
+        },
+        {
+          "uuid": "cA8EVXE7wNGnavbpPqyyeS",
+          "span_id": "DWY5S4RkWNTSekSHtyHLVG",
+          "timestamp": "2026-09-29T15:14:30.706329+00:00",
+          "working_start": 0.001472906005801633,
+          "event": "span_begin",
+          "id": "DWY5S4RkWNTSekSHtyHLVG",
+          "type": "solvers",
+          "name": "solvers"
+        },
+        {
+          "uuid": "eituBGHBN6MxkbrDLpmwvr",
+          "span_id": "gqCCumJFS8AGcAKLiGH8jG",
+          "timestamp": "2026-09-29T15:14:30.706835+00:00",
+          "working_start": 0.001980319997528568,
+          "event": "span_begin",
+          "id": "gqCCumJFS8AGcAKLiGH8jG",
+          "parent_id": "DWY5S4RkWNTSekSHtyHLVG",
+          "type": "solver",
+          "name": "generate"
+        },
+        {
+          "uuid": "42GtuYKiga7pPtLidSm6CD",
+          "span_id": "gqCCumJFS8AGcAKLiGH8jG",
+          "timestamp": "2026-09-29T15:14:30.707131+00:00",
+          "working_start": 0.0022756689868401736,
+          "event": "model",
+          "model": "fixture/local",
+          "input": [
+            {
+              "id": "GgmFKJxwzf4Lb7zCNiPUBU",
+              "content": "Two plus two?",
+              "source": "input",
+              "role": "user"
+            }
+          ],
+          "tools": [],
+          "tool_choice": "none",
+          "config": {},
+          "output": {
+            "model": "local",
+            "choices": [
+              {
+                "message": {
+                  "id": "akbZyDYQ8h3keAbREvkewg",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            ],
+            "completion": "4",
+            "time": 0.00008018399239517748
+          },
+          "completed": "2026-09-29T15:14:30.711297+00:00",
+          "working_time": 0.00008018399239517748
+        },
+        {
+          "uuid": "cScqdHod8xPbBaxWk7pDhD",
+          "span_id": "gqCCumJFS8AGcAKLiGH8jG",
+          "timestamp": "2026-09-29T15:14:30.711783+00:00",
+          "working_start": 0.0030677909962832928,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/messages/1",
+              "value": {
+                "id": "akbZyDYQ8h3keAbREvkewg",
+                "content": "4",
+                "source": "generate",
+                "role": "assistant",
+                "model": "local"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/output/time",
+              "value": 0.00008018399239517748
+            },
+            {
+              "op": "replace",
+              "path": "/output/completion",
+              "value": "4",
+              "replaced": ""
+            },
+            {
+              "op": "replace",
+              "path": "/output/model",
+              "value": "local",
+              "replaced": "fixture/local"
+            },
+            {
+              "op": "add",
+              "path": "/output/choices/0",
+              "value": {
+                "message": {
+                  "id": "akbZyDYQ8h3keAbREvkewg",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            }
+          ]
+        },
+        {
+          "uuid": "UW8h8a3fNcXBuEGEpZXkrk",
+          "span_id": "gqCCumJFS8AGcAKLiGH8jG",
+          "timestamp": "2026-09-29T15:14:30.711999+00:00",
+          "working_start": 0.003283527010353282,
+          "event": "span_end",
+          "id": "gqCCumJFS8AGcAKLiGH8jG"
+        },
+        {
+          "uuid": "NupHzRNgf8PNBZWsAZKCiv",
+          "span_id": "DWY5S4RkWNTSekSHtyHLVG",
+          "timestamp": "2026-09-29T15:14:30.712142+00:00",
+          "working_start": 0.0034265409922227263,
+          "event": "span_end",
+          "id": "DWY5S4RkWNTSekSHtyHLVG"
+        },
+        {
+          "uuid": "9anTYheETtWkGd4sQKNpBm",
+          "span_id": "R6L4Nt67VCFzXpefzuiibw",
+          "timestamp": "2026-09-29T15:14:30.714885+00:00",
+          "working_start": 0.006171065004309639,
+          "event": "span_begin",
+          "id": "R6L4Nt67VCFzXpefzuiibw",
+          "type": "scorers",
+          "name": "scorers"
+        },
+        {
+          "uuid": "jVCgR8Fqwr9CcxDXRpGCjh",
+          "span_id": "Tds3aDswY8EFr72ieGvxGM",
+          "timestamp": "2026-09-29T15:14:30.715153+00:00",
+          "working_start": 0.006438050011638552,
+          "event": "span_begin",
+          "id": "Tds3aDswY8EFr72ieGvxGM",
+          "parent_id": "R6L4Nt67VCFzXpefzuiibw",
+          "type": "scorer",
+          "name": "match"
+        },
+        {
+          "uuid": "APwqiSfRH83tDMzJGuyrS8",
+          "span_id": "Tds3aDswY8EFr72ieGvxGM",
+          "timestamp": "2026-09-29T15:14:30.715361+00:00",
+          "working_start": 0.006646205991273746,
+          "event": "score",
+          "score": {
+            "value": "C",
+            "answer": "4",
+            "explanation": "4",
+            "history": []
+          },
+          "target": "4",
+          "intermediate": false,
+          "scorer": "match",
+          "scorer_args": {}
+        },
+        {
+          "uuid": "eAckCKbDCEY3TiwrQAQsN9",
+          "span_id": "Tds3aDswY8EFr72ieGvxGM",
+          "timestamp": "2026-09-29T15:14:30.715893+00:00",
+          "working_start": 0.007177544990554452,
+          "event": "span_end",
+          "id": "Tds3aDswY8EFr72ieGvxGM"
+        },
+        {
+          "uuid": "Ud8dNnMvHHdbE6U2j5HUHc",
+          "span_id": "jkrpPwxaP8VGLH9S6f7pFe",
+          "timestamp": "2026-09-29T15:14:30.716075+00:00",
+          "working_start": 0.007359812996583059,
+          "event": "span_begin",
+          "id": "jkrpPwxaP8VGLH9S6f7pFe",
+          "parent_id": "R6L4Nt67VCFzXpefzuiibw",
+          "type": "scorer",
+          "name": "includes"
+        },
+        {
+          "uuid": "m4DBehHXK3eeuDq97MMGiA",
+          "span_id": "jkrpPwxaP8VGLH9S6f7pFe",
+          "timestamp": "2026-09-29T15:14:30.716220+00:00",
+          "working_start": 0.007504892011638731,
+          "event": "score",
+          "score": {
+            "value": "C",
+            "answer": "4",
+            "explanation": "4",
+            "history": []
+          },
+          "target": "4",
+          "intermediate": false,
+          "scorer": "includes",
+          "scorer_args": {}
+        },
+        {
+          "uuid": "csSRfx6FmUL2ZRN3gNJ677",
+          "span_id": "jkrpPwxaP8VGLH9S6f7pFe",
+          "timestamp": "2026-09-29T15:14:30.716365+00:00",
+          "working_start": 0.007648530008736998,
+          "event": "span_end",
+          "id": "jkrpPwxaP8VGLH9S6f7pFe"
+        },
+        {
+          "uuid": "g2tNAc4Z3pokaiJfv4LyRC",
+          "span_id": "R6L4Nt67VCFzXpefzuiibw",
+          "timestamp": "2026-09-29T15:14:30.716481+00:00",
+          "working_start": 0.007765084010316059,
+          "event": "span_end",
+          "id": "R6L4Nt67VCFzXpefzuiibw"
+        }
+      ],
+      "model_usage": {},
+      "role_usage": {},
+      "started_at": "2026-09-29T15:14:30.704859+00:00",
+      "completed_at": "2026-09-29T15:14:30.718026+00:00",
+      "total_time": 0.013,
+      "working_time": 0.009,
+      "uuid": "hyNnAVyHcCct5zVDFvpudf",
+      "error_retries": [],
+      "attachments": {},
+      "turn_count": 1
+    },
+    {
+      "id": 1,
+      "epoch": 2,
+      "input": "Two plus two?",
+      "target": "4",
+      "messages": [
+        {
+          "id": "VJcdPbimWYDaxGF4iDdJb4",
+          "content": "Two plus two?",
+          "source": "input",
+          "role": "user"
+        },
+        {
+          "id": "YhcgRnFWtGStUmkDTMGXQx",
+          "content": "4",
+          "source": "generate",
+          "role": "assistant",
+          "model": "local"
+        }
+      ],
+      "output": {
+        "model": "local",
+        "choices": [
+          {
+            "message": {
+              "id": "YhcgRnFWtGStUmkDTMGXQx",
+              "content": "4",
+              "source": "generate",
+              "role": "assistant",
+              "model": "local"
+            },
+            "stop_reason": "stop"
+          }
+        ],
+        "completion": "4",
+        "time": 0.00006003401358611882
+      },
+      "scores": {
+        "match": {
+          "value": "C",
+          "answer": "4",
+          "explanation": "4",
+          "history": []
+        },
+        "includes": {
+          "value": "C",
+          "answer": "4",
+          "explanation": "4",
+          "history": []
+        }
+      },
+      "metadata": {},
+      "store": {},
+      "events": [
+        {
+          "uuid": "N88Ywjyk55JW5EJ7bzgaiZ",
+          "span_id": "mML6aQxLxVbVsciptZvsJb",
+          "timestamp": "2026-09-29T15:14:30.705440+00:00",
+          "working_start": 150172.5799148,
+          "event": "span_begin",
+          "id": "mML6aQxLxVbVsciptZvsJb",
+          "type": "init",
+          "name": "init"
+        },
+        {
+          "uuid": "MQHzQid7vDJnmohdRxWJUW",
+          "span_id": "mML6aQxLxVbVsciptZvsJb",
+          "timestamp": "2026-09-29T15:14:30.705780+00:00",
+          "working_start": 150172.580254904,
+          "event": "sample_init",
+          "sample": {
+            "input": "Two plus two?",
+            "target": "4",
+            "id": 1
+          },
+          "state": {
+            "messages": [
+              {
+                "id": "VJcdPbimWYDaxGF4iDdJb4",
+                "content": "Two plus two?",
+                "source": "input",
+                "role": "user"
+              }
+            ],
+            "tools": [],
+            "tool_choice": null,
+            "store": {},
+            "output": {
+              "model": "fixture/local",
+              "choices": [],
+              "completion": ""
+            },
+            "completed": false,
+            "metadata": {}
+          }
+        },
+        {
+          "uuid": "GHPC7ZSjEUFpYkgYqZykQg",
+          "span_id": "mML6aQxLxVbVsciptZvsJb",
+          "timestamp": "2026-09-29T15:14:30.705942+00:00",
+          "working_start": 150172.580417396,
+          "event": "span_end",
+          "id": "mML6aQxLxVbVsciptZvsJb"
+        },
+        {
+          "uuid": "FQh3U9Q94EmAmp5LC9vWEZ",
+          "span_id": "KDHFLWJuci6sPm9DECU8Kg",
+          "timestamp": "2026-09-29T15:14:30.707271+00:00",
+          "working_start": 0.001222115010023117,
+          "event": "span_begin",
+          "id": "KDHFLWJuci6sPm9DECU8Kg",
+          "type": "solvers",
+          "name": "solvers"
+        },
+        {
+          "uuid": "URuvrToWUEJWwSqa5xr2wN",
+          "span_id": "fJ7LG7ipTWoP27jFGtxLdQ",
+          "timestamp": "2026-09-29T15:14:30.707416+00:00",
+          "working_start": 0.0013670909975189716,
+          "event": "span_begin",
+          "id": "fJ7LG7ipTWoP27jFGtxLdQ",
+          "parent_id": "KDHFLWJuci6sPm9DECU8Kg",
+          "type": "solver",
+          "name": "generate"
+        },
+        {
+          "uuid": "XxGp8wsCB99igBEKB8C7Jc",
+          "span_id": "fJ7LG7ipTWoP27jFGtxLdQ",
+          "timestamp": "2026-09-29T15:14:30.707635+00:00",
+          "working_start": 0.0015864699962548912,
+          "event": "model",
+          "model": "fixture/local",
+          "input": [
+            {
+              "id": "VJcdPbimWYDaxGF4iDdJb4",
+              "content": "Two plus two?",
+              "source": "input",
+              "role": "user"
+            }
+          ],
+          "tools": [],
+          "tool_choice": "none",
+          "config": {},
+          "output": {
+            "model": "local",
+            "choices": [
+              {
+                "message": {
+                  "id": "YhcgRnFWtGStUmkDTMGXQx",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            ],
+            "completion": "4",
+            "time": 0.00006003401358611882
+          },
+          "completed": "2026-09-29T15:14:30.713732+00:00",
+          "working_time": 0.00006003401358611882
+        },
+        {
+          "uuid": "mV6AwJW4qK9HRgMvaGZvvN",
+          "span_id": "fJ7LG7ipTWoP27jFGtxLdQ",
+          "timestamp": "2026-09-29T15:14:30.714103+00:00",
+          "working_start": 0.002178446011384949,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/messages/1",
+              "value": {
+                "id": "YhcgRnFWtGStUmkDTMGXQx",
+                "content": "4",
+                "source": "generate",
+                "role": "assistant",
+                "model": "local"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/output/time",
+              "value": 0.00006003401358611882
+            },
+            {
+              "op": "replace",
+              "path": "/output/completion",
+              "value": "4",
+              "replaced": ""
+            },
+            {
+              "op": "replace",
+              "path": "/output/model",
+              "value": "local",
+              "replaced": "fixture/local"
+            },
+            {
+              "op": "add",
+              "path": "/output/choices/0",
+              "value": {
+                "message": {
+                  "id": "YhcgRnFWtGStUmkDTMGXQx",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            }
+          ]
+        },
+        {
+          "uuid": "hP2AkfhbpbaUHBcVpUKfJ7",
+          "span_id": "fJ7LG7ipTWoP27jFGtxLdQ",
+          "timestamp": "2026-09-29T15:14:30.714274+00:00",
+          "working_start": 0.0023487330181524158,
+          "event": "span_end",
+          "id": "fJ7LG7ipTWoP27jFGtxLdQ"
+        },
+        {
+          "uuid": "edEzNYJKFcKkbjvLUj2xXW",
+          "span_id": "KDHFLWJuci6sPm9DECU8Kg",
+          "timestamp": "2026-09-29T15:14:30.714414+00:00",
+          "working_start": 0.0024888280022423714,
+          "event": "span_end",
+          "id": "KDHFLWJuci6sPm9DECU8Kg"
+        },
+        {
+          "uuid": "TWLmCxYuYFhMbFUPZ7Ame8",
+          "span_id": "h6sy8MXTbaEKNjPFE4LHg5",
+          "timestamp": "2026-09-29T15:14:30.716884+00:00",
+          "working_start": 0.004959022015100345,
+          "event": "span_begin",
+          "id": "h6sy8MXTbaEKNjPFE4LHg5",
+          "type": "scorers",
+          "name": "scorers"
+        },
+        {
+          "uuid": "RpsHDU9bXqqUQ5EuJ27GBq",
+          "span_id": "Wevtdrc6FKhVyen6PkLQ7B",
+          "timestamp": "2026-09-29T15:14:30.717024+00:00",
+          "working_start": 0.005098668014397845,
+          "event": "span_begin",
+          "id": "Wevtdrc6FKhVyen6PkLQ7B",
+          "parent_id": "h6sy8MXTbaEKNjPFE4LHg5",
+          "type": "scorer",
+          "name": "match"
+        },
+        {
+          "uuid": "ESRfvPVqNVg8GAfn32zMrv",
+          "span_id": "Wevtdrc6FKhVyen6PkLQ7B",
+          "timestamp": "2026-09-29T15:14:30.717149+00:00",
+          "working_start": 0.005224033026024699,
+          "event": "score",
+          "score": {
+            "value": "C",
+            "answer": "4",
+            "explanation": "4",
+            "history": []
+          },
+          "target": "4",
+          "intermediate": false,
+          "scorer": "match",
+          "scorer_args": {}
+        },
+        {
+          "uuid": "GWPtgJZp7BDrhxZqi5qZ48",
+          "span_id": "Wevtdrc6FKhVyen6PkLQ7B",
+          "timestamp": "2026-09-29T15:14:30.717266+00:00",
+          "working_start": 0.005341410025721416,
+          "event": "span_end",
+          "id": "Wevtdrc6FKhVyen6PkLQ7B"
+        },
+        {
+          "uuid": "cYNuMdhH76jqesgERfCGEB",
+          "span_id": "AxWkygFGYsauPkG83CQ5yP",
+          "timestamp": "2026-09-29T15:14:30.717380+00:00",
+          "working_start": 0.005455411999719217,
+          "event": "span_begin",
+          "id": "AxWkygFGYsauPkG83CQ5yP",
+          "parent_id": "h6sy8MXTbaEKNjPFE4LHg5",
+          "type": "scorer",
+          "name": "includes"
+        },
+        {
+          "uuid": "eU42Tf4ymCnip7wJrJnCBj",
+          "span_id": "AxWkygFGYsauPkG83CQ5yP",
+          "timestamp": "2026-09-29T15:14:30.717492+00:00",
+          "working_start": 0.00556734501151368,
+          "event": "score",
+          "score": {
+            "value": "C",
+            "answer": "4",
+            "explanation": "4",
+            "history": []
+          },
+          "target": "4",
+          "intermediate": false,
+          "scorer": "includes",
+          "scorer_args": {}
+        },
+        {
+          "uuid": "2oduouTf7arqWHHSedaySP",
+          "span_id": "AxWkygFGYsauPkG83CQ5yP",
+          "timestamp": "2026-09-29T15:14:30.717627+00:00",
+          "working_start": 0.005701607005903497,
+          "event": "span_end",
+          "id": "AxWkygFGYsauPkG83CQ5yP"
+        },
+        {
+          "uuid": "LpNJaydhjQf6QdT85XQSN9",
+          "span_id": "h6sy8MXTbaEKNjPFE4LHg5",
+          "timestamp": "2026-09-29T15:14:30.717734+00:00",
+          "working_start": 0.005808550020447001,
+          "event": "span_end",
+          "id": "h6sy8MXTbaEKNjPFE4LHg5"
+        }
+      ],
+      "model_usage": {},
+      "role_usage": {},
+      "started_at": "2026-09-29T15:14:30.706051+00:00",
+      "completed_at": "2026-09-29T15:14:30.719022+00:00",
+      "total_time": 0.013,
+      "working_time": 0.007,
+      "uuid": "kRni5DWLEZcL85v53nCYgv",
+      "error_retries": [],
+      "attachments": {},
+      "turn_count": 1
+    }
+  ],
+  "reductions": [
+    {
+      "scorer": "match",
+      "samples": [
+        {
+          "value": 1.0,
+          "answer": "4",
+          "explanation": "4",
+          "history": [],
+          "sample_id": 1
+        }
+      ]
+    },
+    {
+      "scorer": "includes",
+      "samples": [
+        {
+          "value": 1.0,
+          "answer": "4",
+          "explanation": "4",
+          "history": [],
+          "sample_id": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+{
+  "version": 2,
+  "status": "cancelled",
+  "eval": {
+    "eval_id": "Yq8yQK5f2dZD8K5Pcwacf3",
+    "run_id": "o7LT2yXtcS2rPHU64PD4r8",
+    "created": "2026-09-29T15:36:55+00:00",
+    "task": "slow_task",
+    "task_id": "4oXaVLLtVhB4WmEDcs9fTt",
+    "task_version": 0,
+    "task_file": "tests/native/inspect_failure_fixture.py",
+    "task_display_name": "slow_task",
+    "task_registry_name": "slow_task",
+    "task_attribs": {},
+    "task_args": {},
+    "task_args_passed": {},
+    "solver_args_passed": {},
+    "dataset": {
+      "samples": 1,
+      "sample_ids": [
+        1
+      ],
+      "shuffled": false
+    },
+    "model": "fixture/slow",
+    "model_generate_config": {},
+    "model_args": {},
+    "config": {
+      "epochs": 1,
+      "fail_on_error": true,
+      "continue_on_fail": false,
+      "score_on_error": false,
+      "sandbox_cleanup": true,
+      "sandbox_prebuilt": false,
+      "log_samples": true,
+      "log_realtime": true,
+      "log_images": true,
+      "score_display": true
+    },
+    "packages": {
+      "inspect_ai": "0.3.272"
+    },
+    "scorers": [
+      {
+        "name": "match",
+        "options": {},
+        "metrics": [
+          {
+            "name": "inspect_ai/accuracy",
+            "options": {}
+          },
+          {
+            "name": "inspect_ai/stderr",
+            "options": {}
+          }
+        ],
+        "metadata": {}
+      }
+    ]
+  },
+  "plan": {
+    "name": "plan",
+    "steps": [
+      {
+        "solver": "generate",
+        "params": {
+          "tool_calls": "loop"
+        },
+        "params_passed": {}
+      }
+    ],
+    "config": {}
+  },
+  "stats": {
+    "started_at": "2026-09-29T15:36:55+00:00",
+    "completed_at": "2026-09-29T15:36:55+00:00",
+    "model_usage": {},
+    "role_usage": {},
+    "connection_limit_history": []
+  },
+  "invalidated": false,
+  "tags": [],
+  "metadata": {},
+  "samples": [
+    {
+      "id": 1,
+      "epoch": 1,
+      "input": "slow",
+      "target": "4",
+      "messages": [
+        {
+          "id": "TEECvTBkiDJn9qXmQWuba4",
+          "content": "slow",
+          "source": "input",
+          "role": "user"
+        }
+      ],
+      "output": {
+        "model": "fixture/slow",
+        "choices": [],
+        "completion": ""
+      },
+      "scores": {},
+      "metadata": {},
+      "store": {},
+      "events": [
+        {
+          "uuid": "n8h9H7LWXZH4WBZPV8bNK2",
+          "span_id": "G22zdjaBZUdku85siePmMm",
+          "timestamp": "2026-09-29T15:36:55.298088+00:00",
+          "working_start": 151517.172565387,
+          "event": "span_begin",
+          "id": "G22zdjaBZUdku85siePmMm",
+          "type": "init",
+          "name": "init"
+        },
+        {
+          "uuid": "DMJvgsocBafaJD6hut7moE",
+          "span_id": "G22zdjaBZUdku85siePmMm",
+          "timestamp": "2026-09-29T15:36:55.299506+00:00",
+          "working_start": 151517.173988244,
+          "event": "sample_init",
+          "sample": {
+            "input": "slow",
+            "target": "4",
+            "id": 1
+          },
+          "state": {
+            "messages": [
+              {
+                "id": "TEECvTBkiDJn9qXmQWuba4",
+                "content": "slow",
+                "source": "input",
+                "role": "user"
+              }
+            ],
+            "tools": [],
+            "tool_choice": null,
+            "store": {},
+            "output": {
+              "model": "fixture/slow",
+              "choices": [],
+              "completion": ""
+            },
+            "completed": false,
+            "metadata": {}
+          }
+        },
+        {
+          "uuid": "hXk7mLvD6Hh2jVBUTb5BFr",
+          "span_id": "G22zdjaBZUdku85siePmMm",
+          "timestamp": "2026-09-29T15:36:55.299917+00:00",
+          "working_start": 151517.174393087,
+          "event": "span_end",
+          "id": "G22zdjaBZUdku85siePmMm"
+        },
+        {
+          "uuid": "7SqQUNe54w7UzGLhGBUW4J",
+          "span_id": "HpPTDL567bSJyUzDFFrDyW",
+          "timestamp": "2026-09-29T15:36:55.301043+00:00",
+          "working_start": 0.0008411329763475806,
+          "event": "span_begin",
+          "id": "HpPTDL567bSJyUzDFFrDyW",
+          "type": "solvers",
+          "name": "solvers"
+        },
+        {
+          "uuid": "VFaZbzsJcRhEFWmcEXvZJF",
+          "span_id": "8x5PgezW2zC6bZWndPjz8n",
+          "timestamp": "2026-09-29T15:36:55.301665+00:00",
+          "working_start": 0.0014636319829151034,
+          "event": "span_begin",
+          "id": "8x5PgezW2zC6bZWndPjz8n",
+          "parent_id": "HpPTDL567bSJyUzDFFrDyW",
+          "type": "solver",
+          "name": "generate"
+        },
+        {
+          "uuid": "9dsV25gETRbTUpfnmNjp55",
+          "span_id": "8x5PgezW2zC6bZWndPjz8n",
+          "timestamp": "2026-09-29T15:36:55.302799+00:00",
+          "working_start": 0.002460702002281323,
+          "event": "model",
+          "model": "fixture/slow",
+          "input": [
+            {
+              "id": "TEECvTBkiDJn9qXmQWuba4",
+              "content": "slow",
+              "source": "input",
+              "role": "user"
+            }
+          ],
+          "tools": [],
+          "tool_choice": "none",
+          "config": {},
+          "output": {
+            "model": "fixture/slow",
+            "choices": [
+              {
+                "message": {
+                  "id": "iQbaXpXth64WEDdoFwJhjL",
+                  "content": "",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "fixture/slow"
+                },
+                "stop_reason": "stop"
+              }
+            ],
+            "completion": ""
+          },
+          "error": "RuntimeError('model call cancelled')",
+          "traceback": "RuntimeError: model call cancelled\nRuntimeError: model call cancelled\n",
+          "traceback_ansi": "\u001b[1;91mRuntimeError: \u001b[0mmodel call cancelled\n"
+        },
+        {
+          "uuid": "mC5KKuHXcWZYdgBUZY9RuC",
+          "span_id": "8x5PgezW2zC6bZWndPjz8n",
+          "timestamp": "2026-09-29T15:36:55.346010+00:00",
+          "working_start": 0.04567209101514891,
+          "event": "span_end",
+          "id": "8x5PgezW2zC6bZWndPjz8n"
+        },
+        {
+          "uuid": "Y6krvuuxpAkzis7KA4x3Fe",
+          "span_id": "HpPTDL567bSJyUzDFFrDyW",
+          "timestamp": "2026-09-29T15:36:55.346287+00:00",
+          "working_start": 0.04594774401630275,
+          "event": "span_end",
+          "id": "HpPTDL567bSJyUzDFFrDyW"
+        },
+        {
+          "uuid": "ZPsrzW7PCGBtiKAPSzJnDj",
+          "timestamp": "2026-09-29T15:36:55.456184+00:00",
+          "working_start": 0.1558494070195593,
+          "event": "error",
+          "error": {
+            "message": "CancelledError(\"Cancelled via cancel scope 759672b176d0 by <Task cancelling name='inspect_ai._util.asyncfiles.with_async_fs.<locals>.wrapper' coro=<with_async_fs.<locals>.wrapper() running at /tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py:2531> cb=[_run_until_complete_cb() at /home/agent/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181, <1 more>, WorkerThread.stop()]>\")",
+            "traceback": "Traceback (most recent call last):\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2892, in _task_run_sample_attempt\n    async with anyio.create_task_group() as tg:\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py\", line 851, in __aexit__\n    raise exc_val\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py\", line 820, in __aexit__\n    await self._on_completed_fut\nasyncio.exceptions.CancelledError: Cancelled via cancel scope 759672b176d0 by <Task cancelling name='inspect_ai._util.asyncfiles.with_async_fs.<locals>.wrapper' coro=<with_async_fs.<locals>.wrapper() running at /tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py:2531> cb=[_run_until_complete_cb() at /home/agent/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181, <1 more>, WorkerThread.stop()]>\n",
+            "traceback_ansi": "\u001b[31m┌─\u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m─┐\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2892 in _task_run_sample_attempt                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[1m_asyncio.p\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1my\u001b[0m:851 in __aexit__                                                          \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 848 \u001b[0m\u001b[2m│   │   │   │   │   │   \u001b[0m\u001b[33m\"\u001b[0m\u001b[33munhandled errors in a TaskGroup\u001b[0m\u001b[33m\"\u001b[0m, \u001b[96mself\u001b[0m._exc \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 849 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m) \u001b[94mfrom\u001b[0m\u001b[90m \u001b[0m\u001b[94mNone\u001b[0m                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 850 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94melif\u001b[0m exc_val:                                        \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m 851 \u001b[2m│   │   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m exc_val                                    \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 852 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mexcept\u001b[0m \u001b[96mBaseException\u001b[0m \u001b[94mas\u001b[0m exc:                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 853 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94mif\u001b[0m \u001b[96mself\u001b[0m.cancel_scope.\u001b[92m__exit__\u001b[0m(\u001b[96mtype\u001b[0m(exc), exc, exc.__ \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 854 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m\u001b[94mreturn\u001b[0m \u001b[94mTrue\u001b[0m                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[1m_asyncio.p\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1my\u001b[0m:820 in __aexit__                                                          \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 817 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[96mself\u001b[0m._on_completed_fut = loop.create_fut \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 818 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 819 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[94mtry\u001b[0m:                                     \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m 820 \u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[94mawait\u001b[0m \u001b[96mself\u001b[0m._on_completed_fut         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 821 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[94mexcept\u001b[0m CancelledError \u001b[94mas\u001b[0m exc:            \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 822 \u001b[0m\u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[2m# Shield the scope against further c\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 823 \u001b[0m\u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[2m# as they're not productive (#695)\u001b[0m   \u001b[31m│\u001b[0m\n\u001b[31m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\u001b[1;91mCancelledError: \u001b[0mCancelled via cancel scope 759672b176d0 by \u001b[1m<\u001b[0m\u001b[1;95mTask\u001b[0m\u001b[39m cancelling \u001b[0m\n\u001b[33mname\u001b[0m\u001b[39m=\u001b[0m\u001b[32m'inspect_ai._util.asyncfiles.with_async_fs.<locals>.wrapper'\u001b[0m\u001b[39m \u001b[0m\n\u001b[33mcoro\u001b[0m\u001b[39m=<with_async_fs.<locals>\u001b[0m\u001b[1;35m.wrapper\u001b[0m\u001b[1;39m(\u001b[0m\u001b[1;39m)\u001b[0m\u001b[39m running at \u001b[0m\n\u001b[35m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[95m_asyncio.py\u001b[0m\u001b[39m:\u001b[0m\u001b[1;36m25\u001b[0m\n\u001b[1;36m31\u001b[0m\u001b[39m> \u001b[0m\u001b[33mcb\u001b[0m\u001b[39m=\u001b[0m\u001b[1;39m[\u001b[0m\u001b[1;35m_run_until_complete_cb\u001b[0m\u001b[1;39m(\u001b[0m\u001b[1;39m)\u001b[0m\u001b[39m at \u001b[0m\n\u001b[35m/home/agent/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3\u001b[0m\n\u001b[35m.11/asyncio/\u001b[0m\u001b[95mbase_events.py\u001b[0m\u001b[39m:\u001b[0m\u001b[1;36m181\u001b[0m\u001b[39m, <\u001b[0m\u001b[1;36m1\u001b[0m\u001b[39m more>, \u001b[0m\u001b[1;35mWorkerThread.stop\u001b[0m\u001b[1;39m(\u001b[0m\u001b[1;39m)\u001b[0m\u001b[1;39m]\u001b[0m\u001b[1m>\u001b[0m\n"
+          }
+        }
+      ],
+      "model_usage": {},
+      "role_usage": {},
+      "started_at": "2026-09-29T15:36:55.300207+00:00",
+      "completed_at": "2026-09-29T15:36:55.456953+00:00",
+      "total_time": 0.157,
+      "working_time": 0.157,
+      "uuid": "7neEYocC9fYPwocTc433Zj",
+      "error": {
+        "message": "CancelledError(\"Cancelled via cancel scope 759672b176d0 by <Task cancelling name='inspect_ai._util.asyncfiles.with_async_fs.<locals>.wrapper' coro=<with_async_fs.<locals>.wrapper() running at /tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py:2531> cb=[_run_until_complete_cb() at /home/agent/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181, <1 more>, WorkerThread.stop()]>\")",
+        "traceback": "Traceback (most recent call last):\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2892, in _task_run_sample_attempt\n    async with anyio.create_task_group() as tg:\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py\", line 851, in __aexit__\n    raise exc_val\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py\", line 820, in __aexit__\n    await self._on_completed_fut\nasyncio.exceptions.CancelledError: Cancelled via cancel scope 759672b176d0 by <Task cancelling name='inspect_ai._util.asyncfiles.with_async_fs.<locals>.wrapper' coro=<with_async_fs.<locals>.wrapper() running at /tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py:2531> cb=[_run_until_complete_cb() at /home/agent/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181, <1 more>, WorkerThread.stop()]>\n",
+        "traceback_ansi": "\u001b[31m┌─\u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m─┐\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2892 in _task_run_sample_attempt                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[1m_asyncio.p\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1my\u001b[0m:851 in __aexit__                                                          \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 848 \u001b[0m\u001b[2m│   │   │   │   │   │   \u001b[0m\u001b[33m\"\u001b[0m\u001b[33munhandled errors in a TaskGroup\u001b[0m\u001b[33m\"\u001b[0m, \u001b[96mself\u001b[0m._exc \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 849 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m) \u001b[94mfrom\u001b[0m\u001b[90m \u001b[0m\u001b[94mNone\u001b[0m                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 850 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94melif\u001b[0m exc_val:                                        \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m 851 \u001b[2m│   │   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m exc_val                                    \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 852 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mexcept\u001b[0m \u001b[96mBaseException\u001b[0m \u001b[94mas\u001b[0m exc:                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 853 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94mif\u001b[0m \u001b[96mself\u001b[0m.cancel_scope.\u001b[92m__exit__\u001b[0m(\u001b[96mtype\u001b[0m(exc), exc, exc.__ \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 854 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m\u001b[94mreturn\u001b[0m \u001b[94mTrue\u001b[0m                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[1m_asyncio.p\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1my\u001b[0m:820 in __aexit__                                                          \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 817 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[96mself\u001b[0m._on_completed_fut = loop.create_fut \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 818 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 819 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[94mtry\u001b[0m:                                     \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m 820 \u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[94mawait\u001b[0m \u001b[96mself\u001b[0m._on_completed_fut         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 821 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[94mexcept\u001b[0m CancelledError \u001b[94mas\u001b[0m exc:            \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 822 \u001b[0m\u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[2m# Shield the scope against further c\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 823 \u001b[0m\u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[2m# as they're not productive (#695)\u001b[0m   \u001b[31m│\u001b[0m\n\u001b[31m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\u001b[1;91mCancelledError: \u001b[0mCancelled via cancel scope 759672b176d0 by \u001b[1m<\u001b[0m\u001b[1;95mTask\u001b[0m\u001b[39m cancelling \u001b[0m\n\u001b[33mname\u001b[0m\u001b[39m=\u001b[0m\u001b[32m'inspect_ai._util.asyncfiles.with_async_fs.<locals>.wrapper'\u001b[0m\u001b[39m \u001b[0m\n\u001b[33mcoro\u001b[0m\u001b[39m=<with_async_fs.<locals>\u001b[0m\u001b[1;35m.wrapper\u001b[0m\u001b[1;39m(\u001b[0m\u001b[1;39m)\u001b[0m\u001b[39m running at \u001b[0m\n\u001b[35m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[95m_asyncio.py\u001b[0m\u001b[39m:\u001b[0m\u001b[1;36m25\u001b[0m\n\u001b[1;36m31\u001b[0m\u001b[39m> \u001b[0m\u001b[33mcb\u001b[0m\u001b[39m=\u001b[0m\u001b[1;39m[\u001b[0m\u001b[1;35m_run_until_complete_cb\u001b[0m\u001b[1;39m(\u001b[0m\u001b[1;39m)\u001b[0m\u001b[39m at \u001b[0m\n\u001b[35m/home/agent/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3\u001b[0m\n\u001b[35m.11/asyncio/\u001b[0m\u001b[95mbase_events.py\u001b[0m\u001b[39m:\u001b[0m\u001b[1;36m181\u001b[0m\u001b[39m, <\u001b[0m\u001b[1;36m1\u001b[0m\u001b[39m more>, \u001b[0m\u001b[1;35mWorkerThread.stop\u001b[0m\u001b[1;39m(\u001b[0m\u001b[1;39m)\u001b[0m\u001b[1;39m]\u001b[0m\u001b[1m>\u001b[0m\n"
+      },
+      "error_retries": [],
+      "attachments": {},
+      "turn_count": 0
+    }
+  ]
+}

@@ -1,0 +1,708 @@
+{
+  "version": 2,
+  "status": "error",
+  "eval": {
+    "eval_id": "arraXcuoqf3iRVEqoCnkFc",
+    "run_id": "V6yFhwtYeA9nie5M5ZSjPc",
+    "created": "2026-09-29T15:35:54+00:00",
+    "task": "run_error_task",
+    "task_id": "PiACnFyJSLudbhzLn2u4Eg",
+    "task_version": 0,
+    "task_file": "tests/native/inspect_failure_fixture.py",
+    "task_display_name": "run_error_task",
+    "task_registry_name": "run_error_task",
+    "task_attribs": {},
+    "task_args": {},
+    "task_args_passed": {},
+    "solver_args_passed": {},
+    "dataset": {
+      "samples": 3,
+      "sample_ids": [
+        1,
+        2,
+        3
+      ],
+      "shuffled": false
+    },
+    "model": "fixture/local",
+    "model_generate_config": {},
+    "model_args": {},
+    "config": {
+      "epochs": 1,
+      "fail_on_error": true,
+      "continue_on_fail": false,
+      "score_on_error": false,
+      "max_samples": 1,
+      "sandbox_cleanup": true,
+      "sandbox_prebuilt": false,
+      "log_samples": true,
+      "log_realtime": true,
+      "log_images": true,
+      "score_display": true
+    },
+    "packages": {
+      "inspect_ai": "0.3.272"
+    },
+    "metadata": {
+      "aiq_evals_measurement_identity": "2fca244fff406681953cbed9aee1012a1626019e3887e876902bde0371f09689",
+      "aiq_evals_adapter_version": "0.1.0"
+    },
+    "scorers": [
+      {
+        "name": "match",
+        "options": {},
+        "metrics": [
+          {
+            "name": "inspect_ai/accuracy",
+            "options": {}
+          },
+          {
+            "name": "inspect_ai/stderr",
+            "options": {}
+          }
+        ],
+        "metadata": {}
+      }
+    ]
+  },
+  "plan": {
+    "name": "plan",
+    "steps": [
+      {
+        "solver": "fail_one",
+        "params": {},
+        "params_passed": {}
+      },
+      {
+        "solver": "generate",
+        "params": {
+          "tool_calls": "loop"
+        },
+        "params_passed": {}
+      }
+    ],
+    "config": {}
+  },
+  "stats": {
+    "started_at": "2026-09-29T15:35:54+00:00",
+    "completed_at": "2026-09-29T15:35:55+00:00",
+    "model_usage": {},
+    "role_usage": {},
+    "connection_limit_history": []
+  },
+  "error": {
+    "message": "RuntimeError('intentional sample failure')",
+    "traceback": "Traceback (most recent call last):\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 1851, in task_run\n    keyed_results = await sample_scheduler.run(seed_plan, run_sample)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/scheduler.py\", line 333, in run\n    raise ex.exceptions[0] from None\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/_tasks.py\", line 327, in _run_coro\n    retval = await self._coro\n             ^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/scheduler.py\", line 300, in run_one\n    result = await run_sample(sample_index, epoch, entry)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 1515, in run_sample\n    result = await task_run_sample(\n             ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2244, in task_run_sample\n    result = await _task_run_sample_attempt(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 3335, in _task_run_sample_attempt\n    raise raise_error\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2903, in _task_run_sample_attempt\n    raise inner_exception(ex)\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/_tasks.py\", line 327, in _run_coro\n    retval = await self._coro\n             ^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2762, in run\n    state = await plan(state, generate)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/solver/_plan.py\", line 106, in __call__\n    state = await solver(state, generate)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/joncrall/code/aiq-evals/tests/native/inspect_failure_fixture.py\", line 14, in solve\n    raise RuntimeError(\"intentional sample failure\")\nRuntimeError: intentional sample failure\n",
+    "traceback_ansi": "\u001b[31m┌─\u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m─┐\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:1851 in task_run                                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1msche\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mduler.py\u001b[0m:333 in run                                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/\u001b[0m\u001b[1m_tasks.py\u001b[0m:327  \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m in _run_coro                                                                \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m324 \u001b[0m\u001b[2m│   │   \u001b[0m                                                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m325 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mwith\u001b[0m \u001b[96mself\u001b[0m._cancel_scope:                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m326 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mtry\u001b[0m:                                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m327 \u001b[2m│   │   │   │   \u001b[0mretval = \u001b[94mawait\u001b[0m \u001b[96mself\u001b[0m._coro                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m328 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mexcept\u001b[0m \u001b[96mBaseException\u001b[0m \u001b[94mas\u001b[0m exc:                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m329 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[96mself\u001b[0m._exception = exc                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m330 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m                                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1msche\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mduler.py\u001b[0m:300 in run_one                                                     \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:1515 in run_sample                                                       \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2244 in task_run_sample                                                  \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:3335 in _task_run_sample_attempt                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2903 in _task_run_sample_attempt                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/\u001b[0m\u001b[1m_tasks.py\u001b[0m:327  \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m in _run_coro                                                                \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m324 \u001b[0m\u001b[2m│   │   \u001b[0m                                                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m325 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mwith\u001b[0m \u001b[96mself\u001b[0m._cancel_scope:                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m326 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mtry\u001b[0m:                                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m327 \u001b[2m│   │   │   │   \u001b[0mretval = \u001b[94mawait\u001b[0m \u001b[96mself\u001b[0m._coro                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m328 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mexcept\u001b[0m \u001b[96mBaseException\u001b[0m \u001b[94mas\u001b[0m exc:                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m329 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[96mself\u001b[0m._exception = exc                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m330 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m                                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2762 in run                                                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/solver/\u001b[0m\u001b[1m_plan.py\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m :106 in __call__                                                            \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/home/joncrall/code/aiq-evals/tests/native/\u001b[0m\u001b[1minspect_failure_fixture.py\u001b[0m:14 in \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m solve                                                                       \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m11 \u001b[0m\u001b[2m│   \u001b[0m\u001b[94masync\u001b[0m \u001b[94mdef\u001b[0m\u001b[90m \u001b[0m\u001b[92msolve\u001b[0m(state, generate):                                  \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m12 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mdel\u001b[0m generate                                                   \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m13 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mif\u001b[0m state.input_text == \u001b[33m\"\u001b[0m\u001b[33mfail\u001b[0m\u001b[33m\"\u001b[0m:                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m14 \u001b[2m│   │   │   \u001b[0m\u001b[1;4;94mraise\u001b[0m\u001b[1;4m \u001b[0m\u001b[1;4;96mRuntimeError\u001b[0m\u001b[1;4m(\u001b[0m\u001b[1;4;33m\"\u001b[0m\u001b[1;4;33mintentional sample failure\u001b[0m\u001b[1;4;33m\"\u001b[0m\u001b[1;4m)\u001b[0m           \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m15 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mreturn\u001b[0m state                                                   \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m16 \u001b[0m\u001b[2m│   \u001b[0m                                                                   \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m17 \u001b[0m\u001b[2m│   \u001b[0m\u001b[94mreturn\u001b[0m solve                                                       \u001b[31m│\u001b[0m\n\u001b[31m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\u001b[1;91mRuntimeError: \u001b[0mintentional sample failure\n"
+  },
+  "invalidated": false,
+  "tags": [],
+  "metadata": {
+    "aiq_evals_measurement_identity": "2fca244fff406681953cbed9aee1012a1626019e3887e876902bde0371f09689",
+    "aiq_evals_adapter_version": "0.1.0"
+  },
+  "samples": [
+    {
+      "id": 1,
+      "epoch": 1,
+      "input": "okay",
+      "target": "4",
+      "messages": [
+        {
+          "id": "aSkveSBb5Grtphp6SJR22H",
+          "content": "okay",
+          "source": "input",
+          "role": "user"
+        },
+        {
+          "id": "aQasZcQyQbqYZhHuyU5QDx",
+          "content": "4",
+          "source": "generate",
+          "role": "assistant",
+          "model": "local"
+        }
+      ],
+      "output": {
+        "model": "local",
+        "choices": [
+          {
+            "message": {
+              "id": "aQasZcQyQbqYZhHuyU5QDx",
+              "content": "4",
+              "source": "generate",
+              "role": "assistant",
+              "model": "local"
+            },
+            "stop_reason": "stop"
+          }
+        ],
+        "completion": "4",
+        "time": 0.00010166902211494744
+      },
+      "scores": {
+        "match": {
+          "value": "C",
+          "answer": "4",
+          "explanation": "4",
+          "history": []
+        }
+      },
+      "metadata": {},
+      "store": {},
+      "events": [
+        {
+          "uuid": "GzvSgq5YPfREuswCnxhtns",
+          "span_id": "4VppEsAUAYPFAfV4e6X8dY",
+          "timestamp": "2026-09-29T15:35:54.970450+00:00",
+          "working_start": 151456.844927253,
+          "event": "span_begin",
+          "id": "4VppEsAUAYPFAfV4e6X8dY",
+          "type": "init",
+          "name": "init"
+        },
+        {
+          "uuid": "3647pgtZFChvWvRC8rEzph",
+          "span_id": "4VppEsAUAYPFAfV4e6X8dY",
+          "timestamp": "2026-09-29T15:35:54.971281+00:00",
+          "working_start": 151456.845759244,
+          "event": "sample_init",
+          "sample": {
+            "input": "okay",
+            "target": "4",
+            "id": 1
+          },
+          "state": {
+            "messages": [
+              {
+                "id": "aSkveSBb5Grtphp6SJR22H",
+                "content": "okay",
+                "source": "input",
+                "role": "user"
+              }
+            ],
+            "tools": [],
+            "tool_choice": null,
+            "store": {},
+            "output": {
+              "model": "fixture/local",
+              "choices": [],
+              "completion": ""
+            },
+            "completed": false,
+            "metadata": {}
+          }
+        },
+        {
+          "uuid": "FrpSZEHqHDAx8sQjzYwT5q",
+          "span_id": "4VppEsAUAYPFAfV4e6X8dY",
+          "timestamp": "2026-09-29T15:35:54.971634+00:00",
+          "working_start": 151456.846110355,
+          "event": "span_end",
+          "id": "4VppEsAUAYPFAfV4e6X8dY"
+        },
+        {
+          "uuid": "PNSoQRuxVnFqH2CQuE6mhj",
+          "span_id": "oSNpcCvTtRhAaLWjzyLQJb",
+          "timestamp": "2026-09-29T15:35:54.972285+00:00",
+          "working_start": 0.00039722700603306293,
+          "event": "span_begin",
+          "id": "oSNpcCvTtRhAaLWjzyLQJb",
+          "type": "solvers",
+          "name": "solvers"
+        },
+        {
+          "uuid": "8EmQropAe73H7qhtc8zLWg",
+          "span_id": "KgbC8LG67BBrn8LzShF8fq",
+          "timestamp": "2026-09-29T15:35:54.972685+00:00",
+          "working_start": 0.00079689099220559,
+          "event": "span_begin",
+          "id": "KgbC8LG67BBrn8LzShF8fq",
+          "parent_id": "oSNpcCvTtRhAaLWjzyLQJb",
+          "type": "solver",
+          "name": "fail_one"
+        },
+        {
+          "uuid": "k4MYktFGEbfZjhvoUHhWny",
+          "span_id": "KgbC8LG67BBrn8LzShF8fq",
+          "timestamp": "2026-09-29T15:35:54.973077+00:00",
+          "working_start": 0.0011897209915332496,
+          "event": "span_end",
+          "id": "KgbC8LG67BBrn8LzShF8fq"
+        },
+        {
+          "uuid": "5B3NS4ja74Kmj32QACKmPz",
+          "span_id": "cishaFNK5hVmbQZ5uebUkF",
+          "timestamp": "2026-09-29T15:35:54.973248+00:00",
+          "working_start": 0.0013597689976450056,
+          "event": "span_begin",
+          "id": "cishaFNK5hVmbQZ5uebUkF",
+          "parent_id": "oSNpcCvTtRhAaLWjzyLQJb",
+          "type": "solver",
+          "name": "generate"
+        },
+        {
+          "uuid": "Q3gM9f5iKDJsSjy62sRPqp",
+          "span_id": "cishaFNK5hVmbQZ5uebUkF",
+          "timestamp": "2026-09-29T15:35:54.973511+00:00",
+          "working_start": 0.0016236910014413297,
+          "event": "model",
+          "model": "fixture/local",
+          "input": [
+            {
+              "id": "aSkveSBb5Grtphp6SJR22H",
+              "content": "okay",
+              "source": "input",
+              "role": "user"
+            }
+          ],
+          "tools": [],
+          "tool_choice": "none",
+          "config": {},
+          "output": {
+            "model": "local",
+            "choices": [
+              {
+                "message": {
+                  "id": "aQasZcQyQbqYZhHuyU5QDx",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            ],
+            "completion": "4",
+            "time": 0.00010166902211494744
+          },
+          "completed": "2026-09-29T15:35:54.975897+00:00",
+          "working_time": 0.00010166902211494744
+        },
+        {
+          "uuid": "UB6bq2qNq8kJqEQXLAuCX6",
+          "span_id": "cishaFNK5hVmbQZ5uebUkF",
+          "timestamp": "2026-09-29T15:35:54.976451+00:00",
+          "working_start": 0.002545224007917568,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/output/time",
+              "value": 0.00010166902211494744
+            },
+            {
+              "op": "replace",
+              "path": "/output/completion",
+              "value": "4",
+              "replaced": ""
+            },
+            {
+              "op": "replace",
+              "path": "/output/model",
+              "value": "local",
+              "replaced": "fixture/local"
+            },
+            {
+              "op": "add",
+              "path": "/output/choices/0",
+              "value": {
+                "message": {
+                  "id": "aQasZcQyQbqYZhHuyU5QDx",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/messages/1",
+              "value": {
+                "id": "aQasZcQyQbqYZhHuyU5QDx",
+                "content": "4",
+                "source": "generate",
+                "role": "assistant",
+                "model": "local"
+              }
+            }
+          ]
+        },
+        {
+          "uuid": "RiTPdbrqX8b28tjegHxeEB",
+          "span_id": "cishaFNK5hVmbQZ5uebUkF",
+          "timestamp": "2026-09-29T15:35:54.976793+00:00",
+          "working_start": 0.002886397036490962,
+          "event": "span_end",
+          "id": "cishaFNK5hVmbQZ5uebUkF"
+        },
+        {
+          "uuid": "7bXEYpBbiZqWQEERkrqidH",
+          "span_id": "oSNpcCvTtRhAaLWjzyLQJb",
+          "timestamp": "2026-09-29T15:35:54.976959+00:00",
+          "working_start": 0.003051344014238566,
+          "event": "span_end",
+          "id": "oSNpcCvTtRhAaLWjzyLQJb"
+        },
+        {
+          "uuid": "PATNaSCBhFX9VPsXq4z26q",
+          "span_id": "Sm2FyzBL2fbHVuCALLo4VD",
+          "timestamp": "2026-09-29T15:35:54.977364+00:00",
+          "working_start": 0.0034573880257084966,
+          "event": "span_begin",
+          "id": "Sm2FyzBL2fbHVuCALLo4VD",
+          "type": "scorers",
+          "name": "scorers"
+        },
+        {
+          "uuid": "8tcVBPqxg23XEzT7Kp3aoJ",
+          "span_id": "7PHu6KPise3CRwn6RdHhHJ",
+          "timestamp": "2026-09-29T15:35:54.977529+00:00",
+          "working_start": 0.0036214860156178474,
+          "event": "span_begin",
+          "id": "7PHu6KPise3CRwn6RdHhHJ",
+          "parent_id": "Sm2FyzBL2fbHVuCALLo4VD",
+          "type": "scorer",
+          "name": "match"
+        },
+        {
+          "uuid": "GRhsM7RomBvBvxyYzACf38",
+          "span_id": "7PHu6KPise3CRwn6RdHhHJ",
+          "timestamp": "2026-09-29T15:35:54.977702+00:00",
+          "working_start": 0.0037941430346108973,
+          "event": "score",
+          "score": {
+            "value": "C",
+            "answer": "4",
+            "explanation": "4",
+            "history": []
+          },
+          "target": "4",
+          "intermediate": false,
+          "scorer": "match",
+          "scorer_args": {}
+        },
+        {
+          "uuid": "dPJgK2HzgpjrjFF8poawW6",
+          "span_id": "7PHu6KPise3CRwn6RdHhHJ",
+          "timestamp": "2026-09-29T15:35:54.977894+00:00",
+          "working_start": 0.0039871140324976295,
+          "event": "span_end",
+          "id": "7PHu6KPise3CRwn6RdHhHJ"
+        },
+        {
+          "uuid": "9kpZ7awEvRQnPPzZuGbQ6s",
+          "span_id": "Sm2FyzBL2fbHVuCALLo4VD",
+          "timestamp": "2026-09-29T15:35:54.978014+00:00",
+          "working_start": 0.004106238018721342,
+          "event": "span_end",
+          "id": "Sm2FyzBL2fbHVuCALLo4VD"
+        }
+      ],
+      "model_usage": {},
+      "role_usage": {},
+      "started_at": "2026-09-29T15:35:54.971891+00:00",
+      "completed_at": "2026-09-29T15:35:54.978300+00:00",
+      "total_time": 0.006,
+      "working_time": 0.004,
+      "uuid": "RSm2gMametCL6xucH79XQX",
+      "error_retries": [],
+      "attachments": {},
+      "turn_count": 1
+    },
+    {
+      "id": 2,
+      "epoch": 1,
+      "input": "fail",
+      "target": "4",
+      "messages": [
+        {
+          "id": "EaLNn5TEGVnDCWqzQF6ckG",
+          "content": "fail",
+          "source": "input",
+          "role": "user"
+        }
+      ],
+      "output": {
+        "model": "fixture/local",
+        "choices": [],
+        "completion": ""
+      },
+      "scores": {},
+      "metadata": {},
+      "store": {},
+      "events": [
+        {
+          "uuid": "RBxtumYArVxFu47tFMfMMm",
+          "span_id": "NVgoUHxeArPBWmRp2ksTVd",
+          "timestamp": "2026-09-29T15:35:54.984517+00:00",
+          "working_start": 151456.858991982,
+          "event": "span_begin",
+          "id": "NVgoUHxeArPBWmRp2ksTVd",
+          "type": "init",
+          "name": "init"
+        },
+        {
+          "uuid": "LiT5ThTmfTTxMfJ3GAnXnf",
+          "span_id": "NVgoUHxeArPBWmRp2ksTVd",
+          "timestamp": "2026-09-29T15:35:54.984939+00:00",
+          "working_start": 151456.859415012,
+          "event": "sample_init",
+          "sample": {
+            "input": "fail",
+            "target": "4",
+            "id": 2
+          },
+          "state": {
+            "messages": [
+              {
+                "id": "EaLNn5TEGVnDCWqzQF6ckG",
+                "content": "fail",
+                "source": "input",
+                "role": "user"
+              }
+            ],
+            "tools": [],
+            "tool_choice": null,
+            "store": {},
+            "output": {
+              "model": "fixture/local",
+              "choices": [],
+              "completion": ""
+            },
+            "completed": false,
+            "metadata": {}
+          }
+        },
+        {
+          "uuid": "iNuhqTmD7DmdXEdWsMgPSV",
+          "span_id": "NVgoUHxeArPBWmRp2ksTVd",
+          "timestamp": "2026-09-29T15:35:54.985139+00:00",
+          "working_start": 151456.859614844,
+          "event": "span_end",
+          "id": "NVgoUHxeArPBWmRp2ksTVd"
+        },
+        {
+          "uuid": "npdnD9XnZcKgvSvHURvqZC",
+          "span_id": "5oEBHH4ftqofho3jr3a2GJ",
+          "timestamp": "2026-09-29T15:35:54.985774+00:00",
+          "working_start": 0.00045867101289331913,
+          "event": "span_begin",
+          "id": "5oEBHH4ftqofho3jr3a2GJ",
+          "type": "solvers",
+          "name": "solvers"
+        },
+        {
+          "uuid": "bbGvF6TWY82iJzXKCMCmaN",
+          "span_id": "YVzyXkVVprXLzjBgFw6Gfi",
+          "timestamp": "2026-09-29T15:35:54.985937+00:00",
+          "working_start": 0.0006213420128915459,
+          "event": "span_begin",
+          "id": "YVzyXkVVprXLzjBgFw6Gfi",
+          "parent_id": "5oEBHH4ftqofho3jr3a2GJ",
+          "type": "solver",
+          "name": "fail_one"
+        },
+        {
+          "uuid": "J3ZCM2BkmKNrtH7SoUHywz",
+          "span_id": "YVzyXkVVprXLzjBgFw6Gfi",
+          "timestamp": "2026-09-29T15:35:54.986069+00:00",
+          "working_start": 0.0007536130142398179,
+          "event": "span_end",
+          "id": "YVzyXkVVprXLzjBgFw6Gfi"
+        },
+        {
+          "uuid": "L8v5ZTUyUqByLgskEZmb4M",
+          "span_id": "5oEBHH4ftqofho3jr3a2GJ",
+          "timestamp": "2026-09-29T15:35:54.986181+00:00",
+          "working_start": 0.0008656239951960742,
+          "event": "span_end",
+          "id": "5oEBHH4ftqofho3jr3a2GJ"
+        },
+        {
+          "uuid": "eFkePoGjB6AvCdCN4KdK3h",
+          "timestamp": "2026-09-29T15:35:55.083821+00:00",
+          "working_start": 0.09851097399950959,
+          "event": "error",
+          "error": {
+            "message": "RuntimeError('intentional sample failure')",
+            "traceback": "  + Exception Group Traceback (most recent call last):\n  |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2892, in _task_run_sample_attempt\n  |     async with anyio.create_task_group() as tg:\n  |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py\", line 847, in __aexit__\n  |     raise BaseExceptionGroup(\n  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)\n  +-+---------------- 1 ----------------\n    | Traceback (most recent call last):\n    |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2903, in _task_run_sample_attempt\n    |     raise inner_exception(ex)\n    |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/_tasks.py\", line 327, in _run_coro\n    |     retval = await self._coro\n    |              ^^^^^^^^^^^^^^^^\n    |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2762, in run\n    |     state = await plan(state, generate)\n    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/solver/_plan.py\", line 106, in __call__\n    |     state = await solver(state, generate)\n    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    |   File \"/home/joncrall/code/aiq-evals/tests/native/inspect_failure_fixture.py\", line 14, in solve\n    |     raise RuntimeError(\"intentional sample failure\")\n    | RuntimeError: intentional sample failure\n    +------------------------------------\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2903, in _task_run_sample_attempt\n    raise inner_exception(ex)\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/_tasks.py\", line 327, in _run_coro\n    retval = await self._coro\n             ^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2762, in run\n    state = await plan(state, generate)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/solver/_plan.py\", line 106, in __call__\n    state = await solver(state, generate)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/joncrall/code/aiq-evals/tests/native/inspect_failure_fixture.py\", line 14, in solve\n    raise RuntimeError(\"intentional sample failure\")\nRuntimeError: intentional sample failure\n",
+            "traceback_ansi": "\u001b[31m┌─\u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m─┐\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2892 in _task_run_sample_attempt                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[1m_asyncio.p\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1my\u001b[0m:847 in __aexit__                                                          \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 844 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m\u001b[2m# added to self._exceptions so it's ok to break \u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 845 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m\u001b[2m# chaining and avoid adding a \"During handling o\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 846 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m\u001b[2m# for each nesting level.\u001b[0m                        \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m 847 \u001b[2m│   │   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m BaseExceptionGroup(                        \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 848 \u001b[0m\u001b[2m│   │   │   │   │   │   \u001b[0m\u001b[33m\"\u001b[0m\u001b[33munhandled errors in a TaskGroup\u001b[0m\u001b[33m\"\u001b[0m, \u001b[96mself\u001b[0m._exc \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 849 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m) \u001b[94mfrom\u001b[0m\u001b[90m \u001b[0m\u001b[94mNone\u001b[0m                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 850 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94melif\u001b[0m exc_val:                                        \u001b[31m│\u001b[0m\n\u001b[31m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\u001b[1;91mExceptionGroup: \u001b[0munhandled errors in a TaskGroup \u001b[1m(\u001b[0m\u001b[1;36m1\u001b[0m sub-exception\u001b[1m)\u001b[0m\n\n\u001b[35m┌─\u001b[0m\u001b[35m────────────────────────────\u001b[0m\u001b[35m Sub-exception #1 \u001b[0m\u001b[35m─────────────────────────────\u001b[0m\u001b[35m─┐\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m┌─\u001b[0m\u001b[31m──────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m──────────────────\u001b[0m\u001b[31m─┐\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[1mrun.py\u001b[0m:2903 in _task_run_sample_attempt                                 \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/\u001b[0m\u001b[1m_tasks.py\u001b[0m: \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m 327 in _run_coro                                                        \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m324 \u001b[0m\u001b[2m│   │   \u001b[0m                                                          \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m325 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mwith\u001b[0m \u001b[96mself\u001b[0m._cancel_scope:                                  \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m326 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mtry\u001b[0m:                                                  \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[31m> \u001b[0m327 \u001b[2m│   │   │   │   \u001b[0mretval = \u001b[94mawait\u001b[0m \u001b[96mself\u001b[0m._coro                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m328 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mexcept\u001b[0m \u001b[96mBaseException\u001b[0m \u001b[94mas\u001b[0m exc:                          \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m329 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[96mself\u001b[0m._exception = exc                             \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m330 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m                                             \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[1mrun.py\u001b[0m:2762 in run                                                      \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/solver/\u001b[0m\u001b[1m_pla\u001b[0m \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[1mn.py\u001b[0m:106 in __call__                                                    \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[2m/home/joncrall/code/aiq-evals/tests/native/\u001b[0m\u001b[1minspect_failure_fixture.py\u001b[0m:1 \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m 4 in solve                                                              \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m11 \u001b[0m\u001b[2m│   \u001b[0m\u001b[94masync\u001b[0m \u001b[94mdef\u001b[0m\u001b[90m \u001b[0m\u001b[92msolve\u001b[0m(state, generate):                              \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m12 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mdel\u001b[0m generate                                               \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m13 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mif\u001b[0m state.input_text == \u001b[33m\"\u001b[0m\u001b[33mfail\u001b[0m\u001b[33m\"\u001b[0m:                             \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[31m> \u001b[0m14 \u001b[2m│   │   │   \u001b[0m\u001b[1;4;94mraise\u001b[0m\u001b[1;4m \u001b[0m\u001b[1;4;96mRuntimeError\u001b[0m\u001b[1;4m(\u001b[0m\u001b[1;4;33m\"\u001b[0m\u001b[1;4;33mintentional sample failure\u001b[0m\u001b[1;4;33m\"\u001b[0m\u001b[1;4m)\u001b[0m       \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m15 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mreturn\u001b[0m state                                               \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m16 \u001b[0m\u001b[2m│   \u001b[0m                                                               \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m17 \u001b[0m\u001b[2m│   \u001b[0m\u001b[94mreturn\u001b[0m solve                                                   \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m└─────────────────────────────────────────────────────────────────────────┘\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[1;91mRuntimeError: \u001b[0mintentional sample failure                                    \u001b[35m│\u001b[0m\n\u001b[35m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\n\u001b[3mDuring handling of the above exception, another exception occurred:\u001b[0m\n\n\u001b[31m┌─\u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m─┐\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2903 in _task_run_sample_attempt                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/\u001b[0m\u001b[1m_tasks.py\u001b[0m:327  \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m in _run_coro                                                                \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m324 \u001b[0m\u001b[2m│   │   \u001b[0m                                                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m325 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mwith\u001b[0m \u001b[96mself\u001b[0m._cancel_scope:                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m326 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mtry\u001b[0m:                                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m327 \u001b[2m│   │   │   │   \u001b[0mretval = \u001b[94mawait\u001b[0m \u001b[96mself\u001b[0m._coro                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m328 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mexcept\u001b[0m \u001b[96mBaseException\u001b[0m \u001b[94mas\u001b[0m exc:                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m329 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[96mself\u001b[0m._exception = exc                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m330 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m                                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2762 in run                                                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/solver/\u001b[0m\u001b[1m_plan.py\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m :106 in __call__                                                            \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/home/joncrall/code/aiq-evals/tests/native/\u001b[0m\u001b[1minspect_failure_fixture.py\u001b[0m:14 in \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m solve                                                                       \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m11 \u001b[0m\u001b[2m│   \u001b[0m\u001b[94masync\u001b[0m \u001b[94mdef\u001b[0m\u001b[90m \u001b[0m\u001b[92msolve\u001b[0m(state, generate):                                  \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m12 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mdel\u001b[0m generate                                                   \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m13 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mif\u001b[0m state.input_text == \u001b[33m\"\u001b[0m\u001b[33mfail\u001b[0m\u001b[33m\"\u001b[0m:                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m14 \u001b[2m│   │   │   \u001b[0m\u001b[1;4;94mraise\u001b[0m\u001b[1;4m \u001b[0m\u001b[1;4;96mRuntimeError\u001b[0m\u001b[1;4m(\u001b[0m\u001b[1;4;33m\"\u001b[0m\u001b[1;4;33mintentional sample failure\u001b[0m\u001b[1;4;33m\"\u001b[0m\u001b[1;4m)\u001b[0m           \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m15 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mreturn\u001b[0m state                                                   \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m16 \u001b[0m\u001b[2m│   \u001b[0m                                                                   \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m17 \u001b[0m\u001b[2m│   \u001b[0m\u001b[94mreturn\u001b[0m solve                                                       \u001b[31m│\u001b[0m\n\u001b[31m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\u001b[1;91mRuntimeError: \u001b[0mintentional sample failure\n"
+          }
+        }
+      ],
+      "model_usage": {},
+      "role_usage": {},
+      "started_at": "2026-09-29T15:35:54.985319+00:00",
+      "completed_at": "2026-09-29T15:35:55.084556+00:00",
+      "total_time": 0.099,
+      "working_time": 0.099,
+      "uuid": "dBnEPrgPdwHk7xrfJ6MkEh",
+      "error": {
+        "message": "RuntimeError('intentional sample failure')",
+        "traceback": "  + Exception Group Traceback (most recent call last):\n  |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2892, in _task_run_sample_attempt\n  |     async with anyio.create_task_group() as tg:\n  |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py\", line 847, in __aexit__\n  |     raise BaseExceptionGroup(\n  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)\n  +-+---------------- 1 ----------------\n    | Traceback (most recent call last):\n    |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2903, in _task_run_sample_attempt\n    |     raise inner_exception(ex)\n    |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/_tasks.py\", line 327, in _run_coro\n    |     retval = await self._coro\n    |              ^^^^^^^^^^^^^^^^\n    |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2762, in run\n    |     state = await plan(state, generate)\n    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    |   File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/solver/_plan.py\", line 106, in __call__\n    |     state = await solver(state, generate)\n    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    |   File \"/home/joncrall/code/aiq-evals/tests/native/inspect_failure_fixture.py\", line 14, in solve\n    |     raise RuntimeError(\"intentional sample failure\")\n    | RuntimeError: intentional sample failure\n    +------------------------------------\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2903, in _task_run_sample_attempt\n    raise inner_exception(ex)\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/_tasks.py\", line 327, in _run_coro\n    retval = await self._coro\n             ^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2762, in run\n    state = await plan(state, generate)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/solver/_plan.py\", line 106, in __call__\n    state = await solver(state, generate)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/joncrall/code/aiq-evals/tests/native/inspect_failure_fixture.py\", line 14, in solve\n    raise RuntimeError(\"intentional sample failure\")\nRuntimeError: intentional sample failure\n",
+        "traceback_ansi": "\u001b[31m┌─\u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m─┐\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2892 in _task_run_sample_attempt                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[1m_asyncio.p\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1my\u001b[0m:847 in __aexit__                                                          \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 844 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m\u001b[2m# added to self._exceptions so it's ok to break \u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 845 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m\u001b[2m# chaining and avoid adding a \"During handling o\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 846 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m\u001b[2m# for each nesting level.\u001b[0m                        \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m 847 \u001b[2m│   │   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m BaseExceptionGroup(                        \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 848 \u001b[0m\u001b[2m│   │   │   │   │   │   \u001b[0m\u001b[33m\"\u001b[0m\u001b[33munhandled errors in a TaskGroup\u001b[0m\u001b[33m\"\u001b[0m, \u001b[96mself\u001b[0m._exc \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 849 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m) \u001b[94mfrom\u001b[0m\u001b[90m \u001b[0m\u001b[94mNone\u001b[0m                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 850 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94melif\u001b[0m exc_val:                                        \u001b[31m│\u001b[0m\n\u001b[31m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\u001b[1;91mExceptionGroup: \u001b[0munhandled errors in a TaskGroup \u001b[1m(\u001b[0m\u001b[1;36m1\u001b[0m sub-exception\u001b[1m)\u001b[0m\n\n\u001b[35m┌─\u001b[0m\u001b[35m────────────────────────────\u001b[0m\u001b[35m Sub-exception #1 \u001b[0m\u001b[35m─────────────────────────────\u001b[0m\u001b[35m─┐\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m┌─\u001b[0m\u001b[31m──────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m──────────────────\u001b[0m\u001b[31m─┐\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[1mrun.py\u001b[0m:2903 in _task_run_sample_attempt                                 \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/\u001b[0m\u001b[1m_tasks.py\u001b[0m: \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m 327 in _run_coro                                                        \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m324 \u001b[0m\u001b[2m│   │   \u001b[0m                                                          \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m325 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mwith\u001b[0m \u001b[96mself\u001b[0m._cancel_scope:                                  \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m326 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mtry\u001b[0m:                                                  \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[31m> \u001b[0m327 \u001b[2m│   │   │   │   \u001b[0mretval = \u001b[94mawait\u001b[0m \u001b[96mself\u001b[0m._coro                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m328 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mexcept\u001b[0m \u001b[96mBaseException\u001b[0m \u001b[94mas\u001b[0m exc:                          \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m329 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[96mself\u001b[0m._exception = exc                             \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m330 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m                                             \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[1mrun.py\u001b[0m:2762 in run                                                      \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/solver/\u001b[0m\u001b[1m_pla\u001b[0m \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[1mn.py\u001b[0m:106 in __call__                                                    \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[2m/home/joncrall/code/aiq-evals/tests/native/\u001b[0m\u001b[1minspect_failure_fixture.py\u001b[0m:1 \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m 4 in solve                                                              \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m                                                                         \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m11 \u001b[0m\u001b[2m│   \u001b[0m\u001b[94masync\u001b[0m \u001b[94mdef\u001b[0m\u001b[90m \u001b[0m\u001b[92msolve\u001b[0m(state, generate):                              \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m12 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mdel\u001b[0m generate                                               \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m13 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mif\u001b[0m state.input_text == \u001b[33m\"\u001b[0m\u001b[33mfail\u001b[0m\u001b[33m\"\u001b[0m:                             \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m \u001b[31m> \u001b[0m14 \u001b[2m│   │   │   \u001b[0m\u001b[1;4;94mraise\u001b[0m\u001b[1;4m \u001b[0m\u001b[1;4;96mRuntimeError\u001b[0m\u001b[1;4m(\u001b[0m\u001b[1;4;33m\"\u001b[0m\u001b[1;4;33mintentional sample failure\u001b[0m\u001b[1;4;33m\"\u001b[0m\u001b[1;4m)\u001b[0m       \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m15 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mreturn\u001b[0m state                                               \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m16 \u001b[0m\u001b[2m│   \u001b[0m                                                               \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m│\u001b[0m   \u001b[2m17 \u001b[0m\u001b[2m│   \u001b[0m\u001b[94mreturn\u001b[0m solve                                                   \u001b[31m│\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[31m└─────────────────────────────────────────────────────────────────────────┘\u001b[0m \u001b[35m│\u001b[0m\n\u001b[35m│\u001b[0m \u001b[1;91mRuntimeError: \u001b[0mintentional sample failure                                    \u001b[35m│\u001b[0m\n\u001b[35m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\n\u001b[3mDuring handling of the above exception, another exception occurred:\u001b[0m\n\n\u001b[31m┌─\u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m─┐\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2903 in _task_run_sample_attempt                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_core/\u001b[0m\u001b[1m_tasks.py\u001b[0m:327  \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m in _run_coro                                                                \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m324 \u001b[0m\u001b[2m│   │   \u001b[0m                                                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m325 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mwith\u001b[0m \u001b[96mself\u001b[0m._cancel_scope:                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m326 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mtry\u001b[0m:                                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m327 \u001b[2m│   │   │   │   \u001b[0mretval = \u001b[94mawait\u001b[0m \u001b[96mself\u001b[0m._coro                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m328 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mexcept\u001b[0m \u001b[96mBaseException\u001b[0m \u001b[94mas\u001b[0m exc:                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m329 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[96mself\u001b[0m._exception = exc                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m330 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m                                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2762 in run                                                              \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/solver/\u001b[0m\u001b[1m_plan.py\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m :106 in __call__                                                            \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/home/joncrall/code/aiq-evals/tests/native/\u001b[0m\u001b[1minspect_failure_fixture.py\u001b[0m:14 in \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m solve                                                                       \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m11 \u001b[0m\u001b[2m│   \u001b[0m\u001b[94masync\u001b[0m \u001b[94mdef\u001b[0m\u001b[90m \u001b[0m\u001b[92msolve\u001b[0m(state, generate):                                  \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m12 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mdel\u001b[0m generate                                                   \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m13 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mif\u001b[0m state.input_text == \u001b[33m\"\u001b[0m\u001b[33mfail\u001b[0m\u001b[33m\"\u001b[0m:                                 \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m14 \u001b[2m│   │   │   \u001b[0m\u001b[1;4;94mraise\u001b[0m\u001b[1;4m \u001b[0m\u001b[1;4;96mRuntimeError\u001b[0m\u001b[1;4m(\u001b[0m\u001b[1;4;33m\"\u001b[0m\u001b[1;4;33mintentional sample failure\u001b[0m\u001b[1;4;33m\"\u001b[0m\u001b[1;4m)\u001b[0m           \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m15 \u001b[0m\u001b[2m│   │   \u001b[0m\u001b[94mreturn\u001b[0m state                                                   \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m16 \u001b[0m\u001b[2m│   \u001b[0m                                                                   \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m17 \u001b[0m\u001b[2m│   \u001b[0m\u001b[94mreturn\u001b[0m solve                                                       \u001b[31m│\u001b[0m\n\u001b[31m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\u001b[1;91mRuntimeError: \u001b[0mintentional sample failure\n"
+      },
+      "error_retries": [],
+      "attachments": {},
+      "turn_count": 0
+    },
+    {
+      "id": 3,
+      "epoch": 1,
+      "input": "okay",
+      "target": "4",
+      "messages": [
+        {
+          "id": "ebW986zvZQFpYmWQRreRZB",
+          "content": "okay",
+          "source": "input",
+          "role": "user"
+        }
+      ],
+      "output": {
+        "model": "fixture/local",
+        "choices": [],
+        "completion": ""
+      },
+      "scores": {},
+      "metadata": {},
+      "store": {},
+      "events": [
+        {
+          "uuid": "RgganXSkvm7ysAvu7m6ZAL",
+          "span_id": "eu4FgVmvoADp2NbZNRxYyE",
+          "timestamp": "2026-09-29T15:35:55.089821+00:00",
+          "working_start": 151456.964295841,
+          "event": "span_begin",
+          "id": "eu4FgVmvoADp2NbZNRxYyE",
+          "type": "init",
+          "name": "init"
+        },
+        {
+          "uuid": "4ErERK9N3fpPbXSQVutnAC",
+          "span_id": "eu4FgVmvoADp2NbZNRxYyE",
+          "timestamp": "2026-09-29T15:35:55.090227+00:00",
+          "working_start": 151456.964702368,
+          "event": "sample_init",
+          "sample": {
+            "input": "okay",
+            "target": "4",
+            "id": 3
+          },
+          "state": {
+            "messages": [
+              {
+                "id": "ebW986zvZQFpYmWQRreRZB",
+                "content": "okay",
+                "source": "input",
+                "role": "user"
+              }
+            ],
+            "tools": [],
+            "tool_choice": null,
+            "store": {},
+            "output": {
+              "model": "fixture/local",
+              "choices": [],
+              "completion": ""
+            },
+            "completed": false,
+            "metadata": {}
+          }
+        },
+        {
+          "uuid": "4DSXomKnRx4GEt2W8CfTsL",
+          "span_id": "eu4FgVmvoADp2NbZNRxYyE",
+          "timestamp": "2026-09-29T15:35:55.090432+00:00",
+          "working_start": 151456.964907235,
+          "event": "span_end",
+          "id": "eu4FgVmvoADp2NbZNRxYyE"
+        },
+        {
+          "uuid": "SfHk4VjWnMA5ztmhha5BVn",
+          "span_id": "ipFSaZm7BzcTdubHxwZRYN",
+          "timestamp": "2026-09-29T15:35:55.090903+00:00",
+          "working_start": 0.0003313480119686574,
+          "event": "span_begin",
+          "id": "ipFSaZm7BzcTdubHxwZRYN",
+          "type": "solvers",
+          "name": "solvers"
+        },
+        {
+          "uuid": "CDSTSvQChqqe663YBUyF2r",
+          "span_id": "bPCHg6MMvBYWhi25ri5Juz",
+          "timestamp": "2026-09-29T15:35:55.091061+00:00",
+          "working_start": 0.0004892190045211464,
+          "event": "span_begin",
+          "id": "bPCHg6MMvBYWhi25ri5Juz",
+          "parent_id": "ipFSaZm7BzcTdubHxwZRYN",
+          "type": "solver",
+          "name": "fail_one"
+        },
+        {
+          "uuid": "HhKHhNiLYwTwzcBdWPUa5D",
+          "span_id": "bPCHg6MMvBYWhi25ri5Juz",
+          "timestamp": "2026-09-29T15:35:55.091246+00:00",
+          "working_start": 0.0006744160200469196,
+          "event": "span_end",
+          "id": "bPCHg6MMvBYWhi25ri5Juz"
+        },
+        {
+          "uuid": "mnjkNW65nrYHvXonE4kXWU",
+          "span_id": "8Hoq7p7bTDJpoKWRHP6Z46",
+          "timestamp": "2026-09-29T15:35:55.091397+00:00",
+          "working_start": 0.0008251320105046034,
+          "event": "span_begin",
+          "id": "8Hoq7p7bTDJpoKWRHP6Z46",
+          "parent_id": "ipFSaZm7BzcTdubHxwZRYN",
+          "type": "solver",
+          "name": "generate"
+        },
+        {
+          "uuid": "KLiRdnVFXkGQZ4L9UFaTXa",
+          "span_id": "8Hoq7p7bTDJpoKWRHP6Z46",
+          "timestamp": "2026-09-29T15:35:55.091848+00:00",
+          "working_start": 0.0011542499996721745,
+          "event": "span_end",
+          "id": "8Hoq7p7bTDJpoKWRHP6Z46"
+        },
+        {
+          "uuid": "DsrzFDZqouJFHoUnKTrzDr",
+          "span_id": "ipFSaZm7BzcTdubHxwZRYN",
+          "timestamp": "2026-09-29T15:35:55.092008+00:00",
+          "working_start": 0.0013145630073267967,
+          "event": "span_end",
+          "id": "ipFSaZm7BzcTdubHxwZRYN"
+        },
+        {
+          "uuid": "emNGGuFvrTC4FhMkXqdyJw",
+          "timestamp": "2026-09-29T15:35:55.179533+00:00",
+          "working_start": 0.08885312601341866,
+          "event": "error",
+          "error": {
+            "message": "CancelledError('Cancelled via cancel scope 74c628989c60')",
+            "traceback": "Traceback (most recent call last):\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2892, in _task_run_sample_attempt\n    async with anyio.create_task_group() as tg:\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py\", line 851, in __aexit__\n    raise exc_val\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py\", line 820, in __aexit__\n    await self._on_completed_fut\nasyncio.exceptions.CancelledError: Cancelled via cancel scope 74c628989c60\n",
+            "traceback_ansi": "\u001b[31m┌─\u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m─┐\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2892 in _task_run_sample_attempt                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[1m_asyncio.p\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1my\u001b[0m:851 in __aexit__                                                          \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 848 \u001b[0m\u001b[2m│   │   │   │   │   │   \u001b[0m\u001b[33m\"\u001b[0m\u001b[33munhandled errors in a TaskGroup\u001b[0m\u001b[33m\"\u001b[0m, \u001b[96mself\u001b[0m._exc \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 849 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m) \u001b[94mfrom\u001b[0m\u001b[90m \u001b[0m\u001b[94mNone\u001b[0m                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 850 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94melif\u001b[0m exc_val:                                        \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m 851 \u001b[2m│   │   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m exc_val                                    \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 852 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mexcept\u001b[0m \u001b[96mBaseException\u001b[0m \u001b[94mas\u001b[0m exc:                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 853 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94mif\u001b[0m \u001b[96mself\u001b[0m.cancel_scope.\u001b[92m__exit__\u001b[0m(\u001b[96mtype\u001b[0m(exc), exc, exc.__ \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 854 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m\u001b[94mreturn\u001b[0m \u001b[94mTrue\u001b[0m                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[1m_asyncio.p\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1my\u001b[0m:820 in __aexit__                                                          \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 817 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[96mself\u001b[0m._on_completed_fut = loop.create_fut \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 818 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 819 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[94mtry\u001b[0m:                                     \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m 820 \u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[94mawait\u001b[0m \u001b[96mself\u001b[0m._on_completed_fut         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 821 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[94mexcept\u001b[0m CancelledError \u001b[94mas\u001b[0m exc:            \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 822 \u001b[0m\u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[2m# Shield the scope against further c\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 823 \u001b[0m\u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[2m# as they're not productive (#695)\u001b[0m   \u001b[31m│\u001b[0m\n\u001b[31m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\u001b[1;91mCancelledError: \u001b[0mCancelled via cancel scope 74c628989c60\n"
+          }
+        }
+      ],
+      "model_usage": {},
+      "role_usage": {},
+      "started_at": "2026-09-29T15:35:55.090575+00:00",
+      "completed_at": "2026-09-29T15:35:55.180097+00:00",
+      "total_time": 0.089,
+      "working_time": 0.089,
+      "uuid": "dWK85A3kn4k3FKPztbQEYz",
+      "error": {
+        "message": "CancelledError('Cancelled via cancel scope 74c628989c60')",
+        "traceback": "Traceback (most recent call last):\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/run.py\", line 2892, in _task_run_sample_attempt\n    async with anyio.create_task_group() as tg:\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py\", line 851, in __aexit__\n    raise exc_val\n  File \"/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/_asyncio.py\", line 820, in __aexit__\n    await self._on_completed_fut\nasyncio.exceptions.CancelledError: Cancelled via cancel scope 74c628989c60\n",
+        "traceback_ansi": "\u001b[31m┌─\u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m \u001b[0m\u001b[1;31mTraceback \u001b[0m\u001b[1;2;31m(most recent call last)\u001b[0m\u001b[31m \u001b[0m\u001b[31m────────────────────\u001b[0m\u001b[31m─┐\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/inspect_ai/_eval/task/\u001b[0m\u001b[1mrun.\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1mpy\u001b[0m:2892 in _task_run_sample_attempt                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[1m_asyncio.p\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1my\u001b[0m:851 in __aexit__                                                          \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 848 \u001b[0m\u001b[2m│   │   │   │   │   │   \u001b[0m\u001b[33m\"\u001b[0m\u001b[33munhandled errors in a TaskGroup\u001b[0m\u001b[33m\"\u001b[0m, \u001b[96mself\u001b[0m._exc \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 849 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m) \u001b[94mfrom\u001b[0m\u001b[90m \u001b[0m\u001b[94mNone\u001b[0m                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 850 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94melif\u001b[0m exc_val:                                        \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m 851 \u001b[2m│   │   │   │   │   \u001b[0m\u001b[94mraise\u001b[0m exc_val                                    \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 852 \u001b[0m\u001b[2m│   │   │   \u001b[0m\u001b[94mexcept\u001b[0m \u001b[96mBaseException\u001b[0m \u001b[94mas\u001b[0m exc:                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 853 \u001b[0m\u001b[2m│   │   │   │   \u001b[0m\u001b[94mif\u001b[0m \u001b[96mself\u001b[0m.cancel_scope.\u001b[92m__exit__\u001b[0m(\u001b[96mtype\u001b[0m(exc), exc, exc.__ \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 854 \u001b[0m\u001b[2m│   │   │   │   │   \u001b[0m\u001b[94mreturn\u001b[0m \u001b[94mTrue\u001b[0m                                      \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[2m/tmp/aiq-inspect-p1/lib/python3.11/site-packages/anyio/_backends/\u001b[0m\u001b[1m_asyncio.p\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[1my\u001b[0m:820 in __aexit__                                                          \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m                                                                             \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 817 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[96mself\u001b[0m._on_completed_fut = loop.create_fut \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 818 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m                                         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 819 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[94mtry\u001b[0m:                                     \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m \u001b[31m> \u001b[0m 820 \u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[94mawait\u001b[0m \u001b[96mself\u001b[0m._on_completed_fut         \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 821 \u001b[0m\u001b[2m│   │   │   │   │   │   │   \u001b[0m\u001b[94mexcept\u001b[0m CancelledError \u001b[94mas\u001b[0m exc:            \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 822 \u001b[0m\u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[2m# Shield the scope against further c\u001b[0m \u001b[31m│\u001b[0m\n\u001b[31m│\u001b[0m   \u001b[2m 823 \u001b[0m\u001b[2m│   │   │   │   │   │   │   │   \u001b[0m\u001b[2m# as they're not productive (#695)\u001b[0m   \u001b[31m│\u001b[0m\n\u001b[31m└─────────────────────────────────────────────────────────────────────────────┘\u001b[0m\n\u001b[1;91mCancelledError: \u001b[0mCancelled via cancel scope 74c628989c60\n"
+      },
+      "error_retries": [],
+      "attachments": {},
+      "turn_count": 0
+    }
+  ]
+}

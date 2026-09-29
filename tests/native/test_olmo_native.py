@@ -260,3 +260,6 @@ def test_native_multi_task_suite(tmp_path: Path) -> None:
         ExecutionContext(output_dir=tmp_path / "multi-import"),
     )
     assert len(imported.result.records) == 2
+    # Task names prefix each other; samples must not fall back to file stems.
+    for result in (bundle.result, imported.result):
+        assert {sample.task for sample in result.samples} == {"aiq_p1_local", "aiq_p1_local_alt"}

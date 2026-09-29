@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -252,6 +253,30 @@ def load_jsonl(path: Path) -> list[Any]:
     return rows
 
 
+def _sanitize_spec(spec: str) -> str:
+    # Mirrors olmo_eval.runners.processing.utils.sanitize_spec_for_filename at
+    # the tested pin (73ade80e24f796af55caeb8fd7b75a7f3fd607fd).
+    return re.sub(r'[:/\\ ]', '_', spec)
+
+
+def _task_for_prediction_file(stem: str, tasks: list[str]) -> str:
+    """Map a native ``<spec>[_<hash6>]-predictions.jsonl`` stem to its task.
+
+    Substring matching is wrong when one task name prefixes another
+    (``aiq_p1_local`` vs ``aiq_p1_local_alt``). An unmatched stem is retained
+    as-is rather than being guessed onto a record.
+    """
+    exact = [task for task in tasks if _sanitize_spec(task) == stem]
+    if len(exact) == 1:
+        return exact[0]
+    hashed = [
+        task for task in tasks if re.fullmatch(re.escape(_sanitize_spec(task)) + r'_[^_]{6}', stem)
+    ]
+    if len(hashed) == 1:
+        return hashed[0]
+    return stem
+
+
 def attach_prediction_files(result: EvaluationResult, native_dir: Path) -> EvaluationResult:
     """Load native ``*-predictions.jsonl`` files and attach normalized samples."""
     existing = list(result.samples)
@@ -260,12 +285,7 @@ def attach_prediction_files(result: EvaluationResult, native_dir: Path) -> Evalu
     for path in sorted(native_dir.rglob('*-predictions.jsonl')):
         filename = path.name[: -len('-predictions.jsonl')]
         rows = load_jsonl(path)
-        # Native filenames may include model/task hashes. Use explicit task in
-        # records when uniquely identifiable; otherwise retain filename identity.
-        task = filename
-        matching = [record.task for record in result.records if record.task in filename]
-        if len(matching) == 1:
-            task = matching[0]
+        task = _task_for_prediction_file(filename, [record.task for record in result.records])
         for sample in _prediction_samples(task, rows):
             key = (sample.task, sample.sample_id)
             if key not in seen:

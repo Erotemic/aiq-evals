@@ -1,0 +1,1257 @@
+{
+  "version": 2,
+  "status": "success",
+  "eval": {
+    "eval_id": "8mXjZzSaujKw9rsGVqhLgU",
+    "run_id": "2hApXG3ZedbqpvrZRzjSST",
+    "created": "2026-09-29T14:49:36+00:00",
+    "task": "tool_task",
+    "task_id": "gctkv8dzw6qYiMLQ9jWXPj",
+    "task_version": 0,
+    "task_file": "tests/native/inspect_fixture.py",
+    "task_display_name": "tool_task",
+    "task_registry_name": "tool_task",
+    "task_attribs": {},
+    "task_args": {},
+    "task_args_passed": {},
+    "solver_args_passed": {},
+    "dataset": {
+      "samples": 1,
+      "sample_ids": [
+        1
+      ],
+      "shuffled": false
+    },
+    "model": "fixture/local",
+    "model_generate_config": {},
+    "model_args": {},
+    "model_roles": {
+      "grader": {
+        "model": "fixture/local",
+        "config": {},
+        "args": {}
+      }
+    },
+    "config": {
+      "epochs": 2,
+      "fail_on_error": true,
+      "continue_on_fail": false,
+      "score_on_error": false,
+      "sandbox_cleanup": true,
+      "sandbox_prebuilt": false,
+      "log_samples": true,
+      "log_realtime": true,
+      "log_images": true,
+      "score_display": true
+    },
+    "packages": {
+      "inspect_ai": "0.3.272"
+    },
+    "metadata": {
+      "aiq_evals_measurement_identity": "9c7505fb23365c10857c72d8598d0d725cbddc371b87ed8d95f773c4c07958bc",
+      "aiq_evals_adapter_version": "0.1.0"
+    },
+    "scorers": [
+      {
+        "name": "match",
+        "options": {},
+        "metrics": [
+          {
+            "name": "inspect_ai/accuracy",
+            "options": {}
+          },
+          {
+            "name": "inspect_ai/stderr",
+            "options": {}
+          }
+        ],
+        "metadata": {}
+      }
+    ]
+  },
+  "plan": {
+    "name": "plan",
+    "steps": [
+      {
+        "solver": "use_tools",
+        "params": {
+          "tools": [
+            {
+              "type": "tool",
+              "name": "double",
+              "params": {}
+            }
+          ],
+          "tool_choice": "auto",
+          "append": false
+        },
+        "params_passed": {
+          "tools": [
+            {
+              "type": "tool",
+              "name": "double",
+              "params": {}
+            }
+          ]
+        }
+      },
+      {
+        "solver": "generate",
+        "params": {
+          "tool_calls": "loop"
+        },
+        "params_passed": {}
+      }
+    ],
+    "config": {}
+  },
+  "results": {
+    "total_samples": 2,
+    "completed_samples": 2,
+    "scores": [
+      {
+        "name": "match",
+        "scorer": "match",
+        "scored_samples": 1,
+        "unscored_samples": 0,
+        "params": {},
+        "metrics": {
+          "accuracy": {
+            "name": "accuracy",
+            "value": 1.0,
+            "params": {}
+          },
+          "stderr": {
+            "name": "stderr",
+            "value": 0.0,
+            "params": {}
+          }
+        }
+      }
+    ],
+    "headline": {
+      "scorer": "match",
+      "score": "match",
+      "metric": "accuracy"
+    }
+  },
+  "stats": {
+    "started_at": "2026-09-29T14:49:36+00:00",
+    "completed_at": "2026-09-29T14:49:36+00:00",
+    "model_usage": {},
+    "role_usage": {},
+    "connection_limit_history": []
+  },
+  "invalidated": false,
+  "tags": [],
+  "metadata": {
+    "aiq_evals_measurement_identity": "9c7505fb23365c10857c72d8598d0d725cbddc371b87ed8d95f773c4c07958bc",
+    "aiq_evals_adapter_version": "0.1.0"
+  },
+  "samples": [
+    {
+      "id": 1,
+      "epoch": 1,
+      "input": "Use double on two.",
+      "target": "4",
+      "messages": [
+        {
+          "id": "5eikJEfCkyRcYMpxnP5ybe",
+          "content": "Use double on two.",
+          "source": "input",
+          "role": "user"
+        },
+        {
+          "id": "dW38G3XCB6bXPVgiVzPBQF",
+          "content": "tool call for tool double",
+          "source": "generate",
+          "role": "assistant",
+          "tool_calls": [
+            {
+              "id": "for_tool_call_1990bb93-29bf-404b-b567-97935a2b901d",
+              "function": "double",
+              "arguments": {
+                "value": 2
+              },
+              "type": "function"
+            }
+          ],
+          "model": "local"
+        },
+        {
+          "id": "96PE2WDo5MgBxB3oDaijhn",
+          "content": "4",
+          "role": "tool",
+          "tool_call_id": "for_tool_call_1990bb93-29bf-404b-b567-97935a2b901d",
+          "function": "double"
+        },
+        {
+          "id": "kDorJh9WHkdVo5tt8gLkQY",
+          "content": "4",
+          "source": "generate",
+          "role": "assistant",
+          "model": "local"
+        }
+      ],
+      "output": {
+        "model": "local",
+        "choices": [
+          {
+            "message": {
+              "id": "kDorJh9WHkdVo5tt8gLkQY",
+              "content": "4",
+              "source": "generate",
+              "role": "assistant",
+              "model": "local"
+            },
+            "stop_reason": "stop"
+          }
+        ],
+        "completion": "4",
+        "time": 0.00006422799197025597
+      },
+      "scores": {
+        "match": {
+          "value": "C",
+          "answer": "4",
+          "explanation": "4",
+          "history": []
+        }
+      },
+      "metadata": {},
+      "store": {},
+      "events": [
+        {
+          "uuid": "dM2k5TyU5h5ksRcnUKYdWe",
+          "span_id": "o7kqmthQZprA8XbrKcc6WL",
+          "timestamp": "2026-09-29T14:49:36.579246+00:00",
+          "working_start": 148678.453722896,
+          "event": "span_begin",
+          "id": "o7kqmthQZprA8XbrKcc6WL",
+          "type": "init",
+          "name": "init"
+        },
+        {
+          "uuid": "RPUj9C8VWuXx8NZFuoVBi4",
+          "span_id": "o7kqmthQZprA8XbrKcc6WL",
+          "timestamp": "2026-09-29T14:49:36.580143+00:00",
+          "working_start": 148678.454618928,
+          "event": "sample_init",
+          "sample": {
+            "input": "Use double on two.",
+            "target": "4",
+            "id": 1
+          },
+          "state": {
+            "messages": [
+              {
+                "id": "5eikJEfCkyRcYMpxnP5ybe",
+                "content": "Use double on two.",
+                "source": "input",
+                "role": "user"
+              }
+            ],
+            "tools": [],
+            "tool_choice": null,
+            "store": {},
+            "output": {
+              "model": "fixture/local",
+              "choices": [],
+              "completion": ""
+            },
+            "completed": false,
+            "metadata": {}
+          }
+        },
+        {
+          "uuid": "LwcfTFZS5xEQFZSyCaw2vP",
+          "span_id": "o7kqmthQZprA8XbrKcc6WL",
+          "timestamp": "2026-09-29T14:49:36.580444+00:00",
+          "working_start": 148678.454919553,
+          "event": "span_end",
+          "id": "o7kqmthQZprA8XbrKcc6WL"
+        },
+        {
+          "uuid": "jcAV6CHjwgYfEBeGyddFA7",
+          "span_id": "4RYMAhpqzjYFkPBakHZDVS",
+          "timestamp": "2026-09-29T14:49:36.582765+00:00",
+          "working_start": 0.002079405006952584,
+          "event": "span_begin",
+          "id": "4RYMAhpqzjYFkPBakHZDVS",
+          "type": "solvers",
+          "name": "solvers"
+        },
+        {
+          "uuid": "334WRv2QbrF2VjGiAUjkSg",
+          "span_id": "8kRuqstTbqdfgDMVRWobzj",
+          "timestamp": "2026-09-29T14:49:36.583382+00:00",
+          "working_start": 0.002696469018701464,
+          "event": "span_begin",
+          "id": "8kRuqstTbqdfgDMVRWobzj",
+          "parent_id": "4RYMAhpqzjYFkPBakHZDVS",
+          "type": "solver",
+          "name": "use_tools"
+        },
+        {
+          "uuid": "4Xpgc2ZZM84my6VCY4VsBq",
+          "span_id": "8kRuqstTbqdfgDMVRWobzj",
+          "timestamp": "2026-09-29T14:49:36.586508+00:00",
+          "working_start": 0.005825878994073719,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/tools/0",
+              "value": {
+                "name": "double",
+                "description": "Double an integer value.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "integer",
+                      "description": "Integer to double."
+                    }
+                  },
+                  "required": [
+                    "value"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/tool_choice",
+              "value": "auto"
+            }
+          ]
+        },
+        {
+          "uuid": "9WKb5ZFBGE8YydnxEzp6RS",
+          "span_id": "8kRuqstTbqdfgDMVRWobzj",
+          "timestamp": "2026-09-29T14:49:36.586911+00:00",
+          "working_start": 0.006224854994798079,
+          "event": "span_end",
+          "id": "8kRuqstTbqdfgDMVRWobzj"
+        },
+        {
+          "uuid": "Le4i8mJitSLu2E5bPi8ZGd",
+          "span_id": "d82Co8Nv74wSPTCL7eXKhn",
+          "timestamp": "2026-09-29T14:49:36.587119+00:00",
+          "working_start": 0.006433147005736828,
+          "event": "span_begin",
+          "id": "d82Co8Nv74wSPTCL7eXKhn",
+          "parent_id": "4RYMAhpqzjYFkPBakHZDVS",
+          "type": "solver",
+          "name": "generate"
+        },
+        {
+          "uuid": "PnjgJaV8AZFkydFiipK8HE",
+          "span_id": "d82Co8Nv74wSPTCL7eXKhn",
+          "timestamp": "2026-09-29T14:49:36.587450+00:00",
+          "working_start": 0.006764259014744312,
+          "event": "model",
+          "model": "fixture/local",
+          "input": [
+            {
+              "id": "5eikJEfCkyRcYMpxnP5ybe",
+              "content": "Use double on two.",
+              "source": "input",
+              "role": "user"
+            }
+          ],
+          "tools": [
+            {
+              "name": "double",
+              "description": "Double an integer value.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "integer",
+                    "description": "Integer to double."
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          ],
+          "tool_choice": "auto",
+          "config": {},
+          "output": {
+            "model": "local",
+            "choices": [
+              {
+                "message": {
+                  "id": "dW38G3XCB6bXPVgiVzPBQF",
+                  "content": "tool call for tool double",
+                  "source": "generate",
+                  "role": "assistant",
+                  "tool_calls": [
+                    {
+                      "id": "for_tool_call_1990bb93-29bf-404b-b567-97935a2b901d",
+                      "function": "double",
+                      "arguments": {
+                        "value": 2
+                      },
+                      "type": "function"
+                    }
+                  ],
+                  "model": "local"
+                },
+                "stop_reason": "tool_calls"
+              }
+            ],
+            "completion": "tool call for tool double",
+            "time": 0.00009260998922400177
+          },
+          "completed": "2026-09-29T14:49:36.590715+00:00",
+          "working_time": 0.00009260998922400177
+        },
+        {
+          "uuid": "N5RxMXVLZJfYRbLgqF8d6M",
+          "span_id": "8TYkRADbzML8RCbycBgct7",
+          "timestamp": "2026-09-29T14:49:36.613228+00:00",
+          "working_start": 0.02966775299864821,
+          "event": "span_begin",
+          "id": "8TYkRADbzML8RCbycBgct7",
+          "parent_id": "d82Co8Nv74wSPTCL7eXKhn",
+          "type": "tool",
+          "name": "double"
+        },
+        {
+          "uuid": "BiYZh7h67CgENALYh3qzFE",
+          "span_id": "d82Co8Nv74wSPTCL7eXKhn",
+          "timestamp": "2026-09-29T14:49:36.591126+00:00",
+          "working_start": 0.007565743988379836,
+          "event": "tool",
+          "type": "function",
+          "id": "for_tool_call_1990bb93-29bf-404b-b567-97935a2b901d",
+          "function": "double",
+          "arguments": {
+            "value": 2
+          },
+          "result": "4",
+          "events": [],
+          "completed": "2026-09-29T14:49:36.615427+00:00",
+          "working_time": 0.024301,
+          "message_id": "96PE2WDo5MgBxB3oDaijhn"
+        },
+        {
+          "uuid": "Sm7MwL8DBPbhMavbdbsh9K",
+          "span_id": "8TYkRADbzML8RCbycBgct7",
+          "timestamp": "2026-09-29T14:49:36.613909+00:00",
+          "working_start": 0.030348530010087416,
+          "event": "span_end",
+          "id": "8TYkRADbzML8RCbycBgct7"
+        },
+        {
+          "uuid": "eyTpgPBhmPLGXT2CM5jdr9",
+          "span_id": "d82Co8Nv74wSPTCL7eXKhn",
+          "timestamp": "2026-09-29T14:49:36.616120+00:00",
+          "working_start": 0.03255829800036736,
+          "event": "model",
+          "model": "fixture/local",
+          "input": [
+            {
+              "id": "5eikJEfCkyRcYMpxnP5ybe",
+              "content": "Use double on two.",
+              "source": "input",
+              "role": "user"
+            },
+            {
+              "id": "dW38G3XCB6bXPVgiVzPBQF",
+              "content": "tool call for tool double",
+              "source": "generate",
+              "role": "assistant",
+              "tool_calls": [
+                {
+                  "id": "for_tool_call_1990bb93-29bf-404b-b567-97935a2b901d",
+                  "function": "double",
+                  "arguments": {
+                    "value": 2
+                  },
+                  "type": "function"
+                }
+              ],
+              "model": "local"
+            },
+            {
+              "id": "96PE2WDo5MgBxB3oDaijhn",
+              "content": "4",
+              "role": "tool",
+              "tool_call_id": "for_tool_call_1990bb93-29bf-404b-b567-97935a2b901d",
+              "function": "double"
+            }
+          ],
+          "tools": [
+            {
+              "name": "double",
+              "description": "Double an integer value.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "integer",
+                    "description": "Integer to double."
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          ],
+          "tool_choice": "auto",
+          "config": {},
+          "output": {
+            "model": "local",
+            "choices": [
+              {
+                "message": {
+                  "id": "kDorJh9WHkdVo5tt8gLkQY",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            ],
+            "completion": "4",
+            "time": 0.00006422799197025597
+          },
+          "completed": "2026-09-29T14:49:36.617905+00:00",
+          "working_time": 0.00006422799197025597
+        },
+        {
+          "uuid": "RAazVpfaaLnTGK6TMPtiFq",
+          "span_id": "d82Co8Nv74wSPTCL7eXKhn",
+          "timestamp": "2026-09-29T14:49:36.618316+00:00",
+          "working_start": 0.033310408995021135,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/messages/1",
+              "value": {
+                "id": "dW38G3XCB6bXPVgiVzPBQF",
+                "content": "tool call for tool double",
+                "source": "generate",
+                "role": "assistant",
+                "tool_calls": [
+                  {
+                    "id": "for_tool_call_1990bb93-29bf-404b-b567-97935a2b901d",
+                    "function": "double",
+                    "arguments": {
+                      "value": 2
+                    },
+                    "type": "function"
+                  }
+                ],
+                "model": "local"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/messages/2",
+              "value": {
+                "id": "96PE2WDo5MgBxB3oDaijhn",
+                "content": "4",
+                "role": "tool",
+                "tool_call_id": "for_tool_call_1990bb93-29bf-404b-b567-97935a2b901d",
+                "function": "double"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/messages/3",
+              "value": {
+                "id": "kDorJh9WHkdVo5tt8gLkQY",
+                "content": "4",
+                "source": "generate",
+                "role": "assistant",
+                "model": "local"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/output/time",
+              "value": 0.00006422799197025597
+            },
+            {
+              "op": "replace",
+              "path": "/output/model",
+              "value": "local",
+              "replaced": "fixture/local"
+            },
+            {
+              "op": "replace",
+              "path": "/output/completion",
+              "value": "4",
+              "replaced": ""
+            },
+            {
+              "op": "add",
+              "path": "/output/choices/0",
+              "value": {
+                "message": {
+                  "id": "kDorJh9WHkdVo5tt8gLkQY",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            }
+          ]
+        },
+        {
+          "uuid": "NuzxhgxUpU9u3nALbLCgDw",
+          "span_id": "d82Co8Nv74wSPTCL7eXKhn",
+          "timestamp": "2026-09-29T14:49:36.618554+00:00",
+          "working_start": 0.033548056992003694,
+          "event": "span_end",
+          "id": "d82Co8Nv74wSPTCL7eXKhn"
+        },
+        {
+          "uuid": "mz2hZmz6CtGdmFwuggnT5o",
+          "span_id": "4RYMAhpqzjYFkPBakHZDVS",
+          "timestamp": "2026-09-29T14:49:36.618736+00:00",
+          "working_start": 0.03373067799839191,
+          "event": "span_end",
+          "id": "4RYMAhpqzjYFkPBakHZDVS"
+        },
+        {
+          "uuid": "LqXacY2oAMjogQv4KUQ2YG",
+          "span_id": "MakpgRKVVdeAM7ArLbZTFu",
+          "timestamp": "2026-09-29T14:49:36.622063+00:00",
+          "working_start": 0.037056789005873725,
+          "event": "span_begin",
+          "id": "MakpgRKVVdeAM7ArLbZTFu",
+          "type": "scorers",
+          "name": "scorers"
+        },
+        {
+          "uuid": "VffEJVHbNa6mpZB6fF6HS5",
+          "span_id": "EonBw3dQZ2X92ootwNfE32",
+          "timestamp": "2026-09-29T14:49:36.622213+00:00",
+          "working_start": 0.037207146000582725,
+          "event": "span_begin",
+          "id": "EonBw3dQZ2X92ootwNfE32",
+          "parent_id": "MakpgRKVVdeAM7ArLbZTFu",
+          "type": "scorer",
+          "name": "match"
+        },
+        {
+          "uuid": "oBJKiWBBMpttxyiyLaumbe",
+          "span_id": "EonBw3dQZ2X92ootwNfE32",
+          "timestamp": "2026-09-29T14:49:36.622356+00:00",
+          "working_start": 0.037349813006585464,
+          "event": "score",
+          "score": {
+            "value": "C",
+            "answer": "4",
+            "explanation": "4",
+            "history": []
+          },
+          "target": "4",
+          "intermediate": false,
+          "scorer": "match",
+          "scorer_args": {}
+        },
+        {
+          "uuid": "nxKAYBZNqjCDXNzMYJjNPS",
+          "span_id": "EonBw3dQZ2X92ootwNfE32",
+          "timestamp": "2026-09-29T14:49:36.622587+00:00",
+          "working_start": 0.0375809189863503,
+          "event": "span_end",
+          "id": "EonBw3dQZ2X92ootwNfE32"
+        },
+        {
+          "uuid": "P4HepwQkzoGUx9CtucN7Hz",
+          "span_id": "MakpgRKVVdeAM7ArLbZTFu",
+          "timestamp": "2026-09-29T14:49:36.622717+00:00",
+          "working_start": 0.03771031499491073,
+          "event": "span_end",
+          "id": "MakpgRKVVdeAM7ArLbZTFu"
+        }
+      ],
+      "model_usage": {},
+      "role_usage": {},
+      "started_at": "2026-09-29T14:49:36.580690+00:00",
+      "completed_at": "2026-09-29T14:49:36.624016+00:00",
+      "total_time": 0.043,
+      "working_time": 0.039,
+      "uuid": "fq3KP9qBs8UhSEwARqzfUm",
+      "error_retries": [],
+      "attachments": {},
+      "turn_count": 2
+    },
+    {
+      "id": 1,
+      "epoch": 2,
+      "input": "Use double on two.",
+      "target": "4",
+      "messages": [
+        {
+          "id": "dHdYEBvFts3nBf5urZwoXn",
+          "content": "Use double on two.",
+          "source": "input",
+          "role": "user"
+        },
+        {
+          "id": "VJi6Q9VdbNzyc5sfLp7RRs",
+          "content": "tool call for tool double",
+          "source": "generate",
+          "role": "assistant",
+          "tool_calls": [
+            {
+              "id": "for_tool_call_bf3afcd1-8606-40cc-9539-0a0d4c27d6c5",
+              "function": "double",
+              "arguments": {
+                "value": 2
+              },
+              "type": "function"
+            }
+          ],
+          "model": "local"
+        },
+        {
+          "id": "JQ5AaRbDfwa3abtzovpcAN",
+          "content": "4",
+          "role": "tool",
+          "tool_call_id": "for_tool_call_bf3afcd1-8606-40cc-9539-0a0d4c27d6c5",
+          "function": "double"
+        },
+        {
+          "id": "UQ9ZoQhtjMZxV53zewW4PQ",
+          "content": "4",
+          "source": "generate",
+          "role": "assistant",
+          "model": "local"
+        }
+      ],
+      "output": {
+        "model": "local",
+        "choices": [
+          {
+            "message": {
+              "id": "UQ9ZoQhtjMZxV53zewW4PQ",
+              "content": "4",
+              "source": "generate",
+              "role": "assistant",
+              "model": "local"
+            },
+            "stop_reason": "stop"
+          }
+        ],
+        "completion": "4",
+        "time": 0.00009067400242201984
+      },
+      "scores": {
+        "match": {
+          "value": "C",
+          "answer": "4",
+          "explanation": "4",
+          "history": []
+        }
+      },
+      "metadata": {},
+      "store": {},
+      "events": [
+        {
+          "uuid": "hYJDF6sQcEQAKQMtxhQWnc",
+          "span_id": "TMW8uhtGoPQF2EKEhGA49n",
+          "timestamp": "2026-09-29T14:49:36.581497+00:00",
+          "working_start": 148678.455971615,
+          "event": "span_begin",
+          "id": "TMW8uhtGoPQF2EKEhGA49n",
+          "type": "init",
+          "name": "init"
+        },
+        {
+          "uuid": "cFkBewQc5qMCW4JZync2H8",
+          "span_id": "TMW8uhtGoPQF2EKEhGA49n",
+          "timestamp": "2026-09-29T14:49:36.581969+00:00",
+          "working_start": 148678.456444738,
+          "event": "sample_init",
+          "sample": {
+            "input": "Use double on two.",
+            "target": "4",
+            "id": 1
+          },
+          "state": {
+            "messages": [
+              {
+                "id": "dHdYEBvFts3nBf5urZwoXn",
+                "content": "Use double on two.",
+                "source": "input",
+                "role": "user"
+              }
+            ],
+            "tools": [],
+            "tool_choice": null,
+            "store": {},
+            "output": {
+              "model": "fixture/local",
+              "choices": [],
+              "completion": ""
+            },
+            "completed": false,
+            "metadata": {}
+          }
+        },
+        {
+          "uuid": "XhLqeCxVpbNPmFtX8EE2p5",
+          "span_id": "TMW8uhtGoPQF2EKEhGA49n",
+          "timestamp": "2026-09-29T14:49:36.582193+00:00",
+          "working_start": 148678.456668049,
+          "event": "span_end",
+          "id": "TMW8uhtGoPQF2EKEhGA49n"
+        },
+        {
+          "uuid": "NPBK3UScpk7FrhYST4ZsVe",
+          "span_id": "2Ty6moipSAmDdFW3ptLiVz",
+          "timestamp": "2026-09-29T14:49:36.587718+00:00",
+          "working_start": 0.0053799389861524105,
+          "event": "span_begin",
+          "id": "2Ty6moipSAmDdFW3ptLiVz",
+          "type": "solvers",
+          "name": "solvers"
+        },
+        {
+          "uuid": "N2xroAGCbeVx6jWYpcEqBo",
+          "span_id": "mHnKiYC3bGWmgkdqMw32fv",
+          "timestamp": "2026-09-29T14:49:36.587889+00:00",
+          "working_start": 0.005551768990699202,
+          "event": "span_begin",
+          "id": "mHnKiYC3bGWmgkdqMw32fv",
+          "parent_id": "2Ty6moipSAmDdFW3ptLiVz",
+          "type": "solver",
+          "name": "use_tools"
+        },
+        {
+          "uuid": "cpgDWBs5gx75ejo4oYmJ72",
+          "span_id": "mHnKiYC3bGWmgkdqMw32fv",
+          "timestamp": "2026-09-29T14:49:36.588180+00:00",
+          "working_start": 0.005843050981638953,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/tools/0",
+              "value": {
+                "name": "double",
+                "description": "Double an integer value.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "integer",
+                      "description": "Integer to double."
+                    }
+                  },
+                  "required": [
+                    "value"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/tool_choice",
+              "value": "auto"
+            }
+          ]
+        },
+        {
+          "uuid": "JgR7bboD6PiWmQjqiq9cj7",
+          "span_id": "mHnKiYC3bGWmgkdqMw32fv",
+          "timestamp": "2026-09-29T14:49:36.588326+00:00",
+          "working_start": 0.0059884719958063215,
+          "event": "span_end",
+          "id": "mHnKiYC3bGWmgkdqMw32fv"
+        },
+        {
+          "uuid": "77EwFacN4yVHDhbvNdtaJo",
+          "span_id": "gHNmYWhQyXEzvSPjfdt4SV",
+          "timestamp": "2026-09-29T14:49:36.588458+00:00",
+          "working_start": 0.00612010300392285,
+          "event": "span_begin",
+          "id": "gHNmYWhQyXEzvSPjfdt4SV",
+          "parent_id": "2Ty6moipSAmDdFW3ptLiVz",
+          "type": "solver",
+          "name": "generate"
+        },
+        {
+          "uuid": "SXYtp9f4EypMksgKpXhKwK",
+          "span_id": "gHNmYWhQyXEzvSPjfdt4SV",
+          "timestamp": "2026-09-29T14:49:36.588733+00:00",
+          "working_start": 0.006395290984073654,
+          "event": "model",
+          "model": "fixture/local",
+          "input": [
+            {
+              "id": "dHdYEBvFts3nBf5urZwoXn",
+              "content": "Use double on two.",
+              "source": "input",
+              "role": "user"
+            }
+          ],
+          "tools": [
+            {
+              "name": "double",
+              "description": "Double an integer value.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "integer",
+                    "description": "Integer to double."
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          ],
+          "tool_choice": "auto",
+          "config": {},
+          "output": {
+            "model": "local",
+            "choices": [
+              {
+                "message": {
+                  "id": "VJi6Q9VdbNzyc5sfLp7RRs",
+                  "content": "tool call for tool double",
+                  "source": "generate",
+                  "role": "assistant",
+                  "tool_calls": [
+                    {
+                      "id": "for_tool_call_bf3afcd1-8606-40cc-9539-0a0d4c27d6c5",
+                      "function": "double",
+                      "arguments": {
+                        "value": 2
+                      },
+                      "type": "function"
+                    }
+                  ],
+                  "model": "local"
+                },
+                "stop_reason": "tool_calls"
+              }
+            ],
+            "completion": "tool call for tool double",
+            "time": 0.00014280399773269892
+          },
+          "completed": "2026-09-29T14:49:36.593324+00:00",
+          "working_time": 0.00014280399773269892
+        },
+        {
+          "uuid": "gPhpRrzcTXvxvQjybYDgZC",
+          "span_id": "V8NyeHBuQh7iTDJGbrVb5b",
+          "timestamp": "2026-09-29T14:49:36.614764+00:00",
+          "working_start": 0.02823746600188315,
+          "event": "span_begin",
+          "id": "V8NyeHBuQh7iTDJGbrVb5b",
+          "parent_id": "gHNmYWhQyXEzvSPjfdt4SV",
+          "type": "tool",
+          "name": "double"
+        },
+        {
+          "uuid": "KpAL4Y7bPvL9YU3Z3FMbYk",
+          "span_id": "gHNmYWhQyXEzvSPjfdt4SV",
+          "timestamp": "2026-09-29T14:49:36.593717+00:00",
+          "working_start": 0.007192577002570033,
+          "event": "tool",
+          "type": "function",
+          "id": "for_tool_call_bf3afcd1-8606-40cc-9539-0a0d4c27d6c5",
+          "function": "double",
+          "arguments": {
+            "value": 2
+          },
+          "result": "4",
+          "events": [],
+          "completed": "2026-09-29T14:49:36.615763+00:00",
+          "working_time": 0.022046,
+          "message_id": "JQ5AaRbDfwa3abtzovpcAN"
+        },
+        {
+          "uuid": "kJovP4QwiswBqVYPxoKdFA",
+          "span_id": "V8NyeHBuQh7iTDJGbrVb5b",
+          "timestamp": "2026-09-29T14:49:36.615044+00:00",
+          "working_start": 0.02851825801189989,
+          "event": "span_end",
+          "id": "V8NyeHBuQh7iTDJGbrVb5b"
+        },
+        {
+          "uuid": "BTxStf8bjLqiYWN2Bc5a3M",
+          "span_id": "gHNmYWhQyXEzvSPjfdt4SV",
+          "timestamp": "2026-09-29T14:49:36.616262+00:00",
+          "working_start": 0.029734748997725546,
+          "event": "model",
+          "model": "fixture/local",
+          "input": [
+            {
+              "id": "dHdYEBvFts3nBf5urZwoXn",
+              "content": "Use double on two.",
+              "source": "input",
+              "role": "user"
+            },
+            {
+              "id": "VJi6Q9VdbNzyc5sfLp7RRs",
+              "content": "tool call for tool double",
+              "source": "generate",
+              "role": "assistant",
+              "tool_calls": [
+                {
+                  "id": "for_tool_call_bf3afcd1-8606-40cc-9539-0a0d4c27d6c5",
+                  "function": "double",
+                  "arguments": {
+                    "value": 2
+                  },
+                  "type": "function"
+                }
+              ],
+              "model": "local"
+            },
+            {
+              "id": "JQ5AaRbDfwa3abtzovpcAN",
+              "content": "4",
+              "role": "tool",
+              "tool_call_id": "for_tool_call_bf3afcd1-8606-40cc-9539-0a0d4c27d6c5",
+              "function": "double"
+            }
+          ],
+          "tools": [
+            {
+              "name": "double",
+              "description": "Double an integer value.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "integer",
+                    "description": "Integer to double."
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          ],
+          "tool_choice": "auto",
+          "config": {},
+          "output": {
+            "model": "local",
+            "choices": [
+              {
+                "message": {
+                  "id": "UQ9ZoQhtjMZxV53zewW4PQ",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            ],
+            "completion": "4",
+            "time": 0.00009067400242201984
+          },
+          "completed": "2026-09-29T14:49:36.620793+00:00",
+          "working_time": 0.00009067400242201984
+        },
+        {
+          "uuid": "QrAM3MY4YSEMWZpQrWu99b",
+          "span_id": "gHNmYWhQyXEzvSPjfdt4SV",
+          "timestamp": "2026-09-29T14:49:36.621250+00:00",
+          "working_start": 0.030544190027285367,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/messages/1",
+              "value": {
+                "id": "VJi6Q9VdbNzyc5sfLp7RRs",
+                "content": "tool call for tool double",
+                "source": "generate",
+                "role": "assistant",
+                "tool_calls": [
+                  {
+                    "id": "for_tool_call_bf3afcd1-8606-40cc-9539-0a0d4c27d6c5",
+                    "function": "double",
+                    "arguments": {
+                      "value": 2
+                    },
+                    "type": "function"
+                  }
+                ],
+                "model": "local"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/messages/2",
+              "value": {
+                "id": "JQ5AaRbDfwa3abtzovpcAN",
+                "content": "4",
+                "role": "tool",
+                "tool_call_id": "for_tool_call_bf3afcd1-8606-40cc-9539-0a0d4c27d6c5",
+                "function": "double"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/messages/3",
+              "value": {
+                "id": "UQ9ZoQhtjMZxV53zewW4PQ",
+                "content": "4",
+                "source": "generate",
+                "role": "assistant",
+                "model": "local"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/output/time",
+              "value": 0.00009067400242201984
+            },
+            {
+              "op": "replace",
+              "path": "/output/model",
+              "value": "local",
+              "replaced": "fixture/local"
+            },
+            {
+              "op": "replace",
+              "path": "/output/completion",
+              "value": "4",
+              "replaced": ""
+            },
+            {
+              "op": "add",
+              "path": "/output/choices/0",
+              "value": {
+                "message": {
+                  "id": "UQ9ZoQhtjMZxV53zewW4PQ",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            }
+          ]
+        },
+        {
+          "uuid": "AekikuzUJTtUpy7nmH32xS",
+          "span_id": "gHNmYWhQyXEzvSPjfdt4SV",
+          "timestamp": "2026-09-29T14:49:36.621461+00:00",
+          "working_start": 0.03075449200696312,
+          "event": "span_end",
+          "id": "gHNmYWhQyXEzvSPjfdt4SV"
+        },
+        {
+          "uuid": "dJNGg6JCxiqstumSKP7jiY",
+          "span_id": "2Ty6moipSAmDdFW3ptLiVz",
+          "timestamp": "2026-09-29T14:49:36.621623+00:00",
+          "working_start": 0.03091620100894943,
+          "event": "span_end",
+          "id": "2Ty6moipSAmDdFW3ptLiVz"
+        },
+        {
+          "uuid": "5xbuXedoegg8JKeAVP5xGE",
+          "span_id": "G5zK38gtbBmqNwhY8xywbe",
+          "timestamp": "2026-09-29T14:49:36.623002+00:00",
+          "working_start": 0.032294775010086596,
+          "event": "span_begin",
+          "id": "G5zK38gtbBmqNwhY8xywbe",
+          "type": "scorers",
+          "name": "scorers"
+        },
+        {
+          "uuid": "WmBMX9m3Ka9yZmB2iuGEm7",
+          "span_id": "Ppj89RYY2i8Dxqw8EFQrHL",
+          "timestamp": "2026-09-29T14:49:36.623278+00:00",
+          "working_start": 0.032570956012932584,
+          "event": "span_begin",
+          "id": "Ppj89RYY2i8Dxqw8EFQrHL",
+          "parent_id": "G5zK38gtbBmqNwhY8xywbe",
+          "type": "scorer",
+          "name": "match"
+        },
+        {
+          "uuid": "VF7TbqujfFkxTpwZwn7HDx",
+          "span_id": "Ppj89RYY2i8Dxqw8EFQrHL",
+          "timestamp": "2026-09-29T14:49:36.623413+00:00",
+          "working_start": 0.03270569600863382,
+          "event": "score",
+          "score": {
+            "value": "C",
+            "answer": "4",
+            "explanation": "4",
+            "history": []
+          },
+          "target": "4",
+          "intermediate": false,
+          "scorer": "match",
+          "scorer_args": {}
+        },
+        {
+          "uuid": "TDrsPsRrss2U9opdxAxhNV",
+          "span_id": "Ppj89RYY2i8Dxqw8EFQrHL",
+          "timestamp": "2026-09-29T14:49:36.623550+00:00",
+          "working_start": 0.032842980028362945,
+          "event": "span_end",
+          "id": "Ppj89RYY2i8Dxqw8EFQrHL"
+        },
+        {
+          "uuid": "6xL8TXLgoQm7erYiLWz84h",
+          "span_id": "G5zK38gtbBmqNwhY8xywbe",
+          "timestamp": "2026-09-29T14:49:36.623687+00:00",
+          "working_start": 0.032979949028231204,
+          "event": "span_end",
+          "id": "G5zK38gtbBmqNwhY8xywbe"
+        }
+      ],
+      "model_usage": {},
+      "role_usage": {},
+      "started_at": "2026-09-29T14:49:36.582340+00:00",
+      "completed_at": "2026-09-29T14:49:36.625342+00:00",
+      "total_time": 0.043,
+      "working_time": 0.035,
+      "uuid": "C9pTZpWwqGw6suNgy9FBDp",
+      "error_retries": [],
+      "attachments": {},
+      "turn_count": 2
+    }
+  ],
+  "reductions": [
+    {
+      "scorer": "match",
+      "samples": [
+        {
+          "value": 1.0,
+          "answer": "4",
+          "explanation": "4",
+          "history": [],
+          "sample_id": 1
+        }
+      ]
+    }
+  ]
+}

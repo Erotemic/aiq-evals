@@ -1,0 +1,458 @@
+{
+  "cancelled__cancelled": {
+    "epochs": [
+      1
+    ],
+    "records": [
+      {
+        "coverage": {
+          "expected": 1,
+          "failed": 1,
+          "processed": 1,
+          "saved": 1,
+          "status": "partial"
+        },
+        "has_error": false,
+        "metrics": [],
+        "native_status": "cancelled",
+        "task": "slow_task"
+      }
+    ],
+    "sample_kinds": {
+      "sample": 1
+    },
+    "samples_with_trajectory": 1,
+    "status": "cancelled",
+    "tool_messages": 0
+  },
+  "error__run-error": {
+    "epochs": [
+      1
+    ],
+    "records": [
+      {
+        "coverage": {
+          "expected": 3,
+          "failed": 2,
+          "processed": 3,
+          "saved": 3,
+          "status": "partial"
+        },
+        "has_error": true,
+        "metrics": [],
+        "native_status": "error",
+        "task": "run_error_task"
+      }
+    ],
+    "sample_kinds": {
+      "sample": 3
+    },
+    "samples_with_trajectory": 3,
+    "status": "failed",
+    "tool_messages": 0
+  },
+  "generation": {
+    "epochs": [
+      1,
+      2
+    ],
+    "records": [
+      {
+        "coverage": {
+          "expected": 2,
+          "failed": 0,
+          "processed": 2,
+          "saved": 2,
+          "status": "complete"
+        },
+        "has_error": false,
+        "metrics": [
+          [
+            "includes",
+            "includes",
+            "accuracy",
+            null,
+            null,
+            1,
+            1.0
+          ],
+          [
+            "includes",
+            "includes",
+            "stderr",
+            null,
+            null,
+            1,
+            0.0
+          ],
+          [
+            "match",
+            "match",
+            "accuracy",
+            null,
+            null,
+            1,
+            1.0
+          ],
+          [
+            "match",
+            "match",
+            "stderr",
+            null,
+            null,
+            1,
+            0.0
+          ]
+        ],
+        "native_status": "success",
+        "task": "generation"
+      }
+    ],
+    "sample_kinds": {
+      "epoch_reduction": 2,
+      "sample": 2
+    },
+    "samples_with_trajectory": 2,
+    "status": "succeeded",
+    "tool_messages": 0
+  },
+  "multi__generation": {
+    "epochs": [
+      1,
+      2
+    ],
+    "records": [
+      {
+        "coverage": {
+          "expected": 2,
+          "failed": 0,
+          "processed": 2,
+          "saved": 2,
+          "status": "complete"
+        },
+        "has_error": false,
+        "metrics": [
+          [
+            "includes",
+            "includes",
+            "accuracy",
+            null,
+            null,
+            1,
+            1.0
+          ],
+          [
+            "includes",
+            "includes",
+            "stderr",
+            null,
+            null,
+            1,
+            0.0
+          ],
+          [
+            "match",
+            "match",
+            "accuracy",
+            null,
+            null,
+            1,
+            1.0
+          ],
+          [
+            "match",
+            "match",
+            "stderr",
+            null,
+            null,
+            1,
+            0.0
+          ]
+        ],
+        "native_status": "success",
+        "task": "generation"
+      }
+    ],
+    "sample_kinds": {
+      "epoch_reduction": 2,
+      "sample": 2
+    },
+    "samples_with_trajectory": 2,
+    "status": "succeeded",
+    "tool_messages": 0
+  },
+  "multi__role": {
+    "epochs": [
+      1,
+      2
+    ],
+    "records": [
+      {
+        "coverage": {
+          "expected": 2,
+          "failed": 0,
+          "processed": 2,
+          "saved": 2,
+          "status": "complete"
+        },
+        "has_error": false,
+        "metrics": [
+          [
+            "match",
+            "match",
+            "accuracy",
+            null,
+            null,
+            1,
+            1.0
+          ],
+          [
+            "match",
+            "match",
+            "stderr",
+            null,
+            null,
+            1,
+            0.0
+          ]
+        ],
+        "native_status": "success",
+        "task": "role_task"
+      }
+    ],
+    "sample_kinds": {
+      "epoch_reduction": 1,
+      "sample": 2
+    },
+    "samples_with_trajectory": 2,
+    "status": "succeeded",
+    "tool_messages": 0
+  },
+  "multi__tool": {
+    "epochs": [
+      1,
+      2
+    ],
+    "records": [
+      {
+        "coverage": {
+          "expected": 2,
+          "failed": 0,
+          "processed": 2,
+          "saved": 2,
+          "status": "complete"
+        },
+        "has_error": false,
+        "metrics": [
+          [
+            "match",
+            "match",
+            "accuracy",
+            null,
+            null,
+            1,
+            1.0
+          ],
+          [
+            "match",
+            "match",
+            "stderr",
+            null,
+            null,
+            1,
+            0.0
+          ]
+        ],
+        "native_status": "success",
+        "task": "tool_task"
+      }
+    ],
+    "sample_kinds": {
+      "epoch_reduction": 1,
+      "sample": 2
+    },
+    "samples_with_trajectory": 2,
+    "status": "succeeded",
+    "tool_messages": 2
+  },
+  "nonterminal__started": {
+    "epochs": [],
+    "records": [
+      {
+        "coverage": {
+          "expected": 1,
+          "failed": 0,
+          "processed": 0,
+          "saved": 0,
+          "status": "partial"
+        },
+        "has_error": false,
+        "metrics": [],
+        "native_status": "started",
+        "task": "slow_task"
+      }
+    ],
+    "sample_kinds": {},
+    "samples_with_trajectory": 0,
+    "status": "incomplete",
+    "tool_messages": 0
+  },
+  "partial__partial": {
+    "epochs": [
+      1
+    ],
+    "records": [
+      {
+        "coverage": {
+          "expected": 2,
+          "failed": 1,
+          "processed": 2,
+          "saved": 2,
+          "status": "partial"
+        },
+        "has_error": false,
+        "metrics": [
+          [
+            "match",
+            "match",
+            "accuracy",
+            null,
+            null,
+            1,
+            1.0
+          ],
+          [
+            "match",
+            "match",
+            "stderr",
+            null,
+            null,
+            1,
+            0.0
+          ]
+        ],
+        "native_status": "success",
+        "task": "partial_task"
+      }
+    ],
+    "sample_kinds": {
+      "epoch_reduction": 1,
+      "sample": 2
+    },
+    "samples_with_trajectory": 2,
+    "status": "succeeded",
+    "tool_messages": 0
+  },
+  "reducers__reducers": {
+    "epochs": [
+      1,
+      2
+    ],
+    "records": [
+      {
+        "coverage": {
+          "expected": 2,
+          "failed": 0,
+          "processed": 2,
+          "saved": 2,
+          "status": "complete"
+        },
+        "has_error": false,
+        "metrics": [
+          [
+            "match",
+            "match",
+            "accuracy",
+            null,
+            "mean",
+            1,
+            1.0
+          ],
+          [
+            "match",
+            "match",
+            "accuracy",
+            null,
+            "mode",
+            1,
+            1.0
+          ],
+          [
+            "match",
+            "match",
+            "stderr",
+            null,
+            "mean",
+            1,
+            0.0
+          ],
+          [
+            "match",
+            "match",
+            "stderr",
+            null,
+            "mode",
+            1,
+            0.0
+          ]
+        ],
+        "native_status": "success",
+        "task": "role_task"
+      }
+    ],
+    "sample_kinds": {
+      "epoch_reduction": 2,
+      "sample": 2
+    },
+    "samples_with_trajectory": 2,
+    "status": "succeeded",
+    "tool_messages": 0
+  },
+  "tool": {
+    "epochs": [
+      1,
+      2
+    ],
+    "records": [
+      {
+        "coverage": {
+          "expected": 2,
+          "failed": 0,
+          "processed": 2,
+          "saved": 2,
+          "status": "complete"
+        },
+        "has_error": false,
+        "metrics": [
+          [
+            "match",
+            "match",
+            "accuracy",
+            null,
+            null,
+            1,
+            1.0
+          ],
+          [
+            "match",
+            "match",
+            "stderr",
+            null,
+            null,
+            1,
+            0.0
+          ]
+        ],
+        "native_status": "success",
+        "task": "tool_task"
+      }
+    ],
+    "sample_kinds": {
+      "epoch_reduction": 1,
+      "sample": 2
+    },
+    "samples_with_trajectory": 2,
+    "status": "succeeded",
+    "tool_messages": 2
+  }
+}

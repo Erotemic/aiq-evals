@@ -1,0 +1,85 @@
+{
+  "version": 2,
+  "status": "started",
+  "eval": {
+    "eval_id": "AbbzPPLj4XYbyud6piTpzr",
+    "run_id": "QS7fsH8uxU48vSRHoWKqiR",
+    "created": "2026-09-29T15:36:57+00:00",
+    "task": "slow_task",
+    "task_id": "TBGVkTKhtLofFnEyYMbebM",
+    "task_version": 0,
+    "task_file": "tests/native/inspect_failure_fixture.py",
+    "task_display_name": "slow_task",
+    "task_registry_name": "slow_task",
+    "task_attribs": {},
+    "task_args": {},
+    "task_args_passed": {},
+    "solver_args_passed": {},
+    "dataset": {
+      "samples": 1,
+      "sample_ids": [
+        1
+      ],
+      "shuffled": false
+    },
+    "model": "fixture/slow",
+    "model_generate_config": {},
+    "model_args": {},
+    "config": {
+      "epochs": 1,
+      "fail_on_error": true,
+      "continue_on_fail": false,
+      "score_on_error": false,
+      "sandbox_cleanup": true,
+      "sandbox_prebuilt": false,
+      "log_samples": true,
+      "log_realtime": true,
+      "log_images": true,
+      "score_display": true
+    },
+    "packages": {
+      "inspect_ai": "0.3.272"
+    },
+    "scorers": [
+      {
+        "name": "match",
+        "options": {},
+        "metrics": [
+          {
+            "name": "inspect_ai/accuracy",
+            "options": {}
+          },
+          {
+            "name": "inspect_ai/stderr",
+            "options": {}
+          }
+        ],
+        "metadata": {}
+      }
+    ]
+  },
+  "plan": {
+    "name": "plan",
+    "steps": [
+      {
+        "solver": "generate",
+        "params": {
+          "tool_calls": "loop"
+        },
+        "params_passed": {}
+      }
+    ],
+    "config": {}
+  },
+  "stats": {
+    "started_at": "",
+    "completed_at": "",
+    "model_usage": {},
+    "role_usage": {},
+    "connection_limit_history": []
+  },
+  "invalidated": false,
+  "tags": [],
+  "metadata": {},
+  "samples": []
+}

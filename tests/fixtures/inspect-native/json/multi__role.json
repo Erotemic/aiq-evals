@@ -1,0 +1,875 @@
+{
+  "version": 2,
+  "status": "success",
+  "eval": {
+    "eval_id": "MkrkLnkcyekF6ooPgoQfxN",
+    "run_id": "JPBf7JbLg8QgjzSdzBK34L",
+    "created": "2026-09-29T15:14:30+00:00",
+    "task": "role_task",
+    "task_id": "LmnjG8getTXZ5RwJXJZunn",
+    "task_version": 0,
+    "task_file": "tests/native/inspect_fixture.py",
+    "task_display_name": "role_task",
+    "task_registry_name": "role_task",
+    "task_attribs": {},
+    "task_args": {},
+    "task_args_passed": {},
+    "solver_args_passed": {},
+    "dataset": {
+      "samples": 1,
+      "sample_ids": [
+        1
+      ],
+      "shuffled": false
+    },
+    "model": "fixture/local",
+    "model_generate_config": {},
+    "model_args": {},
+    "model_roles": {
+      "grader": {
+        "model": "fixture/grader",
+        "config": {},
+        "args": {}
+      }
+    },
+    "config": {
+      "epochs": 2,
+      "fail_on_error": true,
+      "continue_on_fail": false,
+      "score_on_error": false,
+      "sandbox_cleanup": true,
+      "sandbox_prebuilt": false,
+      "log_samples": true,
+      "log_realtime": true,
+      "log_images": true,
+      "score_display": true
+    },
+    "packages": {
+      "inspect_ai": "0.3.272"
+    },
+    "metadata": {
+      "aiq_evals_measurement_identity": "a7dd3502e040f1b0b28612899d3779ec20c6dea2023a83d208a5225053dec35d",
+      "aiq_evals_adapter_version": "0.1.0"
+    },
+    "scorers": [
+      {
+        "name": "match",
+        "options": {},
+        "metrics": [
+          {
+            "name": "inspect_ai/accuracy",
+            "options": {}
+          },
+          {
+            "name": "inspect_ai/stderr",
+            "options": {}
+          }
+        ],
+        "metadata": {}
+      }
+    ]
+  },
+  "plan": {
+    "name": "plan",
+    "steps": [
+      {
+        "solver": "auxiliary_probe",
+        "params": {},
+        "params_passed": {}
+      },
+      {
+        "solver": "generate",
+        "params": {
+          "tool_calls": "loop"
+        },
+        "params_passed": {}
+      }
+    ],
+    "config": {}
+  },
+  "results": {
+    "total_samples": 2,
+    "completed_samples": 2,
+    "scores": [
+      {
+        "name": "match",
+        "scorer": "match",
+        "scored_samples": 1,
+        "unscored_samples": 0,
+        "params": {},
+        "metrics": {
+          "accuracy": {
+            "name": "accuracy",
+            "value": 1.0,
+            "params": {}
+          },
+          "stderr": {
+            "name": "stderr",
+            "value": 0.0,
+            "params": {}
+          }
+        }
+      }
+    ],
+    "headline": {
+      "scorer": "match",
+      "score": "match",
+      "metric": "accuracy"
+    }
+  },
+  "stats": {
+    "started_at": "2026-09-29T15:14:30+00:00",
+    "completed_at": "2026-09-29T15:14:30+00:00",
+    "model_usage": {},
+    "role_usage": {},
+    "connection_limit_history": []
+  },
+  "invalidated": false,
+  "tags": [],
+  "metadata": {
+    "aiq_evals_measurement_identity": "a7dd3502e040f1b0b28612899d3779ec20c6dea2023a83d208a5225053dec35d",
+    "aiq_evals_adapter_version": "0.1.0"
+  },
+  "samples": [
+    {
+      "id": 1,
+      "epoch": 1,
+      "input": "Two plus two?",
+      "target": "4",
+      "messages": [
+        {
+          "id": "BPkR6d9fnVtoxXtk3bWKxa",
+          "content": "Two plus two?",
+          "source": "input",
+          "role": "user"
+        },
+        {
+          "id": "UTsUEUY7yphnCbGgrFyfw7",
+          "content": "4",
+          "source": "generate",
+          "role": "assistant",
+          "model": "local"
+        }
+      ],
+      "output": {
+        "model": "local",
+        "choices": [
+          {
+            "message": {
+              "id": "UTsUEUY7yphnCbGgrFyfw7",
+              "content": "4",
+              "source": "generate",
+              "role": "assistant",
+              "model": "local"
+            },
+            "stop_reason": "stop"
+          }
+        ],
+        "completion": "4",
+        "time": 0.00004424600047059357
+      },
+      "scores": {
+        "match": {
+          "value": "C",
+          "answer": "4",
+          "explanation": "4",
+          "history": []
+        }
+      },
+      "metadata": {
+        "grader_output": "4"
+      },
+      "store": {},
+      "events": [
+        {
+          "uuid": "FU79boiZhr9LYmr8ne8YS3",
+          "span_id": "7NYktfaopUScvfmeYa4Xmp",
+          "timestamp": "2026-09-29T15:14:30.802860+00:00",
+          "working_start": 150172.677335121,
+          "event": "span_begin",
+          "id": "7NYktfaopUScvfmeYa4Xmp",
+          "type": "init",
+          "name": "init"
+        },
+        {
+          "uuid": "oXbgPg48HfEZBq2rtxhfge",
+          "span_id": "7NYktfaopUScvfmeYa4Xmp",
+          "timestamp": "2026-09-29T15:14:30.803507+00:00",
+          "working_start": 150172.677982362,
+          "event": "sample_init",
+          "sample": {
+            "input": "Two plus two?",
+            "target": "4",
+            "id": 1
+          },
+          "state": {
+            "messages": [
+              {
+                "id": "BPkR6d9fnVtoxXtk3bWKxa",
+                "content": "Two plus two?",
+                "source": "input",
+                "role": "user"
+              }
+            ],
+            "tools": [],
+            "tool_choice": null,
+            "store": {},
+            "output": {
+              "model": "fixture/local",
+              "choices": [],
+              "completion": ""
+            },
+            "completed": false,
+            "metadata": {}
+          }
+        },
+        {
+          "uuid": "5zkQmXdcrHUL7ZuCFYB7Nf",
+          "span_id": "7NYktfaopUScvfmeYa4Xmp",
+          "timestamp": "2026-09-29T15:14:30.803756+00:00",
+          "working_start": 150172.678231784,
+          "event": "span_end",
+          "id": "7NYktfaopUScvfmeYa4Xmp"
+        },
+        {
+          "uuid": "NAguX9fom3PEVxJc4sJwtu",
+          "span_id": "eENdKspMtTiKg2Hog9GFG4",
+          "timestamp": "2026-09-29T15:14:30.805723+00:00",
+          "working_start": 0.0018450609932187945,
+          "event": "span_begin",
+          "id": "eENdKspMtTiKg2Hog9GFG4",
+          "type": "solvers",
+          "name": "solvers"
+        },
+        {
+          "uuid": "QumjszVmxYHQJCRyNire46",
+          "span_id": "NpUieyxeKiZ4eXg2hTvdfA",
+          "timestamp": "2026-09-29T15:14:30.806010+00:00",
+          "working_start": 0.002132316993083805,
+          "event": "span_begin",
+          "id": "NpUieyxeKiZ4eXg2hTvdfA",
+          "parent_id": "eENdKspMtTiKg2Hog9GFG4",
+          "type": "solver",
+          "name": "auxiliary_probe"
+        },
+        {
+          "uuid": "aaFEzSHZXq8ED6yMHmkApk",
+          "span_id": "NpUieyxeKiZ4eXg2hTvdfA",
+          "timestamp": "2026-09-29T15:14:30.806383+00:00",
+          "working_start": 0.002505006006686017,
+          "event": "model",
+          "model": "fixture/grader",
+          "role": "grader",
+          "input": [
+            {
+              "id": "7AF2BrkAhnKvjADkyWLzTt",
+              "content": "Say 4",
+              "role": "user"
+            }
+          ],
+          "tools": [],
+          "tool_choice": "none",
+          "config": {},
+          "output": {
+            "model": "grader",
+            "choices": [
+              {
+                "message": {
+                  "id": "HH6XcHgG4CinFA3oDVYsvs",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "grader"
+                },
+                "stop_reason": "stop"
+              }
+            ],
+            "completion": "4",
+            "time": 0.00005671399412676692
+          },
+          "completed": "2026-09-29T15:14:30.808587+00:00",
+          "working_time": 0.00005671399412676692
+        },
+        {
+          "uuid": "XrDwtKXtnNPmWTnTZFd4Kc",
+          "span_id": "NpUieyxeKiZ4eXg2hTvdfA",
+          "timestamp": "2026-09-29T15:14:30.808837+00:00",
+          "working_start": 0.003003837977303192,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/metadata/grader_output",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "uuid": "hL8VuzMjsQBwmkJ7Li9MvV",
+          "span_id": "NpUieyxeKiZ4eXg2hTvdfA",
+          "timestamp": "2026-09-29T15:14:30.808977+00:00",
+          "working_start": 0.0031432379910256714,
+          "event": "span_end",
+          "id": "NpUieyxeKiZ4eXg2hTvdfA"
+        },
+        {
+          "uuid": "UKWL5UkmUF63YcQ8AKAqL8",
+          "span_id": "griCQccVLFQDe2HRDNDBKF",
+          "timestamp": "2026-09-29T15:14:30.809117+00:00",
+          "working_start": 0.0032839249761309475,
+          "event": "span_begin",
+          "id": "griCQccVLFQDe2HRDNDBKF",
+          "parent_id": "eENdKspMtTiKg2Hog9GFG4",
+          "type": "solver",
+          "name": "generate"
+        },
+        {
+          "uuid": "hQymkpzBVGhQAqLo8eHujM",
+          "span_id": "griCQccVLFQDe2HRDNDBKF",
+          "timestamp": "2026-09-29T15:14:30.809332+00:00",
+          "working_start": 0.0034987819963134825,
+          "event": "model",
+          "model": "fixture/local",
+          "input": [
+            {
+              "id": "BPkR6d9fnVtoxXtk3bWKxa",
+              "content": "Two plus two?",
+              "source": "input",
+              "role": "user"
+            }
+          ],
+          "tools": [],
+          "tool_choice": "none",
+          "config": {},
+          "output": {
+            "model": "local",
+            "choices": [
+              {
+                "message": {
+                  "id": "UTsUEUY7yphnCbGgrFyfw7",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            ],
+            "completion": "4",
+            "time": 0.00004424600047059357
+          },
+          "completed": "2026-09-29T15:14:30.811933+00:00",
+          "working_time": 0.00004424600047059357
+        },
+        {
+          "uuid": "V57nHHazrPeNJqs5RKHsk8",
+          "span_id": "griCQccVLFQDe2HRDNDBKF",
+          "timestamp": "2026-09-29T15:14:30.812200+00:00",
+          "working_start": 0.003932620980776846,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/messages/1",
+              "value": {
+                "id": "UTsUEUY7yphnCbGgrFyfw7",
+                "content": "4",
+                "source": "generate",
+                "role": "assistant",
+                "model": "local"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/output/time",
+              "value": 0.00004424600047059357
+            },
+            {
+              "op": "replace",
+              "path": "/output/completion",
+              "value": "4",
+              "replaced": ""
+            },
+            {
+              "op": "replace",
+              "path": "/output/model",
+              "value": "local",
+              "replaced": "fixture/local"
+            },
+            {
+              "op": "add",
+              "path": "/output/choices/0",
+              "value": {
+                "message": {
+                  "id": "UTsUEUY7yphnCbGgrFyfw7",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            }
+          ]
+        },
+        {
+          "uuid": "R2Yd5y6TrXH4KMMBgGb25g",
+          "span_id": "griCQccVLFQDe2HRDNDBKF",
+          "timestamp": "2026-09-29T15:14:30.812366+00:00",
+          "working_start": 0.004099496960407123,
+          "event": "span_end",
+          "id": "griCQccVLFQDe2HRDNDBKF"
+        },
+        {
+          "uuid": "222Ux67BM8RXJywsKFnHwe",
+          "span_id": "eENdKspMtTiKg2Hog9GFG4",
+          "timestamp": "2026-09-29T15:14:30.812583+00:00",
+          "working_start": 0.004316356964409351,
+          "event": "span_end",
+          "id": "eENdKspMtTiKg2Hog9GFG4"
+        },
+        {
+          "uuid": "D5bSAvfrxXRvcS5aAxHrxc",
+          "span_id": "UfWtpR8zWzjGowSL6C5KBR",
+          "timestamp": "2026-09-29T15:14:30.815262+00:00",
+          "working_start": 0.006995169969741255,
+          "event": "span_begin",
+          "id": "UfWtpR8zWzjGowSL6C5KBR",
+          "type": "scorers",
+          "name": "scorers"
+        },
+        {
+          "uuid": "8wnaoJsjxjwrQRtaKaYyPx",
+          "span_id": "2v64gSDo8mZegAaCyuWRVQ",
+          "timestamp": "2026-09-29T15:14:30.815408+00:00",
+          "working_start": 0.007140448957215995,
+          "event": "span_begin",
+          "id": "2v64gSDo8mZegAaCyuWRVQ",
+          "parent_id": "UfWtpR8zWzjGowSL6C5KBR",
+          "type": "scorer",
+          "name": "match"
+        },
+        {
+          "uuid": "DbfDWpaZuoAMiRQtM4KtHB",
+          "span_id": "2v64gSDo8mZegAaCyuWRVQ",
+          "timestamp": "2026-09-29T15:14:30.815565+00:00",
+          "working_start": 0.007298246957361698,
+          "event": "score",
+          "score": {
+            "value": "C",
+            "answer": "4",
+            "explanation": "4",
+            "history": []
+          },
+          "target": "4",
+          "intermediate": false,
+          "scorer": "match",
+          "scorer_args": {}
+        },
+        {
+          "uuid": "4EnAZDmUa36ZP8iK7Eeutb",
+          "span_id": "2v64gSDo8mZegAaCyuWRVQ",
+          "timestamp": "2026-09-29T15:14:30.815748+00:00",
+          "working_start": 0.007480473956093192,
+          "event": "span_end",
+          "id": "2v64gSDo8mZegAaCyuWRVQ"
+        },
+        {
+          "uuid": "3dGvfAgZMrZ9wxf4jWDt4G",
+          "span_id": "UfWtpR8zWzjGowSL6C5KBR",
+          "timestamp": "2026-09-29T15:14:30.815862+00:00",
+          "working_start": 0.007594802969833836,
+          "event": "span_end",
+          "id": "UfWtpR8zWzjGowSL6C5KBR"
+        }
+      ],
+      "model_usage": {},
+      "role_usage": {},
+      "started_at": "2026-09-29T15:14:30.803882+00:00",
+      "completed_at": "2026-09-29T15:14:30.817026+00:00",
+      "total_time": 0.013,
+      "working_time": 0.009,
+      "uuid": "9bUjL3A4KyQT5xJZARLpps",
+      "error_retries": [],
+      "attachments": {},
+      "turn_count": 2
+    },
+    {
+      "id": 1,
+      "epoch": 2,
+      "input": "Two plus two?",
+      "target": "4",
+      "messages": [
+        {
+          "id": "f8wbcZsaD7JAjruBz6jSmR",
+          "content": "Two plus two?",
+          "source": "input",
+          "role": "user"
+        },
+        {
+          "id": "mfDiU2YrUtm8r238Jkf58U",
+          "content": "4",
+          "source": "generate",
+          "role": "assistant",
+          "model": "local"
+        }
+      ],
+      "output": {
+        "model": "local",
+        "choices": [
+          {
+            "message": {
+              "id": "mfDiU2YrUtm8r238Jkf58U",
+              "content": "4",
+              "source": "generate",
+              "role": "assistant",
+              "model": "local"
+            },
+            "stop_reason": "stop"
+          }
+        ],
+        "completion": "4",
+        "time": 0.00008104697917588055
+      },
+      "scores": {
+        "match": {
+          "value": "C",
+          "answer": "4",
+          "explanation": "4",
+          "history": []
+        }
+      },
+      "metadata": {
+        "grader_output": "4"
+      },
+      "store": {},
+      "events": [
+        {
+          "uuid": "mSUweTFZqzBYTTsp2RQLQY",
+          "span_id": "gjawPWxiW8sLziP2Cm8Nx3",
+          "timestamp": "2026-09-29T15:14:30.804413+00:00",
+          "working_start": 150172.678887855,
+          "event": "span_begin",
+          "id": "gjawPWxiW8sLziP2Cm8Nx3",
+          "type": "init",
+          "name": "init"
+        },
+        {
+          "uuid": "92U2wCc8eGJF7WdjX53PBF",
+          "span_id": "gjawPWxiW8sLziP2Cm8Nx3",
+          "timestamp": "2026-09-29T15:14:30.804798+00:00",
+          "working_start": 150172.679274313,
+          "event": "sample_init",
+          "sample": {
+            "input": "Two plus two?",
+            "target": "4",
+            "id": 1
+          },
+          "state": {
+            "messages": [
+              {
+                "id": "f8wbcZsaD7JAjruBz6jSmR",
+                "content": "Two plus two?",
+                "source": "input",
+                "role": "user"
+              }
+            ],
+            "tools": [],
+            "tool_choice": null,
+            "store": {},
+            "output": {
+              "model": "fixture/local",
+              "choices": [],
+              "completion": ""
+            },
+            "completed": false,
+            "metadata": {}
+          }
+        },
+        {
+          "uuid": "JVj7JwX2hPoE9yaKJxr54N",
+          "span_id": "gjawPWxiW8sLziP2Cm8Nx3",
+          "timestamp": "2026-09-29T15:14:30.805099+00:00",
+          "working_start": 150172.679575687,
+          "event": "span_end",
+          "id": "gjawPWxiW8sLziP2Cm8Nx3"
+        },
+        {
+          "uuid": "T3eZc6shYoiemxtXrYhW7K",
+          "span_id": "AmoUP7iXrH5ffxzdq89yaU",
+          "timestamp": "2026-09-29T15:14:30.806659+00:00",
+          "working_start": 0.0014055540086701512,
+          "event": "span_begin",
+          "id": "AmoUP7iXrH5ffxzdq89yaU",
+          "type": "solvers",
+          "name": "solvers"
+        },
+        {
+          "uuid": "dcQDgdZ7roW3TaWBQzqL57",
+          "span_id": "T2r7HvXzXYcz3fJtFxVSCN",
+          "timestamp": "2026-09-29T15:14:30.806858+00:00",
+          "working_start": 0.0016027759993448853,
+          "event": "span_begin",
+          "id": "T2r7HvXzXYcz3fJtFxVSCN",
+          "parent_id": "AmoUP7iXrH5ffxzdq89yaU",
+          "type": "solver",
+          "name": "auxiliary_probe"
+        },
+        {
+          "uuid": "bQAbMYRo7qxpuc9jLHJqsV",
+          "span_id": "T2r7HvXzXYcz3fJtFxVSCN",
+          "timestamp": "2026-09-29T15:14:30.807104+00:00",
+          "working_start": 0.0018490790098439902,
+          "event": "model",
+          "model": "fixture/grader",
+          "role": "grader",
+          "input": [
+            {
+              "id": "km5EVbZyxyucheurbmwGyE",
+              "content": "Say 4",
+              "role": "user"
+            }
+          ],
+          "tools": [],
+          "tool_choice": "none",
+          "config": {},
+          "output": {
+            "model": "grader",
+            "choices": [
+              {
+                "message": {
+                  "id": "RTn336wzF8WiNMU9UMfPJV",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "grader"
+                },
+                "stop_reason": "stop"
+              }
+            ],
+            "completion": "4",
+            "time": 0.00004823500057682395
+          },
+          "completed": "2026-09-29T15:14:30.810293+00:00",
+          "working_time": 0.00004823500057682395
+        },
+        {
+          "uuid": "2Cv2KhvjvBAnnzALTMgqKA",
+          "span_id": "T2r7HvXzXYcz3fJtFxVSCN",
+          "timestamp": "2026-09-29T15:14:30.810505+00:00",
+          "working_start": 0.0022433369886130095,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/metadata/grader_output",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "uuid": "nHUZDn5A8KTEYJoFRvbyyt",
+          "span_id": "T2r7HvXzXYcz3fJtFxVSCN",
+          "timestamp": "2026-09-29T15:14:30.810689+00:00",
+          "working_start": 0.0024267009866889566,
+          "event": "span_end",
+          "id": "T2r7HvXzXYcz3fJtFxVSCN"
+        },
+        {
+          "uuid": "Rf8g5osS8ngdW5BikM9WBR",
+          "span_id": "7sjGzU6jh4oswFHJG2752s",
+          "timestamp": "2026-09-29T15:14:30.810823+00:00",
+          "working_start": 0.002561163011705503,
+          "event": "span_begin",
+          "id": "7sjGzU6jh4oswFHJG2752s",
+          "parent_id": "AmoUP7iXrH5ffxzdq89yaU",
+          "type": "solver",
+          "name": "generate"
+        },
+        {
+          "uuid": "Q4hoFduv7cmDyALTB3apya",
+          "span_id": "7sjGzU6jh4oswFHJG2752s",
+          "timestamp": "2026-09-29T15:14:30.811037+00:00",
+          "working_start": 0.0027747100102715194,
+          "event": "model",
+          "model": "fixture/local",
+          "input": [
+            {
+              "id": "f8wbcZsaD7JAjruBz6jSmR",
+              "content": "Two plus two?",
+              "source": "input",
+              "role": "user"
+            }
+          ],
+          "tools": [],
+          "tool_choice": "none",
+          "config": {},
+          "output": {
+            "model": "local",
+            "choices": [
+              {
+                "message": {
+                  "id": "mfDiU2YrUtm8r238Jkf58U",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            ],
+            "completion": "4",
+            "time": 0.00008104697917588055
+          },
+          "completed": "2026-09-29T15:14:30.814094+00:00",
+          "working_time": 0.00008104697917588055
+        },
+        {
+          "uuid": "dYajNy6dRJmy7g8oC8DRUe",
+          "span_id": "7sjGzU6jh4oswFHJG2752s",
+          "timestamp": "2026-09-29T15:14:30.814464+00:00",
+          "working_start": 0.0033891949569806457,
+          "event": "state",
+          "changes": [
+            {
+              "op": "add",
+              "path": "/messages/1",
+              "value": {
+                "id": "mfDiU2YrUtm8r238Jkf58U",
+                "content": "4",
+                "source": "generate",
+                "role": "assistant",
+                "model": "local"
+              }
+            },
+            {
+              "op": "add",
+              "path": "/output/time",
+              "value": 0.00008104697917588055
+            },
+            {
+              "op": "replace",
+              "path": "/output/completion",
+              "value": "4",
+              "replaced": ""
+            },
+            {
+              "op": "replace",
+              "path": "/output/model",
+              "value": "local",
+              "replaced": "fixture/local"
+            },
+            {
+              "op": "add",
+              "path": "/output/choices/0",
+              "value": {
+                "message": {
+                  "id": "mfDiU2YrUtm8r238Jkf58U",
+                  "content": "4",
+                  "source": "generate",
+                  "role": "assistant",
+                  "model": "local"
+                },
+                "stop_reason": "stop"
+              }
+            }
+          ]
+        },
+        {
+          "uuid": "HA2BYADEqFFsx6Dcz9s7a7",
+          "span_id": "7sjGzU6jh4oswFHJG2752s",
+          "timestamp": "2026-09-29T15:14:30.814723+00:00",
+          "working_start": 0.0036466699675656855,
+          "event": "span_end",
+          "id": "7sjGzU6jh4oswFHJG2752s"
+        },
+        {
+          "uuid": "c5CB2NUzX8BVq76ebp7LoS",
+          "span_id": "AmoUP7iXrH5ffxzdq89yaU",
+          "timestamp": "2026-09-29T15:14:30.814889+00:00",
+          "working_start": 0.0038124899729155004,
+          "event": "span_end",
+          "id": "AmoUP7iXrH5ffxzdq89yaU"
+        },
+        {
+          "uuid": "XhRrhvjfZFcWbUN8hSKG5r",
+          "span_id": "4sWKpyajUaR25wVBbDwdtU",
+          "timestamp": "2026-09-29T15:14:30.816105+00:00",
+          "working_start": 0.005028874962590635,
+          "event": "span_begin",
+          "id": "4sWKpyajUaR25wVBbDwdtU",
+          "type": "scorers",
+          "name": "scorers"
+        },
+        {
+          "uuid": "UXjafoBRVs9NxyEtyw7VqE",
+          "span_id": "DUNxhMcEQjbca2itDYHDsA",
+          "timestamp": "2026-09-29T15:14:30.816378+00:00",
+          "working_start": 0.005302046978613362,
+          "event": "span_begin",
+          "id": "DUNxhMcEQjbca2itDYHDsA",
+          "parent_id": "4sWKpyajUaR25wVBbDwdtU",
+          "type": "scorer",
+          "name": "match"
+        },
+        {
+          "uuid": "n3ARJEDPsbLgvtCrThUdS3",
+          "span_id": "DUNxhMcEQjbca2itDYHDsA",
+          "timestamp": "2026-09-29T15:14:30.816512+00:00",
+          "working_start": 0.005436181963887066,
+          "event": "score",
+          "score": {
+            "value": "C",
+            "answer": "4",
+            "explanation": "4",
+            "history": []
+          },
+          "target": "4",
+          "intermediate": false,
+          "scorer": "match",
+          "scorer_args": {}
+        },
+        {
+          "uuid": "7sb2pxuLWztFYH5Bz6wMaH",
+          "span_id": "DUNxhMcEQjbca2itDYHDsA",
+          "timestamp": "2026-09-29T15:14:30.816672+00:00",
+          "working_start": 0.005596117960521951,
+          "event": "span_end",
+          "id": "DUNxhMcEQjbca2itDYHDsA"
+        },
+        {
+          "uuid": "TF7ubKsKpk99ZbceTAhBKw",
+          "span_id": "4sWKpyajUaR25wVBbDwdtU",
+          "timestamp": "2026-09-29T15:14:30.816783+00:00",
+          "working_start": 0.005706730968086049,
+          "event": "span_end",
+          "id": "4sWKpyajUaR25wVBbDwdtU"
+        }
+      ],
+      "model_usage": {},
+      "role_usage": {},
+      "started_at": "2026-09-29T15:14:30.805258+00:00",
+      "completed_at": "2026-09-29T15:14:30.817819+00:00",
+      "total_time": 0.013,
+      "working_time": 0.007,
+      "uuid": "TEmDH7KkpzGvwtVnSEzZfF",
+      "error_retries": [],
+      "attachments": {},
+      "turn_count": 2
+    }
+  ],
+  "reductions": [
+    {
+      "scorer": "match",
+      "samples": [
+        {
+          "value": 1.0,
+          "answer": "4",
+          "explanation": "4",
+          "history": [],
+          "sample_id": 1
+        }
+      ]
+    }
+  ]
+}
