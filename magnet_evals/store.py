@@ -86,11 +86,18 @@ def _try_lock(path: Path) -> int | None:
             except BlockingIOError:
                 os.close(fd)
                 return None
+            except BaseException:
+                os.close(fd)
+                raise
         _HELD_LOCKS.add(str(path))
-    # Who holds it, for a human looking at a stuck acquisition.
-    holder = json.dumps({'pid': os.getpid(), 'host': socket.gethostname(), 'since': _stamp()})
-    os.ftruncate(fd, 0)
-    os.write(fd, holder.encode() + b'\n')
+    # Who holds it, for a human looking at a stuck acquisition. Best-effort: a
+    # failed write (e.g. a full disk) must not leave the lock held forever.
+    try:
+        holder = json.dumps({'pid': os.getpid(), 'host': socket.gethostname(), 'since': _stamp()})
+        os.ftruncate(fd, 0)
+        os.write(fd, holder.encode() + b'\n')
+    except OSError:
+        pass
     return fd
 
 
@@ -262,7 +269,8 @@ class ResultStore:
         existing = existing_valid()
         if existing is not None:
             return existing
-        if path.exists():
+        if path.exists() and existing_valid() is None:
+            # Re-checked: a concurrent publisher may have just written a valid run.
             self._quarantine(path)
         try:
             return publish_run(path, **publish_kwargs)
@@ -313,23 +321,33 @@ class ResultStore:
     def promote_import(self, attempt: RunBundle) -> RunBundle:
         """Publish a successful import under its native content identity.
 
-        The first valid result of a measurement also becomes its canonical run
-        when none exists yet, so an imported result can satisfy later
-        execute-or-reuse requests. The returned bundle is always the import of
-        *this* content, never an earlier one.
+        Returns the import of *this* content, never an earlier one. Seeding the
+        measurement's canonical run from it is :meth:`seed_canonical`, which
+        ``ensure`` calls under the measurement's own acquisition lock.
         """
         resolved = attempt.resolved
         if not resolved.identity.reusable or attempt.result.status != 'succeeded':
             raise ValueError('only a succeeded, reusable import can be published')
         native_identity = str(attempt.manifest['native_artifact_identity'])
         path = self.import_path(resolved.identity.digest, native_identity)
-        published = self._publish_at(
+        return self._publish_at(
             path,
             lambda: self.check_import_reuse(resolved, native_identity).bundle,
             **self._promotion_kwargs(attempt, path),
         )
-        self.promote(attempt)
-        return published
+
+    def seed_canonical(self, attempt: RunBundle) -> RunBundle | None:
+        """Make a successful attempt the canonical run if the measurement has none.
+
+        The first valid result of a measurement, executed or imported, becomes
+        canonical, so an import can satisfy later execute-or-reuse requests. An
+        existing valid canonical run is kept. Returns the canonical run, or
+        ``None`` if publication lost a race it could not resolve.
+        """
+        try:
+            return self.promote(attempt)
+        except PublicationError:
+            return self.lookup(attempt.resolved)
 
 
 def _relative_or_none(path: Path, root: Path) -> str | None:

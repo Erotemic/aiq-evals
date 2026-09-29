@@ -22,6 +22,14 @@ actually supports is recorded in `planning/phase1-capabilities.md`.
 | `MeasurementIdentity`, `ResolvedEvaluation`, `EvaluationResult` | Result contracts. |
 | `ENGINE_SPECS`, `EngineSpec` | Verified pins and engine notes. |
 
+Workers: a `worker_python` environment needs its engine, not `magnet_evals`. The
+worker imports the caller's `magnet_evals` through a private directory on
+`PYTHONPATH` that exposes that package and nothing installed beside it
+(`magnet_evals.runner.worker_package_path`). Task, plugin, and registration
+modules must therefore be importable in the worker environment itself: installed
+there, on `PYTHONPATH`, or shipped inside `magnet_evals` (like
+`magnet_evals.examples`).
+
 Errors derive from `magnet_evals.errors.AiqEvalsError`. The main ones are
 `RequestValidationError`, `MissingDependencyError`, `EngineCompatibilityError`,
 `ExecutionError`, `ArtifactError`, and `ActiveEventLoopError`.

@@ -12,7 +12,7 @@ had been pushed when this was written.
 | Item | Value |
 | --- | --- |
 | aiq-magnet-evals | `main` after `8086431` (ADR-0010, ADR-0011, worker isolation, rename, packaged examples, Docker sandbox), plus this documentation commit |
-| aiq-magnet | branch `dev/aiq-evals-integration`: `c0f07a5` (fixes and tests), `40cb99a` (recipes), then the CI/lock commit |
+| aiq-magnet | branch `dev/aiq-evals-integration`: `c0f07a5` (fixes and tests), `40cb99a` (recipes), `ecf1bf6` (CI job); `uv.lock` pending |
 | HELM worker and MAGNET | CPython 3.12.3; `crfm-helm==0.5.14` with `dev/environments/phase1/helm-py312-constraints.txt`; kwdagger 0.4.1, cmd_queue 0.3.2 |
 | Inspect worker | CPython 3.11.15 (uv-managed); `inspect-ai==0.3.272` with `inspect-py311-constraints.txt` |
 | OLMo worker | olmo-eval `73ade80e24f796af55caeb8fd7b75a7f3fd607fd`, `uv sync --frozen --extra litellm --extra agents`, CPython 3.12.3 |
@@ -49,12 +49,12 @@ Two further defects found and fixed during this pass:
 
 ## E-M1 Compatibility
 
-MAGNET's full suite: `PATH=<helm-venv>/bin:$PATH python -m pytest -q magnet tests`.
-It gives 448 passed and 24 skipped, with 4 failures that also occur on `main`
-when the venv is not on `PATH` (cards run a bare `python`). With the venv on
-`PATH`, those 4 pass (`tests/test_llama_cards.py`, `tests/test_theory_cards.py`:
-18 passed). The legacy evaluator, HELM loaders/materialization, predictor, and
-llama/theory card tests are unchanged and pass.
+MAGNET's full suite, with every integration prerequisite required
+(`PATH=<helm-venv>/bin:$PATH MAGNET_REQUIRE_AIQ_EVALS=1 MAGNET_TEST_DOCKER=1 ... python -m pytest -q magnet tests`,
+Docker group): 457 passed, 16 skipped (MAGNET's own optional skips), 0 failed.
+The legacy evaluator, HELM loaders/materialization, predictor, and llama/theory
+card tests are unchanged and pass. (Card nodes run a bare `python`, so the venv
+must be on `PATH`; without it, 4 card tests fail on `main` too.)
 
 `ty check ./magnet ./tests` reports the same 12 diagnostics as `main`, none in
 the integration code.
@@ -188,5 +188,9 @@ runs the three files with `MAGNET_REQUIRE_AIQ_EVALS=1`: 47 passed, 0 skipped
 - **Hosted CI (G8)** has not run for either repository.
 - **M1 migration** of MAGNET's legacy HELM internals onto aiq-magnet-evals is
   deferred (see the plan).
+- **Live infer-stack lease.** Lease wrapping and lease-environment mapping are
+  unit-tested, and the OLMo agent recipe exercises the endpoint and key path
+  through a local endpoint. A real `infer-stack run` lease needs a served
+  model and was not exercised.
 - **Untested capabilities** stay untested: OLMo sandboxes, log probabilities,
   resume/rescore (`phase1-capabilities.md`).

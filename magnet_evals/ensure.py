@@ -113,7 +113,7 @@ async def ensure_evaluation_async(
         attempt = await run_evaluation_async(resolved, _attempt_context(base, store, resolved))
         run = attempt
         if attempt.result.status == 'succeeded':
-            run = await asyncio.to_thread(store.promote, attempt)
+            run = await _finish_in_thread(store.promote, attempt)
     return EnsureOutcome('executed', run, resolved, attempt, decision.reason, waited=lock.waited)
 
 
@@ -152,11 +152,35 @@ async def _ensure_import(
         attempt = await import_attempt()
         run = attempt
         if attempt.result.status == 'succeeded':
-            run = await asyncio.to_thread(store.promote_import, attempt)
+            run = await _finish_in_thread(store.promote_import, attempt)
+            # The first valid result also seeds the canonical run; canonical
+            # publication always happens under the measurement's own lock.
+            async with store.acquisition_lock(digest):
+                await _finish_in_thread(store.seed_canonical, attempt)
     # The files may have changed between hashing and copying; report what was
     # actually imported.
     imported_identity = str(attempt.manifest.get('native_artifact_identity') or source_identity)
     return EnsureOutcome('imported', run, resolved, attempt, decision.reason, imported_identity, lock.waited)
+
+
+async def _finish_in_thread(func, attempt: RunBundle):
+    """Run a publication step to completion even if the caller is cancelled.
+
+    Publication runs in a thread that cancellation cannot stop. Returning
+    early would release the acquisition lock while the thread is still
+    publishing, and a waiter would then find nothing and execute again. On
+    cancellation, wait for the thread, then re-raise.
+    """
+    task = asyncio.ensure_future(asyncio.to_thread(func, attempt))
+    try:
+        return await asyncio.shield(task)
+    except asyncio.CancelledError:
+        while not task.done():
+            try:
+                await asyncio.wait({task})
+            except asyncio.CancelledError:
+                continue
+        raise
 
 
 def _attempt_context(base: ExecutionContext, store: ResultStore, resolved: ResolvedEvaluation) -> ExecutionContext:

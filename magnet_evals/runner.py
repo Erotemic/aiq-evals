@@ -241,14 +241,21 @@ async def _execute_in_worker(
 async def resolve_evaluation_async(
     request: EvaluationRequest,
     context: ExecutionContext | None = None,
+    *,
+    require_secrets: bool = True,
 ) -> ResolvedEvaluation:
     """Resolve in ``context.worker_python`` when given, else in this process.
 
     Resolution imports the native engine (and task/plugin code), so it belongs
     in the engine's worker environment (ADR-0002). Errors raised there keep
     their aiq-magnet-evals error type.
+
+    ``require_secrets=False`` skips the declared-secret check. Resolution never
+    needs a secret's value, and a scheduler may resolve before the credential
+    exists (e.g. a key only a later endpoint lease provides); execution still
+    checks.
     """
-    if context is not None:
+    if context is not None and require_secrets:
         # Before any task/plugin code runs, in-process or in the worker.
         check_required_secrets(request, context)
     if context is None or context.worker_python is None:

@@ -271,3 +271,131 @@ def test_external_symlinks_in_an_import_source_are_refused_unless_allowed(tmp_pa
     assert native_source_identity(source, allow_external_symlinks=True) != native_source_identity(
         _native(tmp_path / 'plain', 0.5)
     )
+
+
+# --- regressions from the integration review ------------------------------------
+
+def test_cancelling_the_holder_during_promotion_does_not_execute_twice(tmp_path, monkeypatch):
+    store = ResultStore(tmp_path / 'store')
+    real_promote = ResultStore.promote
+
+    def slow_promote(self, attempt):
+        time.sleep(0.5)  # e.g. copying a large native tree
+        return real_promote(self, attempt)
+
+    monkeypatch.setattr(ResultStore, 'promote', slow_promote)
+
+    async def scenario():
+        first = asyncio.create_task(ensure_evaluation_async(make_request('ok'), store))
+        await asyncio.sleep(0.05)
+        waiter = asyncio.create_task(ensure_evaluation_async(make_request('ok'), store))
+        await asyncio.sleep(0.2)  # the holder is inside the promotion thread
+        first.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await first
+        return await waiter
+
+    outcome = asyncio.run(scenario())
+    assert outcome.action == 'reused'
+    assert fake_backend.EXECUTIONS['ok'] == 1
+
+
+def test_concurrent_imports_of_different_content_all_succeed(tmp_path):
+    # Distinct content means distinct import locks; seeding the shared
+    # canonical run must still be race-free.
+    for trial in range(10):
+        store = ResultStore(tmp_path / f'store-{trial}')
+        sources = [_native(tmp_path / f'n{trial}-{i}', 0.1 * (i + 1)) for i in range(4)]
+
+        async def many():
+            return await asyncio.gather(*(
+                ensure_evaluation_async(make_request('imp'), store, import_source=s) for s in sources
+            ))
+
+        outcomes = asyncio.run(many())
+        assert [o.action for o in outcomes] == ['imported'] * 4
+        assert [round(_value(o), 1) for o in outcomes] == [0.1, 0.2, 0.3, 0.4]
+        assert store.lookup(outcomes[0].resolved) is not None
+
+
+def test_publication_race_on_one_path_resolves_to_the_winner(tmp_path):
+    import threading
+
+    from magnet_evals.contracts import ExecutionContext
+    from magnet_evals.runner import import_evaluation
+
+    for trial in range(20):
+        store = ResultStore(tmp_path / f's{trial}')
+        attempts = [
+            import_evaluation(make_request('imp'), _native(tmp_path / f'src{trial}-{i}', 0.5 + i),
+                              ExecutionContext(output_dir=tmp_path / f'a{trial}-{i}'))
+            for i in range(2)
+        ]
+        errors, barrier = [], threading.Barrier(2)
+
+        def seed(attempt):
+            barrier.wait()
+            try:
+                store.seed_canonical(attempt)
+            except Exception as ex:  # pragma: no cover - the regression
+                errors.append(ex)
+
+        threads = [threading.Thread(target=seed, args=(a,)) for a in attempts]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        assert not errors
+        assert store.lookup(attempts[0].resolved) is not None
+
+
+def test_a_failed_holder_note_does_not_leak_the_lock(tmp_path, monkeypatch):
+    import magnet_evals.store as store_mod
+
+    store = ResultStore(tmp_path / 'store')
+    real_write = os.write
+    calls = []
+
+    def failing_write(fd, data):
+        calls.append(fd)
+        if len(calls) == 1:
+            raise OSError(28, 'No space left on device')
+        return real_write(fd, data)
+
+    monkeypatch.setattr(store_mod.os, 'write', failing_write)
+    digest = 'cd' * 32
+
+    async def twice():
+        async with store.acquisition_lock(digest):
+            pass
+        async with store.acquisition_lock(digest) as lock:
+            return lock.waited
+
+    assert asyncio.run(asyncio.wait_for(twice(), timeout=5)) is False
+    assert not store_mod._HELD_LOCKS
+
+
+def test_symlink_cycles_between_siblings_are_not_followed(tmp_path):
+    source = _native(tmp_path / 'n', 0.5)
+    (source / 'a').mkdir()
+    (source / 'b').mkdir()
+    (source / 'a' / 'x.txt').write_text('x\n')
+    (source / 'a' / 'sib').symlink_to(source / 'b')
+    (source / 'b' / 'back').symlink_to(source / 'a')
+    identity = native_source_identity(source)
+    outcome = ensure_evaluation(make_request('imp'), ResultStore(tmp_path / 'store'), import_source=source)
+    assert outcome.run.manifest['native_artifact_identity'] == identity
+
+
+def test_resolution_can_skip_the_secret_check(tmp_path, monkeypatch):
+    from magnet_evals.contracts import ExecutionContext
+    from magnet_evals.errors import RequestValidationError
+    from magnet_evals.runner import resolve_evaluation_async
+
+    monkeypatch.delenv('AIQ_DECLARED_TOKEN', raising=False)
+    request = make_request('ok', engine_options={'required_secrets': ['AIQ_DECLARED_TOKEN']})
+    context = ExecutionContext(output_dir=tmp_path)
+    with pytest.raises(RequestValidationError):
+        asyncio.run(resolve_evaluation_async(request, context))
+    resolved = asyncio.run(resolve_evaluation_async(request, context, require_secrets=False))
+    assert resolved.identity.reusable

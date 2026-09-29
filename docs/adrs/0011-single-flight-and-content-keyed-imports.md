@@ -30,6 +30,13 @@ for a reusable identity, re-checks for a published result under the lock, and
 only then executes or imports. Waiters poll, so waiting stays cancellable.
 
 - Callers that waited and find a result report `reused` (`waited=True`).
+- Publication finishes before the lock is released, even if the holder is
+  cancelled while publishing. Otherwise a waiter would find nothing and
+  execute again.
+- Canonical runs are only published under the measurement's lock. An import
+  publishes its own slot under its (measurement, content) lock, then seeds the
+  canonical run under the measurement lock. The lock order is always import
+  then measurement, so the two cannot deadlock.
 - A caller that waited for a *failed* acquisition makes its own attempt, as
   if it had arrived afterwards. There is no shared failure and no retry loop:
   ADR-0006 still forbids a nested retry policy.

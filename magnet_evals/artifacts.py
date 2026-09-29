@@ -189,7 +189,9 @@ def _walk_native_tree(
     files: list[tuple[str, Path]] = []
     directories: list[str] = []
 
-    def visit(directory: Path, prefix: str, *, followed: bool) -> None:
+    def visit(directory: Path, prefix: str, *, followed: bool, active: frozenset[Path]) -> None:
+        # ``active``: real directories on the current walk path. Revisiting one
+        # (a link to an ancestor, or siblings linking to each other) is a cycle.
         for entry in sorted(directory.iterdir()):
             rel = f'{prefix}{entry.name}'
             real = entry.resolve()
@@ -206,16 +208,16 @@ def _walk_native_tree(
                 notes['followed_external_symlinks'].append(rel)
             is_followed = followed or (entry.is_symlink() and not inside)
             if real.is_dir():
-                if entry.is_symlink() and inside and real in (directory.resolve(), *directory.resolve().parents):
-                    continue  # a link back up the tree would recurse forever
+                if real in active:
+                    continue  # a symlink cycle would recurse forever
                 directories.append(rel)
-                visit(entry, rel + '/', followed=is_followed)
+                visit(entry, rel + '/', followed=is_followed, active=active | {real})
             elif real.is_file():
                 files.append((rel, real))
             else:
                 notes['skipped_non_regular_files'].append(rel)
 
-    visit(source, '', followed=False)
+    visit(source, '', followed=False, active=frozenset({root}))
     return files, notes, directories
 
 
@@ -357,7 +359,13 @@ def publish_run(
                 raise
             shutil.rmtree(backup)
         else:
-            staging.rename(destination)
+            try:
+                staging.rename(destination)
+            except OSError as ex:
+                if destination.exists():
+                    # A concurrent publisher won between the check and the rename.
+                    raise PublicationError(f'destination appeared during publication: {destination}') from ex
+                raise
         return RunBundle.load(destination)
     except Exception:
         shutil.rmtree(staging, ignore_errors=True)
