@@ -185,9 +185,13 @@ kwdagger continues to own campaign scheduling and node attempt/cache policy.
 For MAGNET leasing/container integration:
 
 - [x] pass leased endpoints/model role bindings into `aiq-magnet-evals` execution
-  context;
-- [x] avoid duplicate model startup (no lease for a stored run or an import;
-  one native execution per measurement under concurrency);
+  context (`endpoint` for the primary, `endpoints: {role: alias}` for others,
+  one lease for all; per-role reach: Inspect any bound role, OLMo Eval primary,
+  HELM none);
+- [x] avoid duplicate model startup: leasing is decided when the node runs,
+  under the store's acquisition lock (a stored run takes no lease; concurrent
+  nodes for one measurement start one lease), and infer-stack coalesces
+  same-model leases;
 - [x] propagate cancellation to engine workers/sandboxes;
 - [x] keep secrets in runtime bindings, not hash/manifests/commands;
 - [x] keep scheduler `backend` independent of evaluation `engine`;

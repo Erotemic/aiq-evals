@@ -11,8 +11,8 @@ had been pushed when this was written.
 
 | Item | Value |
 | --- | --- |
-| aiq-magnet-evals | `main` through `df97604` (ADR-0010, ADR-0011, worker isolation, rename, packaged examples, Docker sandbox, review fixes), plus documentation commits |
-| aiq-magnet | branch `dev/aiq-evals-integration`: `c0f07a5` (fixes and tests), `40cb99a` (recipes), `ecf1bf6` (CI job), `27d8a51` (review fixes); `uv.lock` pending |
+| aiq-magnet-evals | `main` through `6429b31` (ADR-0010, ADR-0011, worker isolation, rename, packaged examples, Docker sandbox, review fixes, `lock_held`, per-role Inspect endpoints), plus documentation commits |
+| aiq-magnet | branch `dev/aiq-evals-integration`: `c0f07a5` (fixes and tests), `40cb99a` (recipes), `ecf1bf6` (CI job), `27d8a51` and `c0a6a5d` (review fixes); `uv.lock` pending |
 | HELM worker and MAGNET | CPython 3.12.3; `crfm-helm==0.5.14` with `dev/environments/phase1/helm-py312-constraints.txt`; kwdagger 0.4.1, cmd_queue 0.3.2 |
 | Inspect worker | CPython 3.11.15 (uv-managed); `inspect-ai==0.3.272` with `inspect-py311-constraints.txt` |
 | OLMo worker | olmo-eval `73ade80e24f796af55caeb8fd7b75a7f3fd607fd`, `uv sync --frozen --extra litellm --extra agents`, CPython 3.12.3 |
@@ -60,6 +60,26 @@ were fixed (regression tests in `tests/test_single_flight.py` and MAGNET's
 - Preflight required secret values that only a later lease provides.
   Resolution now uses `require_secrets=False`.
 
+A second integration review then found the following, fixed in MAGNET
+`c0a6a5d` and aiq-magnet-evals `6429b31`:
+
+| Finding | Fix | Test |
+| --- | --- | --- |
+| `evaluation.json` could redirect a node to another valid bundle of the same measurement | the run must be the scheduled acquisition slot (canonical run, scheduled import slot, or unkeyed attempt of the scheduled store) | `test_evaluation_json_cannot_redirect_to_another_run_of_the_measurement`, `test_import_nodes_must_load_their_scheduled_import_slot` |
+| `comparison.json` chose the compared nodes and mapping | comparison rows take both from the compare node's `invoke.sh` | `test_comparison_rows_follow_the_scheduled_inputs` |
+| lease decided at render time (duplicate leases under concurrency; a run that vanished after rendering executed without a lease) | host-side gate under the store lock; leased child runs `ensure(lock_held=True)` | `test_leasing_is_decided_by_a_gate_when_the_node_runs`, `test_concurrent_gates_start_one_leased_child`; live: `tests/test_aiq_evals_lease.py` |
+| preflight unbounded | `preflight_timeout_seconds` (default 900 s), process group killed | `test_preflight_is_bounded_and_kills_its_process_group` |
+| staleness detected after executing | re-resolve and hash imports before `ensure` | `test_a_stale_schedule_stops_before_any_engine_work` |
+| single leased (primary) endpoint | `endpoints: {role: alias}`, one multi-endpoint lease; Inspect per-role overrides | live Inspect primary+grader lease; `test_leased_endpoint_override_for_an_auxiliary_role` (aiq-magnet-evals, `openai` variant) |
+
+Live leases: `tests/test_aiq_evals_lease.py` runs real `infer-stack run`
+(0.7.0, null serving backend, private ledger). A PATH shim only adds
+`--base_url` to point the lease gateway at the example endpoint. An OLMo agent
+run executes inside a lease, and a second selector node reuses it with no new
+lease (the ledger holds exactly one). An Inspect primary and a separately
+leased grader share one lease claiming both endpoints. Requests name a dead
+`base_url`, so success proves the lease supplied the endpoint.
+
 Two further defects found and fixed during this pass:
 
 - Workers received the caller's whole `site-packages` on `PYTHONPATH` when
@@ -72,7 +92,7 @@ Two further defects found and fixed during this pass:
 
 MAGNET's full suite, with every integration prerequisite required
 (`PATH=<helm-venv>/bin:$PATH MAGNET_REQUIRE_AIQ_EVALS=1 MAGNET_TEST_DOCKER=1 ... python -m pytest -q magnet tests`,
-Docker group): 461 passed, 16 skipped (MAGNET's own optional skips), 0 failed.
+Docker group): 469 passed, 16 skipped (MAGNET's own optional skips), 0 failed.
 The legacy evaluator, HELM loaders/materialization, predictor, and llama/theory
 card tests are unchanged and pass. (Card nodes run a bare `python`, so the venv
 must be on `PATH`; without it, 4 card tests fail on `main` too.)
@@ -192,9 +212,9 @@ evaluation, `NOT_EVALUATED`), `test_static_errors_surface_in_a_dry_run`, and
 | dashboard/card compatibility | `test_one_helm_evaluation_becomes_one_claim_row`: `card.yaml`, log, `results/*/verdict.json` with concrete symbols, `verdict.json` (the eval-card-viz upload contract; the viewer itself was not run) |
 | HELM legacy regression | E-M1 |
 
-Run: `python -m pytest -q tests/test_aiq_evals_integration.py` gives 31 passed;
+Run: `python -m pytest -q tests/test_aiq_evals_integration.py` gives 37 passed;
 `tests/test_aiq_evals_examples.py` gives 19 passed; the container test gives
-1 passed (Docker group).
+1 passed (Docker group); `tests/test_aiq_evals_lease.py` gives 2 passed.
 
 ## CI
 
@@ -210,9 +230,9 @@ reproduction".
 
 `AIQ_MAGNET_EVALS_DIR=<aiq-magnet-evals checkout> dev/ci/aiq_evals_integration.sh <fresh dir>`
 (run with Docker group access) builds all four environments from scratch and
-runs the three files with `MAGNET_REQUIRE_AIQ_EVALS=1`: 51 passed, 0 skipped
-(31 integration, 19 examples, 1 container), exit 0, at MAGNET `27d8a51`
-with aiq-magnet-evals `df97604`.
+runs the four files with `MAGNET_REQUIRE_AIQ_EVALS=1`: 59 passed, 0 skipped
+(37 integration, 19 examples, 1 container, 2 live leases), exit 0, at MAGNET
+`c0a6a5d` with aiq-magnet-evals `6429b31`.
 
 ## Open
 
@@ -222,9 +242,11 @@ with aiq-magnet-evals `df97604`.
 - **Hosted CI (G8)** has not run for either repository.
 - **M1 migration** of MAGNET's legacy HELM internals onto aiq-magnet-evals is
   deferred (see the plan).
-- **Live infer-stack lease.** Lease wrapping and lease-environment mapping are
-  unit-tested, and the OLMo agent recipe exercises the endpoint and key path
-  through a local endpoint. A real `infer-stack run` lease needs a served
-  model and was not exercised.
+- **GPU-served leases.** Real `infer-stack run` leases are exercised with the
+  null serving backend (bookkeeping, environment, coalescing, release) against
+  the example endpoint. A lease that starts a real model (compose/kubeai
+  backends, GPUs) is not exercised here.
+- **Per-role endpoints** reach OLMo Eval's primary role only (it rejects
+  auxiliary role bindings) and are unsupported for HELM (registry deployments).
 - **Untested capabilities** stay untested: OLMo sandboxes, log probabilities,
   resume/rescore (`phase1-capabilities.md`).

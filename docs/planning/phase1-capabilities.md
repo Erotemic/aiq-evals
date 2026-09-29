@@ -22,6 +22,7 @@ No general upstream capability follows from a local fixture.
 | Turn/time limits | T | S (`max_turns`) | S (`message_limit`, `time_limit`) |
 | Tool/judge error mapping | T (no tools) | P (tool exception becomes text with `is_error=False`; judge untested) | S (`ToolError` model-visible; tool crash or judge failure is a sample failure) |
 | External OpenAI-compatible endpoint (local) | T | S (LiteLLM/OpenAI Agents) | S (`openai` provider; needs the `openai` package) |
+| Operational endpoint override (`model_endpoints`) | U (registry deployments) | S primary role only | S primary and bound auxiliary roles (a grader reached only through its override, `openai` variant env) |
 
 HELM fresh generation is demonstrated only with its local simple model. Engine-owned
 sandbox cleanup is demonstrated only for Inspect's `local` sandbox and for its
