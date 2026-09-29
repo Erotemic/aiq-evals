@@ -105,3 +105,33 @@ def find_secret_paths(value: Any, *, path: str = '$') -> list[str]:
         for idx, item in enumerate(value):
             found.extend(find_secret_paths(item, path=f'{path}[{idx}]'))
     return found
+
+
+def redact_values(value: Any, secrets: Mapping[str, str]) -> Any:
+    """Replace every occurrence of a secret value in JSON-shaped data.
+
+    Keys and string leaves are both scrubbed; each occurrence becomes
+    ``<redacted:NAME>``. Used for worker-returned results, whose native
+    exception text and tracebacks can quote credentials from the environment.
+    """
+    replacements = [(secret, f'<redacted:{name}>') for name, secret in secrets.items() if secret]
+    # Longest first so a secret containing another secret is fully replaced.
+    replacements.sort(key=lambda item: len(item[0]), reverse=True)
+    if not replacements:
+        return value
+
+    def scrub(text: str) -> str:
+        for secret, replacement in replacements:
+            text = text.replace(secret, replacement)
+        return text
+
+    def walk(item: Any) -> Any:
+        if isinstance(item, str):
+            return scrub(item)
+        if isinstance(item, Mapping):
+            return {scrub(str(key)): walk(child) for key, child in item.items()}
+        if isinstance(item, (list, tuple)):
+            return [walk(child) for child in item]
+        return item
+
+    return walk(value)

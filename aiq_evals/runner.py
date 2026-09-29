@@ -20,6 +20,7 @@ from aiq_evals.contracts import (
     ResolvedEvaluation,
 )
 from aiq_evals.errors import ActiveEventLoopError, ExecutionError
+from aiq_evals.jsonutil import redact_values
 
 
 def validate_request(request: EvaluationRequest) -> None:
@@ -161,6 +162,14 @@ def _redacted_exception_text(ex: BaseException, env: dict[str, str] | Any) -> st
     return text
 
 
+def _redact_result(result: EvaluationResult, context: ExecutionContext) -> EvaluationResult:
+    # Adapters retain native exception text/tracebacks, which can quote
+    # credentials supplied through the environment; never publish those values.
+    if not any(context.env.values()):
+        return result
+    return EvaluationResult.from_dict(redact_values(result.to_dict(), context.env))
+
+
 def _terminal_error_result(
     resolved: ResolvedEvaluation,
     *,
@@ -199,7 +208,7 @@ async def run_evaluation_async(
     work_dir = Path(tempfile.mkdtemp(prefix='.aiq-evals-work-', dir=destination.parent))
     try:
         try:
-            result = await _execute_resolved(resolved, context, work_dir)
+            result = _redact_result(await _execute_resolved(resolved, context, work_dir), context)
         except asyncio.CancelledError as ex:
             # Preserve an inspectable terminal attempt, but do not consume task
             # cancellation: callers still receive CancelledError.

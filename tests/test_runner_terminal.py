@@ -57,6 +57,38 @@ def test_execution_error_publishes_failed_terminal_bundle(monkeypatch, tmp_path)
     assert '<redacted:TOKEN>' in bundle.result.diagnostics['runner_error']
 
 
+def test_adapter_diagnostics_quoting_a_secret_are_redacted(monkeypatch, tmp_path):
+    from aiq_evals.contracts import EvaluationResult
+
+    resolved = make_resolved()
+
+    async def failed_result(*args, **kwargs):
+        # Mirrors adapters that retain native exception text and tracebacks.
+        return EvaluationResult(
+            engine='olmo_eval',
+            identity=resolved.identity,
+            status='failed',
+            records=(),
+            diagnostics={
+                'execution_error': 'HTTP 401 for key sk-SECRET-123',
+                'traceback': ['frame', {'sk-SECRET-123': 'header Bearer sk-SECRET-123'}],
+            },
+        )
+
+    monkeypatch.setattr(runner_mod, '_execute_resolved', failed_result)
+    destination = tmp_path / 'failed-run'
+    bundle = asyncio.run(
+        runner_mod.run_evaluation_async(
+            resolved,
+            ExecutionContext(output_dir=destination, env={'API_KEY': 'sk-SECRET-123'}),
+        )
+    )
+    assert bundle.result.status == 'failed'
+    for path in destination.rglob('*.json'):
+        assert 'sk-SECRET-123' not in path.read_text(), path
+    assert bundle.result.diagnostics['execution_error'] == 'HTTP 401 for key <redacted:API_KEY>'
+
+
 def test_cancellation_publishes_cancelled_attempt_and_propagates(monkeypatch, tmp_path):
     resolved = make_resolved()
     entered = asyncio.Event()
