@@ -45,6 +45,12 @@ Implemented now:
 - isolated worker-process execution with timeout/cancellation termination;
 - atomic terminal run bundles with native checksums and normalized artifact identity;
 - a content-addressed filesystem result store and engine-free readers;
+- single-flight acquisition: concurrent callers for one measurement, across
+  processes sharing a store, execute it once (ADR-0011);
+- explicit native imports keyed by their content, so different or edited
+  artifacts are imported, never mistaken for an earlier import (ADR-0011);
+- runnable, installed examples for every engine (`magnet_evals.examples`,
+  `examples/*.json`), including agent/tool runs and an opt-in Docker sandbox;
 - a schema-v1 regression fixture and conservative rejection of unknown schema versions;
 - an experimental OLMo Eval adapter using `HarnessConfig`, `AsyncEvalRunner.validate()`,
   and `run_async()`;
@@ -61,6 +67,13 @@ Implemented now:
 
 Remaining work is tracked in `docs/planning/aiq-evals-plan.md`. MAGNET integration is tracked separately in
 `docs/planning/aiq-magnet-integration-plan.md`.
+
+## MAGNET
+
+MAGNET consumes this package through `magnet.backends.aiq_evals.EvaluationNode`
+(aiq-magnet, optional extra `aiq-magnet-evals`). MAGNET owns scheduling,
+evidence selection, and claims; this package owns obtaining the evaluation. See
+`docs/planning/aiq-magnet-integration-plan.md` and `integration-evidence.md`.
 
 ## Bootstrap
 
@@ -135,6 +148,25 @@ The probe is deliberately non-executing. The native acceptance suites live in
 `tests/native/` and run only inside the matching engine environment (see
 `docs/planning/phase1-evidence.md` for the exact environments).
 
+## Examples
+
+Every `examples/*.json` request (except the two placeholder templates) runs
+from an installed package: tasks, a deterministic model provider, and an
+OpenAI-compatible example endpoint live in `magnet_evals.examples`. Each
+engine runs in its own worker interpreter:
+
+```bash
+aiq-magnet-evals ensure examples/inspect_tool_request.json --store results/ \
+    --worker-python /path/to/inspect-venv/bin/python
+python -m magnet_evals.examples.chat_server --port 8000 &   # for *_agent / *_endpoint examples
+OPENAI_API_KEY=any aiq-magnet-evals ensure examples/olmo_agent_request.json --store results/ \
+    --worker-python /path/to/olmo-eval/.venv/bin/python
+```
+
+`dev/walkthrough.sh` runs the generation, tool, local-sandbox, and OLMo agent
+examples from a fresh engine-free venv; `tests/native/test_examples_native.py`
+runs every runnable example (the Docker one only where Docker is usable).
+
 ## Documentation
 
 - `docs/api.md`: public API, CLI, contracts, bundle and store layout.
@@ -149,6 +181,7 @@ Reviewers should start with `docs/adrs/README.md`. The ADRs define the intended 
 ## Planning
 
 - `docs/planning/aiq-evals-plan.md`: work owned by this repository.
+- `docs/planning/integration-evidence.md`: MAGNET integration evidence.
 - `docs/planning/aiq-magnet-integration-plan.md`: work that belongs in MAGNET.
 - `docs/planning/phase1-evidence.md`: canonical phase-1 native acceptance ledger.
 - `docs/planning/phase2-phase3-evidence.md`: phase-2/3 implementation evidence and remaining native gates.

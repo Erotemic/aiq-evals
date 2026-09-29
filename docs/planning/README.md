@@ -14,3 +14,5 @@ evidence, and open gates.
 - `phase5-evidence.md` - HELM adapter design and native evidence.
 - `phase6-evidence.md` - ensure/reuse semantics and conformance.
 - `phase7-evidence.md` - agentic operational behavior; see also `../security-review.md`.
+- `integration-evidence.md` - MAGNET integration (M1-M10) evidence and the integration review's fixes.
+- `archive/original-plan.md` - the historical plan this directory was seeded from.

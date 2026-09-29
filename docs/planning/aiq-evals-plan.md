@@ -1,6 +1,6 @@
 # aiq-magnet-evals implementation plan
 
-Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-8 implemented; all three engines pass the shared conformance suite; no API/schema freeze before a PyPI release (ADR-0010, superseding ADR-0009); release gate G1-G7 pass locally, G8 (hosted CI) pending.
+Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-8 implemented; all three engines pass the shared conformance suite; no API/schema freeze before a PyPI release (ADR-0010, superseding ADR-0009); acquisition is single-flight and imports are content-keyed (ADR-0011); MAGNET integration M1-M10 done except the deferred M1 HELM-internals migration (`integration-evidence.md`); release gate G1-G7 pass locally, G8 (hosted CI) pending a push.
 
 This is the standalone refinement of the earlier MAGNET backend-agnostic
 evaluation plan. It moves generic evaluation execution, import, identity, and
@@ -306,7 +306,9 @@ Requirements:
 - [x] implement the central operation (`magnet_evals.ensure_evaluation`, CLI `ensure`)
   with worker-side resolution;
 - [x] engine/version/config/code changes invalidate reuse;
-- [x] changed native imported artifacts get new identities;
+- [x] changed native imported artifacts get new identities (only across stores
+  at first; within one store since ADR-0011, see `integration-evidence.md`);
+- [x] concurrent acquisitions of one reusable measurement execute it once (ADR-0011);
 - [x] secrets never enter identities or manifests;
 - [x] mutable endpoint aliases need explicit revision/cache tokens;
 - [x] retries/attempt lineage do not inflate sample identity;
@@ -330,7 +332,7 @@ review in `../security-review.md`.
 - [x] cancellation cleanup;
 - [x] isolated attempt retries;
 - [x] external endpoint support (local OpenAI-compatible endpoints);
-- [x] optional sandbox examples;
+- [x] optional sandbox examples (Inspect `local`; Inspect `docker` added 2026-09-29, opt-in);
 - [x] security review of task loading, tool execution, sandbox boundaries, host
   mounts/network, secrets, cancellation, and artifact path handling.
 
@@ -355,7 +357,9 @@ Implementation status: DONE locally; hosted CI (G8 in `../release-gate.md`) pend
 - [x] never let quarantine turn a required release gate green (`tests/conftest.py`,
   `tests/test_ci_policy.py`);
 - [x] run clean-environment walkthroughs for generation and agentic examples
-  (`dev/walkthrough.sh`);
+  (`dev/walkthrough.sh`, now from the installed wheel);
+- [x] package all examples: `magnet_evals.examples` ships the example tasks,
+  provider, and endpoint, so no example needs a source checkout;
 - [x] remove experimental labels only after the release gate passes. The
   constraint is enforced: the labels stay `experimental` until G8 (hosted CI on
   the release commit) passes, and `docs/release-gate.md` records the gate state.

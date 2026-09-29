@@ -68,3 +68,25 @@ Each job was reproduced locally:
 | G4 | `dev/ci/native_helm.sh` with MAGNET cloned via `MAGNET_REPO`/`MAGNET_REV`: 16 passed, 8 skipped |
 | G6 | `dev/walkthrough.sh`: passed, now also covering `run` and `import-native` through the worker from the engine-free core |
 | G8 | Not run (no push) |
+
+## Record: 2026-09-29 after the MAGNET integration corrections
+
+Recorded by Claude Opus 5.5 (Anthropic, `claude-opus-5-5`, 1M context) from
+fresh environments. Changes since the previous record: ADR-0010, ADR-0011,
+worker path isolation, the rename, packaged examples, and the Docker sandbox.
+
+| Check | Result |
+| --- | --- |
+| G1 | `PYTHON_VERSION=3.11` and `3.13` `dev/ci/engine_free.sh`: engine-absence assertion passed, `ruff` clean, 142 passed, 4 skipped, 24 native deselected. `ty check ./magnet_evals`: clean. |
+| G2 | Inspect (verified pin): `test_inspect_native.py`, `test_conformance.py`, `test_examples_native.py`: 24 passed, 14 skipped. |
+| G3 | OLMo (`73ade80e`, locked checkout): the same three files: 17 passed, 13 skipped. |
+| G4 | HELM (`0.5.14`, with MAGNET): adapter, native, conformance, and example tests: 19 passed, 14 skipped. |
+| G5 | Regression fixtures unchanged by these commits; release_gate tests pass in G1-G4. |
+| G6 | `dev/walkthrough.sh` with the **installed wheel** in an engine-free venv: all generation, tool, sandbox, agent, `run`/`import-native` steps, and content-keyed import (imported, reused, imported after an edit) pass; no secret in the store. |
+| G7 | `uv build`: `aiq_magnet_evals-0.1.0` wheel with 46 files, including `magnet_evals/examples/*` and `py.typed`, no tests, no runtime `Requires-Dist`; console scripts `aiq-magnet-evals` and `aiq-evals`. |
+| G8 | **Not run** (nothing pushed). |
+| G9 | Not applicable: no PyPI release. |
+
+Opt-in, outside the gate: Inspect's Docker sandbox (`docker_sandbox`), 2 tests
+plus the Docker example, passed; see `planning/phase7-evidence.md`.
+
