@@ -432,3 +432,104 @@ engines. It remains blocked at the MAGNET projection boundary: neither
 `build_tables` nor `KWDaggerProcessor.load_available_result_rows` reads these
 engine bundles directly, and `ClaimResultNamespace` accepts one already flat
 row. We did not add the later integration merely to make this spike pass.
+
+## 2026-09-29 follow-up 2: Inspect nonterminal statuses and environment constraints
+
+Evidence producer: Claude Opus 5.5 (Anthropic, `claude-opus-5-5`, 1M context).
+These records supersede the P1-04 note above that native top-level
+error/cancelled log import was untested.
+
+### P1-04: Inspect run-level error, cancelled, and started logs — demonstrated
+
+`aiq-evals` revision `10d1c9b`; `inspect-ai==0.3.272`, CPython 3.11.15,
+`/tmp/aiq-inspect-p1`. Command:
+`/tmp/aiq-inspect-p1/bin/python -m pytest -q tests/native/test_inspect_native.py`
+(10 passed). Local fixture provider only.
+
+Probing first showed that Inspect writes run-level `error` and `cancelled` logs
+with `results=None`. The adapter then reported bare `unknown` coverage although
+the log held native sample records. Coverage for such logs is now derived from
+logged samples and from Inspect's own expected count,
+`len(eval.dataset.sample_ids) * epochs` (see `inspect_ai/_eval/task/log.py`
+at the pin). It stays unknown when samples were not read or sample IDs are
+absent. Engine-free unit coverage is in `tests/test_inspect_adapter.py`.
+
+- **Run-level error through the adapter.** `run_error_task` uses
+  `fail_on_error=True`, three samples, and `max_samples=1`. Native status
+  `error`; sample 1 scored, sample 2 raised, and sample 3 was cancelled by
+  Inspect. Normalized status `failed`, coverage partial
+  (expected 3, processed 3, failed 2), no metrics, `ATTEMPT_TERMINAL=failed`,
+  and no `RUN_COMPLETE`. Re-importing the native log gives the same status and
+  coverage. Fixture `inspect-native/error/run-error.eval` SHA256
+  `2b2ef05904e8bffa079933de84983f545a5840f666d2f84dab2e2aaa35eed44f`.
+- **Native cancellation (SIGINT).** An Inspect process running `slow_task`
+  received SIGINT after the provider started. `eval()` returned `[]` and exited
+  0, and Inspect wrote a `cancelled` log with one errored sample. The import
+  status is `cancelled`, with partial coverage (1/1/1) and no `RUN_COMPLETE`.
+  The adapter's fallback of reading `log_dir` after an empty return is
+  therefore exercised by real behavior. Fixture
+  `inspect-native/cancelled/cancelled.eval` SHA256
+  `244e16dbf45bcdd612526818f6888e05d1a7894e58f3aaaeab834260c70bea08`.
+- **Nonterminal (SIGKILL).** Killing the process leaves a native `started` log
+  with zero samples, the same state that killing an owned worker process group
+  produces. The import status is `incomplete`, with partial coverage
+  (expected 1, processed 0) and no `RUN_COMPLETE`. Fixture
+  `inspect-native/nonterminal/started.eval` SHA256
+  `5e226ea2b8346aa5e7b568f9678a5016b52f538a70d8581aae6bce8e5c596ed0`.
+
+The clean engine-free `/tmp/aiq-core-p1` interpreter (CPython 3.11.15, no
+`inspect_ai`) loaded the published failed and cancelled bundles with
+`RunBundle.load`.
+
+Limitations: the SIGINT fixture's `sleep` grandchild was *not* cleaned up by
+Inspect. The test kills it explicitly, and no Inspect cleanup claim follows.
+An aiq-evals asynchronous cancellation still kills its owned worker group, as
+the earlier record shows; it does not produce Inspect's own `cancelled` log.
+Engine-owned sandbox cleanup remains untested.
+
+### P1-02: exact environment constraints — captured and reproduced
+
+`uv pip freeze` output from the tested worker environments, with editable
+checkouts removed, is committed as:
+
+- `dev/environments/phase1/inspect-py311-constraints.txt` (85 pins,
+  CPython 3.11.15, x86_64 Linux);
+- `dev/environments/phase1/helm-py312-constraints.txt` (165 pins,
+  CPython 3.12.3, x86_64 Linux, `torch==2.14.0` CUDA 13.0 build). Its header
+  names the editable MAGNET and EEE revisions.
+
+Both files were checked by rebuilding each environment from scratch in a
+scratch directory:
+
+```sh
+uv venv --python 3.11 $R/inspect
+uv pip install --python $R/inspect/bin/python \
+  -c dev/environments/phase1/inspect-py311-constraints.txt -e '.[inspect,tests]'
+uv venv --python 3.12.3 $R/helm
+uv pip install --python $R/helm/bin/python \
+  -c dev/environments/phase1/helm-py312-constraints.txt \
+  -e '/home/joncrall/code/aiq-magnet[helm]' 'crfm-helm==0.5.14' pytest
+```
+
+In each rebuilt environment the `uv pip freeze` output was identical to the
+constraints file. The native Inspect suite passed there (10 passed), as did the
+native HELM suite with that `bin` first on `PATH` (3 passed). These are
+version pins, not hash locks. They also depend on the local uv cache and on
+platform wheels. OLMo keeps its upstream frozen `uv.lock` as the lock
+authority. Top-level requested sets: Inspect `aiq-evals[inspect,tests]`; HELM
+`aiq-magnet[helm]` + `crfm-helm==0.5.14` + `pytest`; OLMo upstream
+`--extra litellm --extra agents` + `pytest`. These are the tested sets; they
+have not been proven minimal.
+
+At capture time the MAGNET checkout had an uncommitted one-line change in
+`magnet/demo/helm_demodata.py` (demo output directory name). It is not used by
+these native tests and was left untouched.
+
+### Validation at `10d1c9b` plus this documentation commit
+
+- `python -m pytest -q`: 49 passed, 3 native skips.
+- `python -m compileall -q aiq_evals tests`, `ruff check .`: passed.
+- Inspect native: 10 passed. OLMo native (`PYTHONPATH` = repo): 5 passed.
+  HELM native: 3 passed, 4 MAGNET deprecation warnings.
+
+The MAGNET cardinality spike is unchanged and still blocks P1-10.

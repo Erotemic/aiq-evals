@@ -17,7 +17,7 @@ No general upstream capability follows from a local fixture.
 | Native import | S (MAGNET reuse of HELM directory) | S | S (`.eval`, JSON, directory) |
 | Resume | T | T | T |
 | Rescore | T | T | T |
-| Failure and partial coverage | P (incomplete imported copy) | S (hard failure after metrics) | S (one sample error, partial coverage) |
+| Failure and partial coverage | P (incomplete imported copy) | S (hard failure after metrics) | S (sample error; run-level `error`; native SIGINT `cancelled` and SIGKILL `started` logs import as non-success with partial coverage) |
 | Cancellation and owned process cleanup | T | S (owned child) | S (owned child) |
 
 HELM fresh generation is demonstrated only with its local simple model. Engine-owned sandbox cleanup is untested.

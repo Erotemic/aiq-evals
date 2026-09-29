@@ -79,7 +79,8 @@ integration suggests it should work.
 - [x] Select an exact tested Inspect release/revision.
 - [x] Select an exact tested OLMo Eval revision after comparing the original
   plan's inspected revision with the later `eval_audit` prototype revision.
-- [ ] Record minimal dependency/extras sets and clean build instructions.
+- [x] Record tested dependency/extras sets and clean build instructions
+  (exact-version constraints reproduced from scratch; not hash locks, minimality unproven).
 
 ### P1-03 OLMo Eval native fixtures
 
@@ -99,7 +100,7 @@ it is design/prototype input that must be reproduced from this repository.
 - [x] Run one native solver/agent with a real tool invocation.
 - [x] Capture multiple returned logs, sample errors, usage, traces, epochs, and
   reducers where available.
-- [ ] Exercise cancellation/nonterminal/error status.
+- [x] Exercise cancellation/nonterminal/error status.
 - [x] Verify custom task/tool imports in the selected worker environment.
 
 ### P1-05 HELM native fixtures

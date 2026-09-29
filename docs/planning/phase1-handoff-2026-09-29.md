@@ -107,3 +107,20 @@ generic), `5ed0483` (OLMo multi-task), and `ad6b69a` (fresh scored HELM).
 Earlier commits `07d361f`, `225a40a`, `9a06d1a`, `e895107`, and `9579d33`
 contain the first native probes, cancellation, historical HELM import, and
 OLMo agent/failure evidence. All have model attribution trailers.
+
+## Update — 2026-09-29, later session (Claude Opus 5.5)
+
+- Item 2 closed: Inspect native run-level `error`, native SIGINT `cancelled`,
+  and SIGKILL `started` logs are captured and import as non-success. Coverage
+  for these `results=None` logs is now derived from native samples (`10d1c9b`).
+  P1-04 is checked.
+- Item 4 closed as far as pip allows: exact-version constraints for the Inspect
+  and HELM worker environments are in `dev/environments/phase1/`. Each file
+  rebuilds an environment whose freeze is identical, and the native suites
+  pass in those rebuilt environments. They are not hash locks.
+- Still open: item 1 (MAGNET cardinality projection, the P1-10 blocker) and item
+  3 (engine-owned sandbox cleanup, log probabilities, resume/rescore). Also
+  open: P1-06's sync/async entry-point and no-nested-`asyncio.run` checks, and
+  P1-08 Inspect/OLMo EEE mapping, which is blocked upstream.
+- Current validation: base 49 passed/3 skipped; Inspect native 10; OLMo native
+  5; HELM native 3. See the ledger's "follow-up 2" section.
