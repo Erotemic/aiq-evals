@@ -7,6 +7,8 @@ import time
 from olmo_eval.common.metrics import AccuracyMetric
 from olmo_eval.common.scorers.substring import SubstringRecallScorer
 from olmo_eval.common.types import Instance, LMRequest, RequestType
+from olmo_eval.evals.suites.registry import Suite
+from olmo_eval.evals.suites.registry import register as register_suite
 from olmo_eval.evals.tasks.common import Task, register
 from olmo_eval.harness.tools import registered_tool
 
@@ -50,3 +52,13 @@ class ToolTask(LocalTask):
             request_type=RequestType.CHAT,
             messages=({"role": "user", "content": "Use double on two. Return only the result."},),
         )
+
+
+@register("aiq_p1_local_alt")
+class AlternateLocalTask(LocalTask):
+    @property
+    def instances(self):
+        yield Instance(question="Return 42.", gold_answer="42")
+
+
+register_suite(Suite(name="aiq_p1_multi", tasks=("aiq_p1_local", "aiq_p1_local_alt")))

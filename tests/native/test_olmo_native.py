@@ -235,3 +235,28 @@ def test_hard_failure_retains_diagnostics(tmp_path: Path) -> None:
     assert bundle.result.records[0].coverage.saved == 0
     assert bundle.result.records[0].coverage.failed == 1
     assert not (tmp_path / "failed" / "RUN_COMPLETE").exists()
+
+
+def test_native_multi_task_suite(tmp_path: Path) -> None:
+    request = EvaluationRequest(
+        engine="olmo_eval",
+        task="aiq_p1_multi",
+        models=(ModelBinding(role="primary", model="mock", provider="mock", revision="local-v1"),),
+        engine_options={
+            "upstream_revision": "73ade80e24f796af55caeb8fd7b75a7f3fd607fd",
+            "task_modules": ["tests.native.olmo_fixture"],
+        },
+    )
+    bundle = run_evaluation(
+        request,
+        ExecutionContext(output_dir=tmp_path / "multi", worker_python=sys.executable),
+    )
+    assert bundle.result.status == "succeeded", bundle.result.diagnostics
+    assert {record.task for record in bundle.result.records} == {"aiq_p1_local", "aiq_p1_local_alt"}
+    assert all(record.coverage.status == "complete" for record in bundle.result.records)
+    imported = import_evaluation(
+        request,
+        tmp_path / "multi" / "native",
+        ExecutionContext(output_dir=tmp_path / "multi-import"),
+    )
+    assert len(imported.result.records) == 2
