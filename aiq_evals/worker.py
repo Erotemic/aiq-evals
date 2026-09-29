@@ -7,7 +7,8 @@ import json
 from pathlib import Path
 
 from aiq_evals.backends.registry import get_backend
-from aiq_evals.contracts import ExecutionContext, ResolvedEvaluation
+from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ResolvedEvaluation
+from aiq_evals.errors import AiqEvalsError
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -17,7 +18,23 @@ def _parser() -> argparse.ArgumentParser:
     execute.add_argument('--resolved', type=Path, required=True)
     execute.add_argument('--output-dir', type=Path, required=True)
     execute.add_argument('--result', type=Path, required=True)
+    resolve = sub.add_parser('resolve')
+    resolve.add_argument('--request', type=Path, required=True)
+    resolve.add_argument('--result', type=Path, required=True)
     return parser
+
+
+def _resolve(args: argparse.Namespace) -> int:
+    request = EvaluationRequest.from_dict(json.loads(args.request.read_text()))
+    try:
+        backend = get_backend(request.engine)
+        backend.validate_request(request)
+        payload = {'resolved': backend.resolve(request).to_dict()}
+    except AiqEvalsError as ex:
+        # Typed errors cross the process boundary; anything else is a crash.
+        payload = {'error': {'type': type(ex).__name__, 'message': str(ex)}}
+    args.result.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+    return 0
 
 
 def _execute(args: argparse.Namespace) -> int:
@@ -42,6 +59,8 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == 'execute':
         return _execute(args)
+    if args.command == 'resolve':
+        return _resolve(args)
     raise AssertionError(args.command)
 
 

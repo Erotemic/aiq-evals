@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -8,6 +9,7 @@ from pathlib import Path
 from aiq_evals.backends.registry import registrations
 from aiq_evals.contracts import EvaluationRequest, ExecutionContext
 from aiq_evals.engines import ENGINE_SPECS
+from aiq_evals.ensure import ensure_evaluation
 from aiq_evals.outputs import load_run
 from aiq_evals.phase1 import PHASE1_TASKS
 from aiq_evals.probes.api_surface import probe_all_api_surfaces
@@ -17,6 +19,7 @@ from aiq_evals.probes.source import inspect_checkout
 from aiq_evals.runner import (
     import_evaluation,
     resolve_evaluation,
+    resolve_evaluation_async,
     run_evaluation,
     validate_request,
 )
@@ -63,6 +66,17 @@ def _parser() -> argparse.ArgumentParser:
     )
     resolve.add_argument('request', type=Path)
     resolve.add_argument('--output', type=Path)
+    resolve.add_argument('--worker-python', help='Resolve inside this engine interpreter.')
+
+    ensure = sub.add_parser(
+        'ensure',
+        help='Reuse a validated stored result, or import/execute and publish one.',
+    )
+    ensure.add_argument('request', type=Path)
+    ensure.add_argument('--store', type=Path, required=True)
+    ensure.add_argument('--worker-python')
+    ensure.add_argument('--timeout', type=float)
+    ensure.add_argument('--import-source', type=Path, help='Import these native artifacts instead of executing.')
 
     run = sub.add_parser('run', help='Execute a request and atomically publish a run bundle.')
     run.add_argument('request', type=Path)
@@ -165,8 +179,13 @@ def _validate(path: Path) -> int:
     return 0
 
 
-def _resolve(path: Path, output: Path | None) -> int:
-    resolved = resolve_evaluation(_load_request(path))
+def _resolve(path: Path, output: Path | None, worker_python: str | None = None) -> int:
+    request = _load_request(path)
+    if worker_python:
+        context = ExecutionContext(output_dir=Path.cwd(), worker_python=worker_python)
+        resolved = asyncio.run(resolve_evaluation_async(request, context))
+    else:
+        resolved = resolve_evaluation(request)
     text = json.dumps(resolved.to_dict(), indent=2, sort_keys=True) + '\n'
     if output:
         output.parent.mkdir(parents=True, exist_ok=True)
@@ -175,6 +194,25 @@ def _resolve(path: Path, output: Path | None) -> int:
     else:
         print(text, end='')
     return 0
+
+
+def _ensure(args: argparse.Namespace) -> int:
+    outcome = ensure_evaluation(
+        _load_request(args.request),
+        args.store,
+        worker_python=args.worker_python,
+        timeout_seconds=args.timeout,
+        import_source=args.import_source,
+    )
+    payload = {
+        'action': outcome.action,
+        'path': str(outcome.run.path),
+        'status': outcome.run.result.status,
+        'measurement_identity': outcome.resolved.identity.to_dict(),
+        'reuse_reason': outcome.reuse_reason,
+    }
+    print(json.dumps(payload, indent=2, sort_keys=True))
+    return 0 if outcome.run.result.status == 'succeeded' else 2
 
 
 def _run(args: argparse.Namespace) -> int:
@@ -226,7 +264,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == 'validate':
         return _validate(args.request)
     if args.command == 'resolve':
-        return _resolve(args.request, args.output)
+        return _resolve(args.request, args.output, args.worker_python)
+    if args.command == 'ensure':
+        return _ensure(args)
     if args.command == 'run':
         return _run(args)
     if args.command == 'import-native':

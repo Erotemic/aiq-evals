@@ -1,6 +1,6 @@
 # aiq-evals implementation plan
 
-Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-5 implemented and natively accepted for the tested combinations; public API/schema provisional until phase 6.
+Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-6 implemented; all three engines pass the shared conformance suite; first public API/schema frozen (ADR-0009).
 
 This is the standalone refinement of the earlier MAGNET backend-agnostic
 evaluation plan. It moves generic evaluation execution, import, identity, and
@@ -210,7 +210,8 @@ required before the public contract can freeze.
 - [x] Implement schema version checks, conservative future-version rejection, and a frozen v1 fixture.
 - [x] Keep MAGNET metric selection and evidence policy out of measurement identity.
 - [ ] Add explicit migration code when a schema-N+1 actually exists; v1 readers currently reject unknown versions.
-- [ ] Freeze the phase-2 public API only after OLMo, Inspect, and HELM production adapters pass.
+  (Not triggered: no schema N+1 exists. ADR-0009 requires it with any breaking change.)
+- [x] Freeze the phase-2 public API only after OLMo, Inspect, and HELM production adapters pass (ADR-0009).
 
 The dependency-free result structures are a provisional normalized envelope, not
 a declaration that `aiq-evals` should replace Every Eval Ever. P1-08 still decides
@@ -296,18 +297,22 @@ resolve request
 -> return engine-independent run
 ```
 
+Implementation status: IMPLEMENTED; evidence in `phase6-evidence.md`.
+
 Requirements:
 
-- engine/version/config/code changes invalidate reuse;
-- changed native imported artifacts get new identities;
-- secrets never enter identities or manifests;
-- mutable endpoint aliases need explicit revision/cache tokens;
-- retries/attempt lineage do not inflate sample identity;
-- stale success markers cannot hide failed/incomplete attempts;
-- no engine dependency is required to read a normalized result.
+- [x] implement the central operation (`aiq_evals.ensure_evaluation`, CLI `ensure`)
+  with worker-side resolution;
+- [x] engine/version/config/code changes invalidate reuse;
+- [x] changed native imported artifacts get new identities;
+- [x] secrets never enter identities or manifests;
+- [x] mutable endpoint aliases need explicit revision/cache tokens;
+- [x] retries/attempt lineage do not inflate sample identity;
+- [x] stale success markers cannot hide failed/incomplete attempts;
+- [x] no engine dependency is required to read a normalized result.
 
-Freeze the first public API/schema only after HELM, OLMo Eval, and Inspect all
-pass the same conformance suite.
+- [x] Freeze the first public API/schema only after HELM, OLMo Eval, and Inspect all
+  pass the same conformance suite (`tests/native/test_conformance.py`; ADR-0009).
 
 ## Phase 7 - Agentic operational/security behavior
 

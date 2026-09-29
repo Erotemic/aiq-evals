@@ -11,6 +11,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from aiq_evals import errors as errors_module
 from aiq_evals.artifacts import RunBundle, publish_run
 from aiq_evals.backends.registry import get_backend
 from aiq_evals.contracts import (
@@ -98,35 +99,7 @@ def _worker_result_path(work_dir: Path) -> Path:
     return work_dir / '.aiq-evals-worker' / 'result.json'
 
 
-async def _execute_in_worker(
-    resolved: ResolvedEvaluation,
-    context: ExecutionContext,
-    work_dir: Path,
-) -> EvaluationResult:
-    assert context.worker_python is not None
-    protocol_dir = work_dir / '.aiq-evals-worker'
-    protocol_dir.mkdir(parents=True, exist_ok=True)
-    resolved_path = protocol_dir / 'resolved.json'
-    result_path = _worker_result_path(work_dir)
-    # Worker diagnostics must survive publication, especially when a native
-    # runner fails after writing partial artifacts.
-    worker_log_dir = work_dir / 'native' / 'aiq_worker'
-    worker_log_dir.mkdir(parents=True, exist_ok=True)
-    stdout_path = worker_log_dir / 'stdout.log'
-    stderr_path = worker_log_dir / 'stderr.log'
-    resolved_path.write_text(json.dumps(resolved.to_dict(), indent=2, sort_keys=True) + '\n')
-    command = [
-        context.worker_python,
-        '-m',
-        'aiq_evals.worker',
-        'execute',
-        '--resolved',
-        str(resolved_path),
-        '--output-dir',
-        str(work_dir),
-        '--result',
-        str(result_path),
-    ]
+def _worker_env(context: ExecutionContext) -> dict[str, str]:
     env = os.environ.copy()
     env.update(context.env)
     # Make source-tree execution work without requiring an editable install in
@@ -134,15 +107,29 @@ async def _execute_in_worker(
     package_parent = str(Path(__file__).resolve().parent.parent)
     old_pythonpath = env.get('PYTHONPATH')
     env['PYTHONPATH'] = package_parent if not old_pythonpath else package_parent + os.pathsep + old_pythonpath
-    # Files rather than pipes: a worker that keeps writing during the
-    # cancellation grace period can never block on an unread pipe.
+    return env
+
+
+async def _run_worker(
+    arguments: list[str],
+    context: ExecutionContext,
+    stdout_path: Path,
+    stderr_path: Path,
+) -> int:
+    """Run ``python -m aiq_evals.worker ...`` in its own process group.
+
+    Output goes to files rather than pipes, so a worker that keeps writing
+    during the cancellation grace period can never block on an unread pipe.
+    Cancellation and timeout terminate the whole group (SIGINT first).
+    """
+    assert context.worker_python is not None
     try:
         with stdout_path.open('wb') as stdout_file, stderr_path.open('wb') as stderr_file:
             process = await asyncio.create_subprocess_exec(
-                *command,
+                context.worker_python, '-m', 'aiq_evals.worker', *arguments,
                 stdout=stdout_file,
                 stderr=stderr_file,
-                env=env,
+                env=_worker_env(context),
                 start_new_session=(os.name == 'posix'),
             )
             try:
@@ -156,16 +143,84 @@ async def _execute_in_worker(
     finally:
         _redact_file(stdout_path, context.env)
         _redact_file(stderr_path, context.env)
-    if process.returncode != 0:
+    assert process.returncode is not None
+    return process.returncode
+
+
+async def _execute_in_worker(
+    resolved: ResolvedEvaluation,
+    context: ExecutionContext,
+    work_dir: Path,
+) -> EvaluationResult:
+    protocol_dir = work_dir / '.aiq-evals-worker'
+    protocol_dir.mkdir(parents=True, exist_ok=True)
+    resolved_path = protocol_dir / 'resolved.json'
+    result_path = _worker_result_path(work_dir)
+    # Worker diagnostics must survive publication, especially when a native
+    # runner fails after writing partial artifacts.
+    worker_log_dir = work_dir / 'native' / 'aiq_worker'
+    worker_log_dir.mkdir(parents=True, exist_ok=True)
+    stderr_path = worker_log_dir / 'stderr.log'
+    resolved_path.write_text(json.dumps(resolved.to_dict(), indent=2, sort_keys=True) + '\n')
+    returncode = await _run_worker(
+        [
+            'execute',
+            '--resolved', str(resolved_path),
+            '--output-dir', str(work_dir),
+            '--result', str(result_path),
+        ],
+        context,
+        worker_log_dir / 'stdout.log',
+        stderr_path,
+    )
+    if returncode != 0:
         detail = stderr_path.read_text(errors='replace')[-4000:]
-        raise ExecutionError(
-            f'evaluation worker exited with code {process.returncode}: {detail}'
-        )
+        raise ExecutionError(f'evaluation worker exited with code {returncode}: {detail}')
     try:
         payload = json.loads(result_path.read_text())
     except (FileNotFoundError, json.JSONDecodeError) as ex:
         raise ExecutionError('evaluation worker did not produce a valid result protocol file') from ex
     return EvaluationResult.from_dict(payload)
+
+
+async def resolve_evaluation_async(
+    request: EvaluationRequest,
+    context: ExecutionContext | None = None,
+) -> ResolvedEvaluation:
+    """Resolve in ``context.worker_python`` when given, else in this process.
+
+    Resolution imports the native engine (and task/plugin code), so it belongs
+    in the engine's worker environment (ADR-0002). Errors raised there keep
+    their aiq-evals error type.
+    """
+    if context is None or context.worker_python is None:
+        return resolve_evaluation(request)
+    validate_request(request)
+    with tempfile.TemporaryDirectory(prefix='aiq-evals-resolve-') as scratch:
+        scratch_dir = Path(scratch)
+        request_path = scratch_dir / 'request.json'
+        result_path = scratch_dir / 'resolved.json'
+        request_path.write_text(json.dumps(request.to_dict(), sort_keys=True))
+        stderr_path = scratch_dir / 'stderr.log'
+        returncode = await _run_worker(
+            ['resolve', '--request', str(request_path), '--result', str(result_path)],
+            context,
+            scratch_dir / 'stdout.log',
+            stderr_path,
+        )
+        try:
+            payload = json.loads(result_path.read_text())
+        except (FileNotFoundError, json.JSONDecodeError) as ex:
+            detail = stderr_path.read_text(errors='replace')[-4000:]
+            raise ExecutionError(
+                f'resolution worker exited with code {returncode} without a result: {detail}'
+            ) from ex
+    if 'error' in payload:
+        error_cls = getattr(errors_module, str(payload['error'].get('type')), None)
+        if not (isinstance(error_cls, type) and issubclass(error_cls, errors_module.AiqEvalsError)):
+            error_cls = ExecutionError
+        raise error_cls(str(payload['error'].get('message')))
+    return ResolvedEvaluation.from_dict(payload['resolved'])
 
 
 def _cancelled_result(resolved: ResolvedEvaluation, work_dir: Path, detail: str) -> EvaluationResult:

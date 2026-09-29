@@ -47,6 +47,7 @@ turn that record into a MAGNET claim or verdict.
 - [ADR-0006](0006-scheduler-and-magnet-boundary.md): `aiq-evals` owns one evaluation; MAGNET/kwdagger owns campaign scheduling and claim projection.
 - [ADR-0007](0007-normalized-schema-strategy.md): retain native truth and decide EEE from fixture evidence.
 - [ADR-0008](0008-normalized-schema-fixture-decision.md): fixture gaps require the independent normalized result schema for Phase 1.
+- [ADR-0009](0009-phase6-api-schema-freeze.md): the first public API/schema is frozen after all three engines pass the shared conformance suite.
 
 ## Reviewer invariants
 
@@ -72,5 +73,6 @@ explicit replacement ADR:
 - **Deferred**: intentionally unresolved until named evidence exists.
 - **Superseded**: retained for history; a newer ADR is authoritative.
 
-The current Python API and schema remain provisional until the three production
-adapters pass conformance and the phase-6 freeze is recorded.
+The phase-6 freeze is recorded in ADR-0009: the `aiq_evals` exports and the
+v1 request/result/manifest schemas are now stable. Adapter internals are not
+public API.

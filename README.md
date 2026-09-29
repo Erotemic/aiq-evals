@@ -32,8 +32,8 @@ Phase 1 (native validation) closed on 2026-09-29. The adapters passed native
 fixtures at verified pins: Inspect `inspect-ai==0.3.272`, OLMo Eval
 `73ade80e24f796af55caeb8fd7b75a7f3fd607fd` (isolated worker checkout), and
 HELM `crfm-helm==0.5.14` through MAGNET. Support is limited to the tested
-combinations in `docs/planning/phase1-capabilities.md`. The public API and schema
-remain provisional until the phase-6 conformance freeze.
+combinations in `docs/planning/phase1-capabilities.md`. All three engines pass
+the shared conformance suite, and the first public API/schema is frozen (ADR-0009).
 
 Implemented now:
 
@@ -59,9 +59,7 @@ Implemented now:
   expansion, executing `helm.benchmark.run` in a worker, and importing native
   (including MAGNET-materialized) run directories.
 
-The implementation is intentionally provisional. Remaining work, including
-reuse/`ensure` semantics and conformance, is tracked in
-`docs/planning/aiq-evals-plan.md`. MAGNET integration is tracked separately in
+Remaining work is tracked in `docs/planning/aiq-evals-plan.md`. MAGNET integration is tracked separately in
 `docs/planning/aiq-magnet-integration-plan.md`.
 
 ## Bootstrap
@@ -119,6 +117,7 @@ worker interpreter can be selected without adding the engine to core:
 ```bash
 aiq-evals resolve request.json
 aiq-evals run request.json --output run-dir --worker-python /path/to/worker/python
+aiq-evals ensure request.json --store results/ --worker-python /path/to/worker/python
 aiq-evals show run-dir
 ```
 
