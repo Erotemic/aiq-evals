@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "engine": "olmo_eval",
-  "task": "aiq_example_local",
-  "task_revision": "example-v1",
+  "engine": "inspect_ai",
+  "task": "python:magnet_evals.examples.inspect_tasks:tool_task",
+  "task_revision": null,
   "data_revision": "example-v1",
   "models": [
     {
       "role": "primary",
-      "model": "mock",
-      "provider": "mock",
+      "model": "local",
+      "provider": "aiq_example",
       "revision": "local-v1",
       "cache_token": null,
       "provider_options": {}
@@ -17,9 +17,8 @@
   "task_options": {},
   "generation": {},
   "engine_options": {
-    "upstream_revision": "73ade80e24f796af55caeb8fd7b75a7f3fd607fd",
-    "task_modules": [
-      "magnet_evals.examples.olmo_tasks"
+    "registration_modules": [
+      "magnet_evals.examples.inspect_tasks"
     ]
   }
 }

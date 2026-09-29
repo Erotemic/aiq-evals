@@ -27,4 +27,5 @@ for attempt in 1 2 3; do
   sleep $((attempt * 10))
 done
 PATH="$VENV/bin:$PATH" "$VENV/bin/python" -m pytest -q \
-  tests/native/test_helm_adapter_native.py tests/native/test_helm_native.py tests/native/test_conformance.py
+  tests/native/test_helm_adapter_native.py tests/native/test_helm_native.py tests/native/test_conformance.py \
+  tests/native/test_examples_native.py

@@ -1,20 +1,27 @@
 {
   "schema_version": 1,
   "engine": "inspect_ai",
-  "task": "python:tests.native.inspect_fixture:tool_task",
+  "task": "python:magnet_evals.examples.inspect_tasks:tool_task",
   "task_revision": null,
-  "data_revision": "fixture-v1",
+  "data_revision": "example-v1",
   "models": [
     {
       "role": "primary",
       "model": "gpt-4o-mini",
       "provider": "openai",
-      "revision": "<immutable-endpoint-revision-or-cache-token>",
+      "revision": "example-endpoint-v1",
       "cache_token": null,
-      "provider_options": {"base_url": "http://127.0.0.1:8000/v1", "responses_api": false}
+      "provider_options": {
+        "base_url": "http://127.0.0.1:8000/v1",
+        "responses_api": false
+      }
     }
   ],
   "task_options": {},
   "generation": {},
-  "engine_options": {"required_secrets": ["OPENAI_API_KEY"]}
+  "engine_options": {
+    "required_secrets": [
+      "OPENAI_API_KEY"
+    ]
+  }
 }

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "engine": "olmo_eval",
+  "task": "aiq_example_tool",
+  "task_revision": "example-v1",
+  "data_revision": "example-v1",
+  "models": [
+    {
+      "role": "primary",
+      "model": "gpt-4o-mini",
+      "provider": "litellm",
+      "revision": "example-endpoint-v1",
+      "cache_token": null,
+      "provider_options": {
+        "base_url": "http://127.0.0.1:8000/v1"
+      }
+    }
+  ],
+  "task_options": {},
+  "generation": {},
+  "engine_options": {
+    "upstream_revision": "73ade80e24f796af55caeb8fd7b75a7f3fd607fd",
+    "task_modules": [
+      "magnet_evals.examples.olmo_tasks"
+    ],
+    "required_secrets": [
+      "OPENAI_API_KEY"
+    ],
+    "harness_config": {
+      "scaffold": "openai_agents",
+      "tools": [
+        "aiq_example_double"
+      ],
+      "scaffold_kwargs": {
+        "enable_compaction": false
+      }
+    }
+  }
+}

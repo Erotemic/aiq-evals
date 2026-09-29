@@ -1,14 +1,24 @@
 {
   "schema_version": 1,
   "engine": "inspect_ai",
-  "task": "python:tests.native.inspect_fixture:generation",
+  "task": "python:magnet_evals.examples.inspect_tasks:generation",
   "task_revision": null,
-  "data_revision": "fixture-v1",
+  "data_revision": "example-v1",
   "models": [
-    {"role": "primary", "model": "local", "provider": "fixture", "revision": "local-v1",
-     "cache_token": null, "provider_options": {}}
+    {
+      "role": "primary",
+      "model": "local",
+      "provider": "aiq_example",
+      "revision": "local-v1",
+      "cache_token": null,
+      "provider_options": {}
+    }
   ],
   "task_options": {},
   "generation": {},
-  "engine_options": {"registration_modules": ["tests.native.inspect_fixture"]}
+  "engine_options": {
+    "registration_modules": [
+      "magnet_evals.examples.inspect_tasks"
+    ]
+  }
 }

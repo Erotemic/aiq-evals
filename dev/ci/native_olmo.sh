@@ -18,4 +18,4 @@ for attempt in 1 2 3; do
 done
 uv pip install -q --python "$CHECKOUT/.venv/bin/python" pytest
 PYTHONPATH="$PWD" "$CHECKOUT/.venv/bin/python" -m pytest -q \
-  tests/native/test_olmo_native.py tests/native/test_conformance.py
+  tests/native/test_olmo_native.py tests/native/test_conformance.py tests/native/test_examples_native.py
