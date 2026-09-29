@@ -32,5 +32,5 @@ without any evaluation engine installed. EEE interoperability may be added later
 as a converter, after its model mapping and scientific-field gaps are addressed;
 it is not a core dependency.
 
-This decision does not freeze the schema API before the later planned contract
-review. It only resolves the Phase 1 EEE choice from tested evidence.
+This decision does not freeze the schema (see ADR-0010). It only resolves the
+Phase 1 EEE choice from tested evidence.

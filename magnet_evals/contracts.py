@@ -369,8 +369,8 @@ class MetricRecord:
             'value': self.value,
             'denominator': self.denominator,
         }
-        # ``score`` and ``group`` were added during the provisional pre-freeze
-        # contract. Omit them when absent so phase-2 frozen fixtures retain their
+        # ``score`` and ``group`` were added after the phase-2 fixtures were
+        # captured. Omit them when absent so those fixtures retain their
         # byte-derived normalized artifact identity.
         if self.score is not None:
             data['score'] = self.score

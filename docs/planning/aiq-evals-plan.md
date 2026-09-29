@@ -1,6 +1,6 @@
 # aiq-evals implementation plan
 
-Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-8 implemented; all three engines pass the shared conformance suite; first public API/schema frozen (ADR-0009); release gate G1-G7 pass locally, G8 (hosted CI) pending.
+Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-8 implemented; all three engines pass the shared conformance suite; no API/schema freeze before a PyPI release (ADR-0010, superseding ADR-0009); release gate G1-G7 pass locally, G8 (hosted CI) pending.
 
 This is the standalone refinement of the earlier MAGNET backend-agnostic
 evaluation plan. It moves generic evaluation execution, import, identity, and
@@ -56,7 +56,7 @@ The package owns:
 See `aiq-magnet-integration-plan.md` for everything deliberately outside this
 repository.
 
-## Phase 1 - Verify native APIs and freeze no public runtime contract yet
+## Phase 1 - Verify native APIs before building the runtime contract
 
 The purpose of phase 1 is to replace assumptions with captured native evidence.
 No engine capability is supported merely because documentation or an older
@@ -190,8 +190,8 @@ Status: **closed 2026-09-29**. See the closure record in `phase1-evidence.md`.
 
 ## Phase 2 - Shared contracts, identity, store, and engine-free artifacts
 
-Implementation status: PRESENT, PROVISIONAL. Native phase-1 evidence is still
-required before the public contract can freeze.
+Implementation status: PRESENT. Not frozen: the contract changes as the MAGNET
+integration requires until a PyPI release (ADR-0010).
 
 - [x] Define versioned `EvaluationRequest`, `ResolvedEvaluation`, and result contracts.
 - [x] Define `ExecutionContext` separately from measurement inputs.
@@ -207,11 +207,13 @@ required before the public contract can freeze.
 - [x] Implement atomic terminal run publication.
 - [x] Implement native artifact inventory/checksums and normalized artifact identity lineage.
 - [x] Implement engine-free run/sample/metric readers.
-- [x] Implement schema version checks, conservative future-version rejection, and a frozen v1 fixture.
+- [x] Implement schema version checks, conservative future-version rejection, and a v1 regression fixture.
 - [x] Keep MAGNET metric selection and evidence policy out of measurement identity.
-- [ ] Add explicit migration code when a schema-N+1 actually exists; v1 readers currently reject unknown versions.
-  (Not triggered: no schema N+1 exists. ADR-0009 requires it with any breaking change.)
-- [x] Freeze the phase-2 public API only after OLMo, Inspect, and HELM production adapters pass (ADR-0009).
+- ~~Add explicit migration code when a schema-N+1 exists.~~ Not required before a
+  PyPI release (ADR-0010): an unreleased schema change regenerates the fixtures
+  instead. Readers still reject unknown versions.
+- ~~Freeze the phase-2 public API after the production adapters pass (ADR-0009).~~
+  Withdrawn: ADR-0010 supersedes ADR-0009; nothing is frozen before a PyPI release.
 
 The dependency-free result structures are a provisional normalized envelope, not
 a declaration that `aiq-evals` should replace Every Eval Ever. P1-08 still decides
@@ -311,8 +313,9 @@ Requirements:
 - [x] stale success markers cannot hide failed/incomplete attempts;
 - [x] no engine dependency is required to read a normalized result.
 
-- [x] Freeze the first public API/schema only after HELM, OLMo Eval, and Inspect all
-  pass the same conformance suite (`tests/native/test_conformance.py`; ADR-0009).
+- [x] HELM, OLMo Eval, and Inspect all pass the same conformance suite
+  (`tests/native/test_conformance.py`). The freeze ADR-0009 recorded on that
+  basis is superseded by ADR-0010: no freeze before a PyPI release.
 
 ## Phase 7 - Agentic operational/security behavior
 
@@ -343,7 +346,8 @@ Implementation status: DONE locally; hosted CI (G8 in `../release-gate.md`) pend
   `[tool.xcookie]`: `tests.yml` for lint and the wheel tests, `checks.yml` with
   native source checks calling `dev/ci/*.sh`; every job was reproduced locally
   from fresh environments; no hosted run yet);
-- [x] retain frozen schema fixtures across releases (`release_gate` tests; ADR-0009);
+- [x] retain schema regression fixtures (`release_gate` tests); at a PyPI release
+  they become the frozen compatibility fixtures (ADR-0010);
 - [x] keep paid/GPU/sandbox/external tests separate from deterministic CI
   (markers `paid`, `gpu`, `docker_sandbox`, `external`; CI runs deterministic suites only);
 - [x] classify external failures and bound retries (`external-unavailable`

@@ -37,6 +37,6 @@ been selected.
 ## Consequences
 
 Reviewers should not reject provisional result-structure changes merely because
-they change the pre-freeze schema. They should reject changes that erase native
+they change the unreleased schema (ADR-0010). They should reject changes that erase native
 information, make migration impossible, or prematurely declare the normalization
 question settled without fixture evidence.

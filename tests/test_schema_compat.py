@@ -10,7 +10,9 @@ from magnet_evals.errors import ArtifactError, RequestValidationError
 FIXTURE = Path(__file__).parent / 'fixtures' / 'run-v1'
 
 
-def test_frozen_schema_v1_bundle_remains_engine_free_readable():
+def test_schema_v1_regression_bundle_is_engine_free_readable():
+    # A regression fixture, not a frozen contract (ADR-0010): regenerate it in
+    # the same change as a schema change, and review the diff.
     bundle = RunBundle.load(FIXTURE)
     assert bundle.complete
     assert bundle.result.engine == 'olmo_eval'

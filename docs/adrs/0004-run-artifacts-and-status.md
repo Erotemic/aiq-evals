@@ -23,8 +23,8 @@ normalized/
 RUN_COMPLETE          # terminal successful publication marker, if used
 ```
 
-Exact filenames remain a versioned implementation detail until the public schema
-freeze, but the semantic separation is mandatory.
+Exact filenames remain a versioned implementation detail until a PyPI release
+freezes them (ADR-0010), but the semantic separation is mandatory.
 
 Track at least these concepts independently:
 

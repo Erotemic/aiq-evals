@@ -1,6 +1,8 @@
 # ADR-0009: Freeze the first public API and schemas after cross-engine conformance
 
-Status: Accepted (recorded 2026-09-29 under the plan's phase-6 criterion)
+Status: Superseded by [ADR-0010](0010-no-freeze-before-release.md) (2026-09-29).
+Originally accepted 2026-09-29 under the plan's phase-6 criterion; retained for history.
+Nothing below constrains current work.
 
 ## Context
 

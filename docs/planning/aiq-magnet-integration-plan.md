@@ -132,7 +132,8 @@ Using representative multi-result fixtures:
 - [ ] test ambiguous selector rejection;
 - [ ] prove no silent averaging of unrelated results.
 
-Repeat with production adapters before freezing the public integration schema.
+Repeat with production adapters. Nothing on either side is frozen before a PyPI
+release (aiq-magnet-evals ADR-0010).
 
 ## M7 - Recipes and mixed-engine examples
 

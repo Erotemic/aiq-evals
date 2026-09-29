@@ -1,7 +1,8 @@
 # Phase-6 evidence: reuse/ensure semantics and conformance
 
-Status: IMPLEMENTED; all three engines pass the shared native conformance suite;
-first public API/schema frozen (ADR-0009). Date 2026-09-29.
+Status: IMPLEMENTED; all three engines pass the shared native conformance suite.
+The API/schema freeze first recorded here (ADR-0009) is superseded by ADR-0010:
+nothing is frozen before a PyPI release. Date 2026-09-29.
 Evidence producer: Claude Opus 5.5 (Anthropic, `claude-opus-5-5`, 1M context).
 
 ## Implementation

@@ -21,7 +21,6 @@ QUARANTINE_FILE = Path(__file__).with_name('quarantine.txt')
 RELEASE_GATE_MODULES = {
     'test_conformance.py',
     'test_native_fixture_regression.py',
-    'test_public_api_freeze.py',
     'test_schema_compat.py',
 }
 _NETWORK_ERRORS = (ConnectionError, TimeoutError, socket.gaierror, socket.timeout)

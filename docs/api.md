@@ -1,7 +1,8 @@
-# aiq-evals API, CLI, and contracts (v1)
+# aiq-magnet-evals API, CLI, and contracts
 
-This surface is frozen by ADR-0009. Adapter modules (`magnet_evals.backends.*`) and
-the worker protocol are internal. What each engine/task/provider combination
+This surface is not frozen: it changes as the MAGNET integration requires, until
+a PyPI release freezes it (ADR-0010). Adapter modules (`magnet_evals.backends.*`)
+and the worker protocol are internal. What each engine/task/provider combination
 actually supports is recorded in `planning/phase1-capabilities.md`.
 
 ## Python API (`import magnet_evals`)

@@ -20,8 +20,8 @@ execute(resolved, context) -> EvaluationResult
 import_results(source, context) -> EvaluationResult
 ```
 
-Names/signatures may evolve before the phase-6 API freeze, but these responsibility
-boundaries should remain.
+Names/signatures may evolve until a PyPI release freezes them (ADR-0010), but
+these responsibility boundaries should remain.
 
 Adapters must:
 

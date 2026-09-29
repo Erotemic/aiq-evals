@@ -12,5 +12,5 @@ evidence, and open gates.
 - `phase4-evidence.md` - Inspect adapter implementation evidence and native gates.
 - `phase1-capabilities.md` - combination-level native capability matrix.
 - `phase5-evidence.md` - HELM adapter design and native evidence.
-- `phase6-evidence.md` - ensure/reuse semantics, conformance, and the API freeze.
+- `phase6-evidence.md` - ensure/reuse semantics and conformance.
 - `phase7-evidence.md` - agentic operational behavior; see also `../security-review.md`.

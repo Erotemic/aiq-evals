@@ -47,7 +47,11 @@ turn that record into a MAGNET claim or verdict.
 - [ADR-0006](0006-scheduler-and-magnet-boundary.md): `aiq-evals` owns one evaluation; MAGNET/kwdagger owns campaign scheduling and claim projection.
 - [ADR-0007](0007-normalized-schema-strategy.md): retain native truth and decide EEE from fixture evidence.
 - [ADR-0008](0008-normalized-schema-fixture-decision.md): fixture gaps require the independent normalized result schema for Phase 1.
-- [ADR-0009](0009-phase6-api-schema-freeze.md): the first public API/schema is frozen after all three engines pass the shared conformance suite.
+- [ADR-0010](0010-no-freeze-before-release.md): no API/schema freeze until a PyPI release; data-safety rules (version rejection, identity algorithms, tamper detection) stay.
+
+## Superseded decisions
+
+- [ADR-0009](0009-phase6-api-schema-freeze.md): froze the API/schema after engine conformance, before any consumer existed. Superseded by ADR-0010.
 
 ## Reviewer invariants
 
@@ -69,10 +73,11 @@ explicit replacement ADR:
 ## Decision status vocabulary
 
 - **Accepted**: part of the target architecture. Change through a superseding ADR.
-- **Provisional**: the direction is intentional but the public API/schema may still change before the phase-6 freeze.
+- **Provisional**: the direction is intentional but the public API/schema may still change (nothing is frozen before a PyPI release; ADR-0010).
 - **Deferred**: intentionally unresolved until named evidence exists.
 - **Superseded**: retained for history; a newer ADR is authoritative.
 
-The phase-6 freeze is recorded in ADR-0009: the `magnet_evals` exports and the
-v1 request/result/manifest schemas are now stable. Adapter internals are not
-public API.
+No public surface is frozen (ADR-0010). The `magnet_evals` exports, schemas,
+store layout, and CLI change when the MAGNET integration or native evidence
+shows they should; the first PyPI release records whatever is frozen then.
+Adapter internals and the worker protocol are never public API.

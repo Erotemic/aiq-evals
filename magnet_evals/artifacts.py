@@ -272,14 +272,14 @@ def publish_run(
             'native_artifacts': [ref.to_dict() for ref in native_refs],
             'native_artifact_identity': native_artifact_identity,
             'normalized_artifact_identity': normalized_artifact_identity,
-            # Integrity of the bundle's own metadata files (added after the v1
-            # freeze as an optional field; bundles without it still load).
+            # Integrity of the bundle's own metadata files (optional when
+            # loading: older bundles without it still load).
             'metadata_checksums': {
                 name: sha256_file(staging / name) for name in METADATA_FILES
             },
         }
-        # Optional (ADR-0009 allows additions): symlink handling is recorded so
-        # a reader can tell which native paths were followed or left out.
+        # Optional: symlink handling is recorded so a reader can tell which
+        # native paths were followed or left out.
         manifest.update(
             normalize_json_object({key: value for key, value in dict(manifest_notes or {}).items() if value})
         )

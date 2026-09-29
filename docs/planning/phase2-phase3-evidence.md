@@ -37,7 +37,7 @@ Behavior covered by the repository tests includes:
 - conservative rejection of unknown future manifest/result schema versions;
 - synchronous facade rejection inside an active event loop.
 
-Remaining before phase-2 API freeze:
+Open at the time of this record (the freeze itself was later withdrawn; ADR-0010):
 
 - native evidence from all three production adapters;
 - EEE normalization decision;

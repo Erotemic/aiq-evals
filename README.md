@@ -33,7 +33,7 @@ fixtures at verified pins: Inspect `inspect-ai==0.3.272`, OLMo Eval
 `73ade80e24f796af55caeb8fd7b75a7f3fd607fd` (isolated worker checkout), and
 HELM `crfm-helm==0.5.14` through MAGNET. Support is limited to the tested
 combinations in `docs/planning/phase1-capabilities.md`. All three engines pass
-the shared conformance suite, and the first public API/schema is frozen (ADR-0009).
+the shared conformance suite. Nothing is frozen before a PyPI release (ADR-0010).
 
 Implemented now:
 
@@ -45,7 +45,7 @@ Implemented now:
 - isolated worker-process execution with timeout/cancellation termination;
 - atomic terminal run bundles with native checksums and normalized artifact identity;
 - a content-addressed filesystem result store and engine-free readers;
-- a frozen schema-v1 compatibility fixture;
+- a schema-v1 regression fixture and conservative rejection of unknown schema versions;
 - an experimental OLMo Eval adapter using `HarnessConfig`, `AsyncEvalRunner.validate()`,
   and `run_async()`;
 - OLMo nested metric/scorer preservation, coverage accounting, predictions/trajectories,
