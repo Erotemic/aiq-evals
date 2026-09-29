@@ -1,5 +1,13 @@
 # Phase-1 evidence ledger
 
+> **Current status: Phase 1 CLOSED (2026-09-29).** Every P1 task is done; the
+> MAGNET cardinality spike moved to integration gate M6. For the closure table,
+> read "follow-up 3" → "P1-10: Phase 1 closed" below. For the per-task summary,
+> run `aiq-evals phase1-status`. The "Repository bootstrap evidence" and "Runtime
+> items" sections are the original pre-campaign snapshot. Their `Status:` lines
+> are marked *(bootstrap snapshot, superseded)* and are kept for history only.
+> Records are append-only and read in date order.
+
 This is the canonical record for phase-1 validation. The repository-bootstrap
 snapshot below predates the 2026-09-29 native campaign; later campaign records
 supersede its OPEN status labels. A checkbox is not complete
@@ -32,7 +40,7 @@ them with only the eventual green attempt.
 
 ### P1-01 - evidence ledger
 
-Status: COMPLETE for repository scaffolding.
+Status *(bootstrap snapshot, superseded)*: COMPLETE for repository scaffolding.
 
 Evidence:
 
@@ -44,7 +52,7 @@ No native engine behavior is implied by this completion.
 
 ### P1-02 - pins and worker instructions
 
-Status: PARTIAL.
+Status *(bootstrap snapshot, superseded)*: PARTIAL.
 
 Implemented evidence tooling:
 
@@ -71,7 +79,7 @@ fixture suite below.
 
 ### P1-03 - OLMo Eval generation + tool execution
 
-Status: OPEN.
+Status *(bootstrap snapshot, superseded)*: OPEN.
 
 Required artifacts:
 
@@ -83,7 +91,7 @@ Required artifacts:
 
 ### P1-04 - Inspect generation + tool execution
 
-Status: IMPLEMENTATION PRESENT; NATIVE EVIDENCE OPEN.
+Status *(bootstrap snapshot, superseded)*: IMPLEMENTATION PRESENT; NATIVE EVIDENCE OPEN.
 
 The phase-4 adapter targets candidate release `inspect-ai==0.3.272` through the
 public eval/log APIs. Fake-native and owned-worker contract tests are recorded in
@@ -99,7 +107,7 @@ Required artifacts:
 
 ### P1-05 - HELM compute/reuse/import
 
-Status: OPEN.
+Status *(bootstrap snapshot, superseded)*: OPEN.
 
 Required artifacts:
 
@@ -111,20 +119,20 @@ Required artifacts:
 
 ### P1-06 - async/worker/cleanup
 
-Status: OPEN.
+Status *(bootstrap snapshot, superseded)*: OPEN.
 
 Must be demonstrated with selected native pins.
 
 ### P1-07 - capability matrix
 
-Status: PARTIAL.
+Status *(bootstrap snapshot, superseded)*: PARTIAL.
 
 The matrix categories are defined in `aiq-evals-plan.md`; no runtime capability
 is yet marked supported in this new repository.
 
 ### P1-08 - EEE normalization decision
 
-Status: OPEN.
+Status *(bootstrap snapshot, superseded)*: OPEN.
 
 The supplied `eval_audit` source demonstrates that EEE was already considered a
 normalization substrate, but its `every_eval_ever` submodule contents were not
@@ -134,14 +142,14 @@ run fixture conversions before deciding.
 
 ### P1-09 - OLMo Eval packaging go/no-go
 
-Status: OPEN.
+Status *(bootstrap snapshot, superseded)*: OPEN.
 
 Default hypothesis: prefer an isolated locked upstream worker if co-installation
 is not cleanly reproducible. This is not yet a decision.
 
 ### P1-10 - acceptance gate
 
-Status: BLOCKED by P1-02 through P1-09 runtime evidence and the separate MAGNET
+Status *(bootstrap snapshot, superseded)*: BLOCKED by P1-02 through P1-09 runtime evidence and the separate MAGNET
 cardinality experiment.
 
 ## Local build-environment observation

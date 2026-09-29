@@ -34,9 +34,10 @@ from aiq_evals.contracts import (
     MetricRecord,
     ResultRecord,
     SampleRecord,
+    as_execution_status,
 )
 from aiq_evals.errors import ArtifactError
-from aiq_evals.jsonutil import normalize_json, omitted_fields
+from aiq_evals.jsonutil import normalize_json_object, omitted_fields
 
 RUN_SPEC = 'run_spec.json'
 STATS = 'stats.json'
@@ -247,7 +248,7 @@ def normalize_run_dir(
         coverage=coverage,
         native_status=native_status,
         error=None if present[STATS] else f'{STATS} is missing',
-        native_config=normalize_json(
+        native_config=normalize_json_object(
             {
                 'run_spec_name': run_spec.get('name'),
                 'scenario_spec': run_spec.get('scenario_spec'),
@@ -313,8 +314,8 @@ def normalize_helm_runs(
     return EvaluationResult(
         engine='helm',
         identity=identity,
-        status=status,  # type: ignore[arg-type]
+        status=as_execution_status(status),
         records=tuple(records),
         samples=tuple(samples),
-        diagnostics=normalize_json(diagnostics),
+        diagnostics=normalize_json_object(diagnostics),
     )

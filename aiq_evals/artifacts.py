@@ -17,7 +17,13 @@ from aiq_evals.contracts import (
     ResolvedEvaluation,
 )
 from aiq_evals.errors import ArtifactError, PublicationError
-from aiq_evals.jsonutil import JSONValue, normalize_json, sha256_file, sha256_json
+from aiq_evals.jsonutil import (
+    JSONValue,
+    normalize_json,
+    normalize_json_object,
+    sha256_file,
+    sha256_json,
+)
 
 RUN_COMPLETE = 'RUN_COMPLETE'
 METADATA_FILES = ('resolved_request.json', 'results.json', 'attempt.json')
@@ -274,8 +280,10 @@ def publish_run(
         }
         # Optional (ADR-0009 allows additions): symlink handling is recorded so
         # a reader can tell which native paths were followed or left out.
-        manifest.update({key: value for key, value in dict(manifest_notes or {}).items() if value})
-        manifest.update({key: value for key, value in link_notes.items() if value})
+        manifest.update(
+            normalize_json_object({key: value for key, value in dict(manifest_notes or {}).items() if value})
+        )
+        manifest.update(normalize_json_object({key: value for key, value in link_notes.items() if value}))
         _write_json(staging / 'run_manifest.json', manifest)
         (staging / ATTEMPT_TERMINAL).write_text(result.status + '\n')
         if result.status == 'succeeded':

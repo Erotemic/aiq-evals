@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal, Mapping
+from typing import Any, Literal, Mapping, cast, get_args
 
 from aiq_evals.errors import RequestValidationError
 from aiq_evals.jsonutil import (
@@ -16,6 +16,7 @@ from aiq_evals.jsonutil import (
     check_secret_name_list,
     find_secret_paths,
     normalize_json,
+    normalize_json_object,
 )
 
 REQUEST_SCHEMA_VERSION = 1
@@ -24,6 +25,21 @@ MANIFEST_SCHEMA_VERSION = 1
 
 ExecutionStatus = Literal['succeeded', 'failed', 'cancelled', 'incomplete']
 CoverageStatus = Literal['complete', 'partial', 'unknown']
+
+
+def as_execution_status(value: object) -> ExecutionStatus:
+    """Validate and narrow a status string (e.g. native or deserialized)."""
+    text = str(value)
+    if text not in get_args(ExecutionStatus):
+        raise RequestValidationError(f'invalid execution status {text!r}')
+    return cast(ExecutionStatus, text)
+
+
+def as_coverage_status(value: object) -> CoverageStatus:
+    text = str(value)
+    if text not in get_args(CoverageStatus):
+        raise RequestValidationError(f'invalid coverage status {text!r}')
+    return cast(CoverageStatus, text)
 
 
 def _reject_unknown(data: Mapping[str, Any], allowed: set[str], label: str) -> None:
@@ -193,12 +209,14 @@ class ExecutionContext:
 
     def public_dict(self) -> dict[str, JSONValue]:
         """Return persistable context metadata without secret values."""
-        return {
-            'output_dir': str(self.output_dir),
-            'env_keys': sorted(self.env),
-            'worker_python': self.worker_python,
-            'timeout_seconds': self.timeout_seconds,
-        }
+        return normalize_json_object(
+            {
+                'output_dir': str(self.output_dir),
+                'env_keys': sorted(self.env),
+                'worker_python': self.worker_python,
+                'timeout_seconds': self.timeout_seconds,
+            }
+        )
 
 
 @dataclass(frozen=True)
@@ -302,7 +320,7 @@ class CoverageFacts:
     def from_dict(cls, data: Mapping[str, Any]) -> 'CoverageFacts':
         _reject_unknown(data, {'status', 'expected', 'processed', 'saved', 'failed'}, 'coverage')
         return cls(
-            status=str(data.get('status', 'unknown')),  # type: ignore[arg-type]
+            status=as_coverage_status(data.get('status', 'unknown')),
             expected=_nonnegative_int(data.get('expected'), label='coverage.expected'),
             processed=_nonnegative_int(data.get('processed'), label='coverage.processed'),
             saved=_nonnegative_int(data.get('saved'), label='coverage.saved'),
@@ -570,7 +588,7 @@ class EvaluationResult:
             schema_version=int(data.get('schema_version', RESULT_SCHEMA_VERSION)),
             engine=str(data['engine']),
             identity=MeasurementIdentity.from_dict(data['identity']),
-            status=str(data['status']),  # type: ignore[arg-type]
+            status=as_execution_status(data['status']),
             records=tuple(ResultRecord.from_dict(x) for x in data.get('records', [])),
             samples=tuple(SampleRecord.from_dict(x) for x in data.get('samples', [])),
             artifacts=tuple(ArtifactReference.from_dict(x) for x in data.get('artifacts', [])),

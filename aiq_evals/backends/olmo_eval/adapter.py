@@ -37,7 +37,7 @@ from aiq_evals.errors import (
     RequestValidationError,
 )
 from aiq_evals.identity import adapter_source_digest, build_measurement_identity
-from aiq_evals.jsonutil import normalize_json, sha256_file
+from aiq_evals.jsonutil import normalize_json_object, sha256_file
 from aiq_evals.probes.source import verify_engine_revision
 
 # 0.2.0: native phase-1 fixes (worker registration, task paths, coverage of
@@ -68,7 +68,8 @@ def _distribution_version() -> str | None:
         return None
 
 
-def _native_symbols() -> tuple[type, type, type, type, Any]:
+def _native_symbols() -> tuple[Any, Any, Any, Any, Any]:
+    # Untyped on purpose: these are optional upstream classes resolved at runtime.
     """Load the narrow upstream API surface phase 3 supports."""
     try:
         config_mod = importlib.import_module('olmo_eval.harness.config')
@@ -260,7 +261,7 @@ def _validate_import_source(
         records=result.records,
         samples=result.samples,
         artifacts=result.artifacts,
-        diagnostics=normalize_json(diagnostics),
+        diagnostics=normalize_json_object(diagnostics),
     )
 
 
@@ -427,14 +428,16 @@ class OlmoEvalBackend:
             runner.validate()
             if modules:
                 worker_module = importlib.import_module('olmo_eval.runners.asynq.workers')
-                original_worker = worker_module.inference_worker
-                worker_module.inference_worker = partial(
-                    inference_worker_with_registration, modules
+                original_worker = getattr(worker_module, 'inference_worker')
+                setattr(
+                    worker_module,
+                    'inference_worker',
+                    partial(inference_worker_with_registration, modules),
                 )
                 try:
                     raw = await runner.run_async()
                 finally:
-                    worker_module.inference_worker = original_worker
+                    setattr(worker_module, 'inference_worker', original_worker)
             else:
                 raw = await runner.run_async()
             if not isinstance(raw, Mapping):
@@ -473,7 +476,7 @@ class OlmoEvalBackend:
                 records=result.records,
                 samples=result.samples,
                 artifacts=result.artifacts,
-                diagnostics=normalize_json(diagnostics),
+                diagnostics=normalize_json_object(diagnostics),
             )
 
     def import_results(

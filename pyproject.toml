@@ -28,6 +28,7 @@ inspect = [
 tests = [
   "pytest>=8.1.1",
   "pytest-cov>=5",
+  "xdoctest>=1.1.5",
 ]
 dev = [
   "aiq-evals[tests]",
@@ -85,3 +86,27 @@ ci_pypy_versions = []
 use_setup_py = false
 use_pyproject_requirements = true
 linter = true
+
+# Engine-native acceptance + conformance jobs (plan phase 8). Each runs a
+# dev/ci script so local runs match CI; see docs/release-gate.md.
+[tool.xcookie.ci_source_checks.native-inspect]
+name = "Native Inspect (inspect-ai 0.3.272)"
+python_version = "3.11"
+setup_commands = ["python -m pip install uv"]
+commands = ["dev/ci/native_inspect.sh"]
+
+[tool.xcookie.ci_source_checks.native-olmo]
+name = "Native OLMo Eval (73ade80, locked worker)"
+python_version = "3.12"
+setup_commands = ["python -m pip install uv"]
+commands = ["dev/ci/native_olmo.sh"]
+
+[tool.xcookie.ci_source_checks.native-helm]
+name = "Native HELM (crfm-helm 0.5.14)"
+python_version = "3.12"
+setup_commands = ["python -m pip install uv"]
+commands = ["dev/ci/native_helm.sh"]
+
+[tool.xcookie.ci_source_checks.native-helm.env]
+MAGNET_REPO = "https://github.com/AIQ-Kitware/aiq-magnet.git"
+MAGNET_REV = "7bb105ab1c85bfaa01bf68c97ff7523332479ee4"

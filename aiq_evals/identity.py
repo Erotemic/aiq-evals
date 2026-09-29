@@ -7,14 +7,14 @@ from pathlib import Path
 from typing import Any
 
 from aiq_evals.contracts import EvaluationRequest, MeasurementIdentity
-from aiq_evals.jsonutil import normalize_json, sha256_file, sha256_json
+from aiq_evals.jsonutil import normalize_json_object, sha256_file, sha256_json
 
 # v2: resolved content digests (``identity_facts``) and adapter source identity
 # participate in the digest; v1 hashed neither.
 IDENTITY_ALGORITHM = 'aiq-evals-measurement-v2+sha256'
 
 
-def adapter_source_digest(package: str) -> str:
+def adapter_source_digest(package: str | None) -> str:
     """Digest every Python source file of an adapter package.
 
     Pre-release adapter implementation identity: any change to the adapter or
@@ -23,6 +23,8 @@ def adapter_source_digest(package: str) -> str:
     fail to capture. This is deliberately conservative (cosmetic edits also
     invalidate reuse).
     """
+    if not package:
+        raise ValueError('adapter_source_digest needs a package name')
     spec = importlib.util.find_spec(package)
     if spec is None or not spec.submodule_search_locations:
         raise ValueError(f'{package!r} is not an importable package')
@@ -74,7 +76,7 @@ def measurement_inputs(
     path-free subset of resolution results (content digests, adapter source
     identity) that affects the measurement.
     """
-    return normalize_json(
+    return normalize_json_object(
         {
             'identity_schema': 2,
             'engine': request.engine,
@@ -85,7 +87,7 @@ def measurement_inputs(
             'native_config': dict(native_config),
             'identity_facts': dict(identity_facts or {}),
         }
-    )  # type: ignore[return-value]
+    )
 
 
 def build_measurement_identity(

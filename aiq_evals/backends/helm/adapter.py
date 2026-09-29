@@ -44,7 +44,7 @@ from aiq_evals.errors import (
     RequestValidationError,
 )
 from aiq_evals.identity import adapter_source_digest, build_measurement_identity
-from aiq_evals.jsonutil import normalize_json, sha256_file
+from aiq_evals.jsonutil import normalize_json_object, sha256_file
 from aiq_evals.probes.source import verify_engine_revision
 
 # 0.1.0: first adapter; verified against crfm-helm 0.5.14 (phase-1 fixtures).
@@ -220,7 +220,7 @@ def _validate_import(
     status = result.status if not missing else 'incomplete'
     diagnostics = dict(result.diagnostics)
     diagnostics['missing_run_specs'] = missing
-    return dataclasses.replace(result, status=status, diagnostics=normalize_json(diagnostics))
+    return dataclasses.replace(result, status=status, diagnostics=normalize_json_object(diagnostics))
 
 
 class HelmBackend:
@@ -365,7 +365,7 @@ class HelmBackend:
         )
         diagnostics = dict(result.diagnostics)
         diagnostics['command'] = command[1:]  # interpreter path is operational
-        return dataclasses.replace(result, diagnostics=normalize_json(diagnostics))
+        return dataclasses.replace(result, diagnostics=normalize_json_object(diagnostics))
 
     async def execute(self, resolved: ResolvedEvaluation, context: ExecutionContext) -> EvaluationResult:
         return await asyncio.to_thread(self.execute_blocking, resolved, context)
@@ -386,7 +386,7 @@ class HelmBackend:
         diagnostics = dict(result.diagnostics)
         diagnostics['import_source'] = str(root)
         diagnostics['import_provenance'] = 'caller-supplied-native-artifact'
-        return dataclasses.replace(result, diagnostics=normalize_json(diagnostics))
+        return dataclasses.replace(result, diagnostics=normalize_json_object(diagnostics))
 
 
 __all__ = ['ADAPTER_VERSION', 'HelmBackend', 'build_run_entry', 'normalize_run_dir']

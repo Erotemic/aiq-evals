@@ -6,6 +6,18 @@ set -euo pipefail
 VENV=${1:-${RUNNER_TEMP:-/tmp}/aiq-ci-helm}
 uv venv -q --python 3.12 "$VENV"
 EXTRA=()
+# MAGNET compatibility tests need a MAGNET checkout: MAGNET_DIR, or clone
+# MAGNET_REPO at MAGNET_REV. If unreachable, those tests skip and the adapter
+# and conformance suites still run.
+if [ -z "${MAGNET_DIR:-}" ] && [ -n "${MAGNET_REPO:-}" ]; then
+  MAGNET_DIR=$(dirname "$VENV")/aiq-magnet
+  if [ ! -d "$MAGNET_DIR/.git" ] && ! git clone -q "$MAGNET_REPO" "$MAGNET_DIR"; then
+    echo "MAGNET checkout unavailable; MAGNET compatibility tests will skip" >&2
+    MAGNET_DIR=
+  elif [ -n "${MAGNET_REV:-}" ]; then
+    git -C "$MAGNET_DIR" checkout -q "$MAGNET_REV"
+  fi
+fi
 if [ -n "${MAGNET_DIR:-}" ]; then EXTRA+=(-e "$MAGNET_DIR[helm]"); fi
 for attempt in 1 2 3; do
   uv pip install -q --python "$VENV/bin/python" \

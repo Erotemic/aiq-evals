@@ -20,8 +20,9 @@ from aiq_evals.contracts import (
     MetricRecord,
     ResultRecord,
     SampleRecord,
+    as_execution_status,
 )
-from aiq_evals.jsonutil import normalize_json, omitted_fields
+from aiq_evals.jsonutil import normalize_json, normalize_json_object, omitted_fields
 
 
 def _get(value: Any, key: str, default: Any = None) -> Any:
@@ -428,10 +429,10 @@ def normalize_inspect_logs(
     return EvaluationResult(
         engine='inspect_ai',
         identity=identity,
-        status=status,  # type: ignore[arg-type]
+        status=as_execution_status(status),
         records=tuple(records),
         samples=tuple(samples),
-        diagnostics=normalize_json(diagnostics),
+        diagnostics=normalize_json_object(diagnostics),
     )
 
 

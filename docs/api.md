@@ -13,7 +13,7 @@ actually supports is recorded in `planning/phase1-capabilities.md`.
 | `validate_request(request)` | Static validation. Imports no engine and no task code. |
 | `resolve_evaluation(request)` / `resolve_evaluation_async(request, context)` | Native resolution and measurement identity. The async form runs inside `context.worker_python` when one is given. |
 | `run_evaluation[_async](request_or_resolved, context)` | Execute once and atomically publish a run bundle at `context.output_dir`. The sync form refuses to run inside an active event loop. |
-| `import_evaluation(request_or_resolved, source, context, *, allow_external_symlinks=False)` | Normalize existing native artifacts into a bundle. |
+| `import_evaluation[_async](request_or_resolved, source, context, *, allow_external_symlinks=False)` | Normalize existing native artifacts into a bundle. Resolution and native reading run in `context.worker_python` when given. |
 | `ensure_evaluation[_async](request, store, *, env, worker_python, timeout_seconds, import_source, allow_external_symlinks)` | Reuse a validated stored result, otherwise import or execute into a new attempt and promote a success. Returns `EnsureOutcome(action, run, resolved, attempt, reuse_reason)`. |
 | `ResultStore(root)` | Content-addressed store: `lookup`, `check_reuse`, `attempts(digest)`, `publish`, `promote`. |
 | `load_run(path)` | Engine-free bundle reader. `aiq_evals.outputs` also provides `select_metrics`, `sample_records`, `native_artifacts`, `trajectory_detail`, and related helpers. |
@@ -32,7 +32,7 @@ Errors derive from `aiq_evals.errors.AiqEvalsError`. The main ones are
 | `resolve REQUEST [--worker-python PY] [--output F]` | Print the resolved request and its identity |
 | `ensure REQUEST --store DIR [--worker-python PY] [--timeout S] [--import-source SRC] [--allow-external-symlinks]` | The central operation; prints the action, path, status, identity, and reuse reason |
 | `run REQUEST --output DIR [--worker-python PY] [--timeout S]` | Execute once |
-| `import-native REQUEST SOURCE --output DIR [--allow-external-symlinks]` | Import native artifacts |
+| `import-native REQUEST SOURCE --output DIR [--worker-python PY] [--allow-external-symlinks]` | Import native artifacts |
 | `show RUN_DIR [--no-verify]` | Inspect a bundle without engines |
 | `backends`, `engines`, `phase1-status`, `phase1-probe` | Introspection |
 
@@ -48,6 +48,11 @@ when the published result is not `succeeded`.
              "revision": "...|null", "cache_token": "...|null", "provider_options": {}}],
  "task_options": {}, "generation": {}, "engine_options": {"required_secrets": ["NAME"]}}
 ```
+
+Secrets: values come from `ExecutionContext.env` or, for names declared in
+`required_secrets`, the inherited environment. Declared secrets are checked
+before any resolution code runs, and every such value of 8 characters or more
+is scrubbed from logs and published results.
 
 Identity is reusable only when the task is pinned (`task_revision` or a
 hashed source), `data_revision` is set, every model has a `revision` or
@@ -67,11 +72,13 @@ Engine options:
 ## Run bundle (manifest schema 1)
 
 ```text
-run_manifest.json   identity, reusable flag, native inventory + checksums,
-                    native/normalized artifact identities, symlink notes
+run_manifest.json   identity, reusable flag, native inventory + checksums (exact set),
+                    native/normalized artifact identities, metadata_checksums for
+                    resolved_request/results/attempt JSON, symlink notes
 resolved_request.json
 results.json        EvaluationResult (records, metrics, coverage, samples, diagnostics)
-attempt.json        status, diagnostics, public execution context (env keys only)
+attempt.json        status, diagnostics, public execution context (env keys only);
+                    canonical runs also carry source_attempt (path, identities)
 ATTEMPT_TERMINAL    always; the terminal status
 RUN_COMPLETE        only for succeeded
 native/             retained native artifacts (authoritative)

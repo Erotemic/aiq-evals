@@ -19,6 +19,7 @@ from aiq_evals.contracts import (
     EvaluationResult,
     ExecutionContext,
     ResolvedEvaluation,
+    as_execution_status,
 )
 from aiq_evals.errors import (
     ActiveEventLoopError,
@@ -364,7 +365,7 @@ def _terminal_error_result(
     return EvaluationResult(
         engine=resolved.request.engine,
         identity=resolved.identity,
-        status=status,  # type: ignore[arg-type]
+        status=as_execution_status(status),
         records=(),
         diagnostics={
             'runner_failure_kind': kind,

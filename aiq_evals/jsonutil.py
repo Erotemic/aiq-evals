@@ -60,6 +60,14 @@ def normalize_json(value: Any, *, path: str = '$') -> JSONValue:
     )
 
 
+def normalize_json_object(value: Any, *, path: str = '$') -> dict[str, JSONValue]:
+    """:func:`normalize_json` for values that must be JSON objects."""
+    result = normalize_json(value, path=path)
+    if not isinstance(result, dict):
+        raise TypeError(f'{path} must be a JSON object, got {type(result).__name__}')
+    return result
+
+
 def canonical_json_bytes(value: Any) -> bytes:
     """Serialize a JSON value in the canonical form used for identities."""
     normalized = normalize_json(value)

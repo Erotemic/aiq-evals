@@ -13,6 +13,7 @@ from aiq_evals.contracts import (
     MetricRecord,
     ResultRecord,
     SampleRecord,
+    as_execution_status,
 )
 from aiq_evals.errors import ArtifactError
 from aiq_evals.jsonutil import omitted_fields
@@ -176,7 +177,7 @@ def normalize_olmo_results(
     return EvaluationResult(
         engine='olmo_eval',
         identity=identity,
-        status=normalized_status,  # type: ignore[arg-type]
+        status=as_execution_status(normalized_status),
         records=tuple(records),
         samples=tuple(samples),
         diagnostics=diagnostics,

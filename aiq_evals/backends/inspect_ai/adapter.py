@@ -37,7 +37,7 @@ from aiq_evals.errors import (
     RequestValidationError,
 )
 from aiq_evals.identity import adapter_source_digest, build_measurement_identity
-from aiq_evals.jsonutil import normalize_json, sha256_file
+from aiq_evals.jsonutil import normalize_json_object, sha256_file
 from aiq_evals.probes.source import verify_engine_revision
 
 # 0.2.0: native phase-1 fixes (worker registration, task paths, coverage of
@@ -358,7 +358,7 @@ def _validate_native_logs(
         records=result.records,
         samples=result.samples,
         artifacts=result.artifacts,
-        diagnostics=normalize_json(diagnostics),
+        diagnostics=normalize_json_object(diagnostics),
     )
 
 
@@ -539,7 +539,7 @@ class InspectAIBackend:
                 records=result.records,
                 samples=result.samples,
                 artifacts=result.artifacts,
-                diagnostics=normalize_json(diagnostics),
+                diagnostics=normalize_json_object(diagnostics),
             )
 
     async def execute(
@@ -583,5 +583,5 @@ class InspectAIBackend:
             records=result.records,
             samples=result.samples,
             artifacts=result.artifacts,
-            diagnostics=normalize_json(diagnostics),
+            diagnostics=normalize_json_object(diagnostics),
         )
