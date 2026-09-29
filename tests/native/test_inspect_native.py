@@ -470,3 +470,32 @@ def test_openai_compatible_external_endpoint(tmp_path: Path) -> None:
     roles = [m["role"] for m in _only_sample(bundle).trajectory["messages"]]
     assert roles == ["user", "assistant", "tool", "assistant"]
     assert not any("local-fixture-key" in p.read_text(errors="ignore") for p in (tmp_path / "run").rglob("*.json"))
+
+
+def test_leased_endpoint_override_reaches_the_provider(tmp_path: Path) -> None:
+    # M8 support: the request names a dead URL; only the operational
+    # ExecutionContext.model_endpoints override points at the live server.
+    pytest.importorskip("openai")
+    from tests.native.chat_server import DeterministicChatHandler, chat_server
+
+    with chat_server() as port:
+        request = EvaluationRequest(
+            engine="inspect_ai",
+            task="python:tests.native.inspect_fixture:tool_task",
+            models=(ModelBinding(
+                role="primary", model="gpt-4o-mini", provider="openai", revision="local-script-v1",
+                provider_options={"base_url": "http://127.0.0.1:9/v1", "responses_api": False},
+            ),),
+        )
+        bundle = run_evaluation(
+            request,
+            ExecutionContext(
+                output_dir=tmp_path / "run", worker_python=sys.executable,
+                env={"OPENAI_API_KEY": "local-fixture-key"},
+                model_endpoints={"primary": f"http://127.0.0.1:{port}/v1"},
+            ),
+        )
+        calls = DeterministicChatHandler.calls
+    assert bundle.result.status == "succeeded", bundle.result.diagnostics
+    assert calls == 2
+    assert bundle.attempt["execution_context"]["model_endpoint_roles"] == ["primary"]

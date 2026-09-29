@@ -205,6 +205,16 @@ def _load_registration_modules(modules: list[str]) -> dict[str, str | None]:
     return digests
 
 
+def _endpoint_for_primary(context: ExecutionContext) -> str | None:
+    """Operational endpoint override (e.g. a leased URL); only the primary role."""
+    extra = sorted(set(context.model_endpoints) - {'primary'})
+    if extra:
+        raise RequestValidationError(
+            f'Inspect endpoint overrides are supported for the primary role only, got {extra}'
+        )
+    return context.model_endpoints.get('primary')
+
+
 def _merge_native_config(request: EvaluationRequest) -> dict[str, Any]:
     options = dict(request.engine_options)
     unknown = set(options) - _ALLOWED_ENGINE_OPTIONS
@@ -483,11 +493,12 @@ class InspectAIBackend:
         _load_registration_modules(list(config.get('registration_modules') or []))
         task = _materialize_task_reference(str(config['task_reference']))
         kwargs = dict(config.get('eval_options') or {})
+        model_base_url = _endpoint_for_primary(context) or config.get('model_base_url')
         try:
             returned = eval_fn(
                 tasks=task,
                 model=str(config['model']),
-                model_base_url=config.get('model_base_url'),
+                model_base_url=model_base_url,
                 model_args=dict(config.get('model_args') or {}),
                 model_roles=dict(config.get('model_roles') or {}) or None,
                 task_args=dict(config.get('task_args') or {}),

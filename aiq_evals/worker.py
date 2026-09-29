@@ -18,6 +18,7 @@ def _parser() -> argparse.ArgumentParser:
     execute.add_argument('--resolved', type=Path, required=True)
     execute.add_argument('--output-dir', type=Path, required=True)
     execute.add_argument('--result', type=Path, required=True)
+    execute.add_argument('--model-endpoints', default='{}')
     imp = sub.add_parser('import')
     imp.add_argument('--resolved', type=Path, required=True)
     imp.add_argument('--source', type=Path, required=True)
@@ -57,7 +58,9 @@ def _import(args: argparse.Namespace) -> int:
 def _execute(args: argparse.Namespace) -> int:
     resolved = ResolvedEvaluation.from_dict(json.loads(args.resolved.read_text()))
     backend = get_backend(resolved.request.engine)
-    context = ExecutionContext(output_dir=args.output_dir)
+    context = ExecutionContext(
+        output_dir=args.output_dir, model_endpoints=json.loads(args.model_endpoints)
+    )
     blocking = getattr(backend, 'execute_blocking', None)
     if callable(blocking):
         # Synchronous native APIs run on the main thread, where the runner's

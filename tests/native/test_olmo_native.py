@@ -310,3 +310,24 @@ def test_crashing_tool_is_reported_to_the_model(tmp_path: Path) -> None:
     assert "An error occurred while running the tool" in results[0]["content"]
     assert "tool crashed" in results[0]["content"]
     assert bundle.result.records[0].coverage.status == "complete"
+
+
+def test_leased_endpoint_override_reaches_the_provider(tmp_path: Path) -> None:
+    # M8 support: the request's base_url is dead; the operational override wins.
+    pytest.importorskip("agents")
+    from dataclasses import replace
+
+    with _chat_server() as port:
+        request = _tool_request(9)  # base_url http://127.0.0.1:9/v1 is unreachable
+        bundle = run_evaluation(
+            request,
+            ExecutionContext(
+                output_dir=tmp_path / "run", worker_python=sys.executable,
+                env={"OPENAI_API_KEY": "local-fixture"},
+                model_endpoints={"primary": f"http://127.0.0.1:{port}/v1"},
+            ),
+        )
+        calls = _DeterministicChatHandler.calls
+    assert bundle.result.status == "succeeded", bundle.result.diagnostics
+    assert calls >= 2
+    del replace

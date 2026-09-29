@@ -410,8 +410,19 @@ class OlmoEvalBackend:
         config = dict(resolved.native_config)
         _load_task_modules(list(config.get('task_modules') or []))
         modules = tuple(config.get('task_modules') or [])
+        extra = sorted(set(context.model_endpoints) - {'primary'})
+        if extra:
+            raise RequestValidationError(
+                f'OLMo endpoint overrides support the primary role only, got {extra}'
+            )
         try:
-            harness = harness_cls.from_dict(dict(config['harness_config']))
+            harness_config = dict(config['harness_config'])
+            if context.model_endpoints:
+                # Operational (e.g. leased) endpoint; identity keeps the binding.
+                provider = dict(harness_config.get('provider') or {})
+                provider['base_url'] = context.model_endpoints['primary']
+                harness_config['provider'] = provider
+            harness = harness_cls.from_dict(harness_config)
             runner = runner_cls(
                 harness_config=harness,
                 task_specs=list(config['task_specs']),

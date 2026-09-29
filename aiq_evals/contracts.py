@@ -200,10 +200,17 @@ class ExecutionContext:
     env: Mapping[str, str] = field(default_factory=dict)
     worker_python: str | None = None
     timeout_seconds: float | None = None
+    #: Operational endpoint override per model role (role -> base URL), e.g. a
+    #: leased serving endpoint whose URL varies per lease. It never enters
+    #: identity; the binding's ``revision``/``cache_token`` names the model.
+    model_endpoints: Mapping[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, 'output_dir', Path(self.output_dir).expanduser().resolve())
         object.__setattr__(self, 'env', {str(k): str(v) for k, v in self.env.items()})
+        object.__setattr__(
+            self, 'model_endpoints', {str(k): str(v) for k, v in self.model_endpoints.items()}
+        )
         if self.timeout_seconds is not None and self.timeout_seconds <= 0:
             raise RequestValidationError('timeout_seconds must be positive')
 
@@ -215,6 +222,7 @@ class ExecutionContext:
                 'env_keys': sorted(self.env),
                 'worker_python': self.worker_python,
                 'timeout_seconds': self.timeout_seconds,
+                'model_endpoint_roles': sorted(self.model_endpoints),
             }
         )
 

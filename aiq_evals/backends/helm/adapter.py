@@ -316,6 +316,10 @@ class HelmBackend:
         """
         if resolved.request.engine != self.key:
             raise RequestValidationError('resolved evaluation belongs to another engine')
+        if context.model_endpoints:
+            raise RequestValidationError(
+                'HELM model deployments come from its registry; endpoint overrides are unsupported'
+            )
         config = dict(resolved.native_config)
         native_root = (context.output_dir / 'native' / 'helm').resolve()
         output_path = native_root / 'benchmark_output'

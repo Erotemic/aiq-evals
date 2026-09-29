@@ -178,6 +178,7 @@ async def _execute_in_worker(
             '--resolved', str(resolved_path),
             '--output-dir', str(work_dir),
             '--result', str(result_path),
+            '--model-endpoints', json.dumps(dict(context.model_endpoints)),
         ],
         context,
         worker_log_dir / 'stdout.log',
@@ -279,6 +280,7 @@ async def _execute_resolved(
             env=context.env,
             worker_python=context.worker_python or sys.executable,
             timeout_seconds=context.timeout_seconds,
+            model_endpoints=context.model_endpoints,
         )
         return await _execute_in_worker(resolved, worker_context, work_dir)
     direct_context = ExecutionContext(
@@ -286,6 +288,7 @@ async def _execute_resolved(
         env=context.env,
         worker_python=None,
         timeout_seconds=context.timeout_seconds,
+        model_endpoints=context.model_endpoints,
     )
     if context.timeout_seconds is None:
         return await backend.execute(resolved, direct_context)

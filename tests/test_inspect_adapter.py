@@ -245,6 +245,27 @@ def test_base_url_goes_to_model_base_url_not_model_args(monkeypatch, tmp_path):
     assert captured['model_args'] == {'responses_api': False}
 
 
+def test_model_endpoint_override_is_operational(monkeypatch, tmp_path):
+    captured = {}
+
+    def capturing_eval(**kwargs):
+        captured.update(kwargs)
+        return [make_log()]
+
+    patch_runtime(monkeypatch, eval_fn=capturing_eval)
+    backend = InspectAIBackend()
+    resolved = backend.resolve(make_request())
+    context = ExecutionContext(output_dir=tmp_path / 'w', model_endpoints={'primary': 'http://leased:1/v1'})
+    asyncio.run(backend.execute(resolved, context))
+    assert captured['model_base_url'] == 'http://leased:1/v1'
+    assert backend.resolve(make_request()).identity == resolved.identity
+    assert context.public_dict()['model_endpoint_roles'] == ['primary']
+    with pytest.raises(RequestValidationError, match='primary role only'):
+        asyncio.run(backend.execute(
+            resolved, ExecutionContext(output_dir=tmp_path / 'x', model_endpoints={'grader': 'http://g/v1'})
+        ))
+
+
 def test_execute_multi_log_preserves_metric_identity_and_trajectories(monkeypatch, tmp_path):
     CALLS.clear()
     patch_runtime(monkeypatch)

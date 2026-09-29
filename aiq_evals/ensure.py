@@ -56,6 +56,7 @@ async def ensure_evaluation_async(
     timeout_seconds: float | None = None,
     import_source: str | Path | None = None,
     allow_external_symlinks: bool = False,
+    model_endpoints: Mapping[str, str] | None = None,
     verify_checksums: bool = True,
 ) -> EnsureOutcome:
     store = store if isinstance(store, ResultStore) else ResultStore(store)
@@ -65,6 +66,7 @@ async def ensure_evaluation_async(
         env=dict(env or {}),
         worker_python=worker_python,
         timeout_seconds=timeout_seconds,
+        model_endpoints=dict(model_endpoints or {}),
     )
     resolved = (
         request
@@ -82,6 +84,7 @@ async def ensure_evaluation_async(
         env=base.env,
         worker_python=base.worker_python,
         timeout_seconds=base.timeout_seconds,
+        model_endpoints=base.model_endpoints,
     )
     if import_source is not None:
         action: EnsureAction = 'imported'
