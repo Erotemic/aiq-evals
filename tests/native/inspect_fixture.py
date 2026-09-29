@@ -4,6 +4,10 @@ The model is deliberately local; Inspect still performs its actual evaluation,
 tool dispatch, scoring, epoch reduction, and log serialization.
 """
 
+import asyncio
+import os
+import subprocess
+
 from inspect_ai import Task, task
 from inspect_ai.dataset import Sample
 from inspect_ai.model import ModelAPI, ModelOutput, modelapi
@@ -16,6 +20,11 @@ from inspect_ai.tool import tool
 class FixtureModel(ModelAPI):
     async def generate(self, input, tools, tool_choice, config):
         del tool_choice, config
+        if self.model_name == "slow":
+            child = subprocess.Popen(["sleep", "120"])
+            with open(os.environ["AIQ_P1_CHILD_PID_FILE"], "w") as file:
+                file.write(str(child.pid))
+            await asyncio.sleep(120)
         if tools and not any(message.role == "tool" for message in input):
             return ModelOutput.for_tool_call(
                 model=self.model_name,

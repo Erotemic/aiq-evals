@@ -1,5 +1,6 @@
 """Run only in an environment with the real pinned Inspect runtime installed."""
 
+import asyncio
 import sys
 from pathlib import Path
 
@@ -8,7 +9,7 @@ import pytest
 pytest.importorskip("inspect_ai")
 
 from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
-from aiq_evals.runner import import_evaluation, run_evaluation
+from aiq_evals.runner import import_evaluation, run_evaluation, run_evaluation_async
 
 
 def request(task: str, log_format: str = "eval") -> EvaluationRequest:
@@ -57,3 +58,46 @@ def test_inspect_native_run_and_import(tmp_path: Path, task: str, log_format: st
     assert imported.result.status == "succeeded"
     assert len(imported.result.samples) == len(bundle.result.samples)
     assert (tmp_path / "import" / imported.result.diagnostics["native_logs"][0]["location"]).is_file()
+
+
+def test_cancel_terminates_owned_child(tmp_path: Path) -> None:
+    async def exercise() -> None:
+        pid_file = tmp_path / "child.pid"
+        req = EvaluationRequest(
+            engine="inspect_ai",
+            task="python:tests.native.inspect_fixture:generation",
+            models=(ModelBinding(role="primary", model="slow", provider="fixture", revision="local-v1"),),
+        )
+        task = asyncio.create_task(
+            run_evaluation_async(
+                req,
+                ExecutionContext(
+                    output_dir=tmp_path / "cancelled",
+                    worker_python=sys.executable,
+                    env={"AIQ_P1_CHILD_PID_FILE": str(pid_file)},
+                ),
+            )
+        )
+        for _ in range(100):
+            if pid_file.exists():
+                break
+            await asyncio.sleep(0.1)
+        assert pid_file.exists(), "native provider never started its child"
+        child_pid = int(pid_file.read_text())
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+        for _ in range(50):
+            try:
+                state = Path(f"/proc/{child_pid}/stat").read_text().split()[2]
+            except FileNotFoundError:
+                break
+            if state == "Z":
+                break
+            await asyncio.sleep(0.1)
+        else:
+            pytest.fail(f"child process {child_pid} remained running after cancellation")
+        assert (tmp_path / "cancelled" / "ATTEMPT_TERMINAL").read_text().strip() == "cancelled"
+        assert not (tmp_path / "cancelled" / "RUN_COMPLETE").exists()
+
+    asyncio.run(exercise())
