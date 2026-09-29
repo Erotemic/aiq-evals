@@ -5,21 +5,21 @@ Evidence is limited to the pins, local providers, tasks, and fixtures in
 explicitly unsupported, **T** = untested, **P** = task/provider-specific support.
 No general upstream capability follows from a local fixture.
 
-| Capability | HELM 0.5.14 through MAGNET | OLMo 73ade80 (mock or local LiteLLM/Agents) | Inspect 0.3.272 (local fixture provider) |
+| Capability | HELM 0.5.14 through MAGNET (local simple model) | OLMo 73ade80 (mock or local LiteLLM/Agents) | Inspect 0.3.272 (local fixture provider) |
 | --- | --- | --- | --- |
-| Scored generation | T (historical output only) | S | S |
+| Scored generation | S (fresh simple MCQA exact-match) | S | S |
 | Log probabilities | T | T | T |
-| Multiple scorers/metrics | P (162 aggregate statistics in imported fixture) | T | S (match, includes) |
+| Multiple scorers/metrics | P (81 fresh MCQA statistics; multiple score names) | T | S (match, includes) |
 | Agent and tool execution | T | P (OpenAI Agents scaffold, `double`) | P (`use_tools`, `double`) |
-| Trajectories | P (historical per-instance data; no live run) | S (assistant/tool/assistant turns) | S (messages/events) |
+| Trajectories | P (fresh scenario state and per-instance statistics) | S (assistant/tool/assistant turns) | S (messages/events) |
 | Sandboxing | T | T | T |
 | Epochs/repetitions | T | T | S (two epochs, mean/mode reducers) |
-| Native import | P (MAGNET reuse of HELM directory) | S | S (`.eval`, JSON, directory) |
+| Native import | S (MAGNET reuse of HELM directory) | S | S (`.eval`, JSON, directory) |
 | Resume | T | T | T |
 | Rescore | T | T | T |
 | Failure and partial coverage | P (incomplete imported copy) | S (hard failure after metrics) | S (one sample error, partial coverage) |
 | Cancellation and owned process cleanup | T | S (owned child) | S (owned child) |
 
-HELM fresh computation remains open. Engine-owned sandbox cleanup is untested.
+HELM fresh generation is demonstrated only with its local simple model. Engine-owned sandbox cleanup is untested.
 The adapters' generic capability APIs must not be read as broader native proof
 than this matrix.

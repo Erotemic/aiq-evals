@@ -324,8 +324,8 @@ commit that contains this record:
 - `ruff check .`: passed after clearing 10 import/unused-import lint findings;
   the first check failed with 9 findings before the new native fixture added one.
 - `/tmp/aiq-inspect-p1/bin/python -m pytest -q tests/native/test_inspect_native.py`: 7 passed.
-- `PYTHONPATH=/home/joncrall/code/aiq-evals /tmp/olmo-eval-p1/.venv/bin/python -m pytest -q tests/native/test_olmo_native.py --basetemp=/tmp/aiq-olmo-final`: 4 passed.
-- `/tmp/aiq-helm-p1/bin/python -m pytest -q tests/native/test_helm_native.py`: 1 passed, 2 upstream MAGNET deprecation warnings.
+- `PYTHONPATH=/home/joncrall/code/aiq-evals /tmp/olmo-eval-p1/.venv/bin/python -m pytest -q tests/native/test_olmo_native.py --basetemp=/tmp/aiq-olmo-final2`: 5 passed after the multi-task suite was added.
+- `/tmp/aiq-helm-p1/bin/python -m pytest -q tests/native/test_helm_native.py --basetemp=/tmp/aiq-helm-final`: 3 passed, 4 upstream MAGNET deprecation warnings after fresh generic and scored fixtures were added.
 - A clean `/tmp/aiq-core-p1` CPython 3.11.15 environment built with
   `uv venv --python 3.11 /tmp/aiq-core-p1` and
   `uv pip install --python /tmp/aiq-core-p1/bin/python -e .` imported
@@ -346,3 +346,89 @@ inside `magnet/_kwdagger.py`, and its rows are handed to
 `ClaimResultNamespace` by MAGNET. The native multi-log/epoch fixtures cannot
 be presented to these paths as one claim row without implementing the future
 MAGNET projection.
+
+## 2026-09-29 follow-up: fresh HELM and OLMo multi-task fixtures
+
+These records supersede the earlier P1-05/MAGNET notes where they said HELM
+fresh execution and an OLMo multi-task fixture were still absent. MAGNET's
+one-claim-row projection remains absent.
+
+### HELM fresh computation — demonstrated
+
+`aiq-evals` revisions `05a665f` (generic generation) and `ad6b69a`
+(scored MCQA); `crfm-helm==0.5.14`, MAGNET `7bb105ab1c85bfaa01bf68c97ff7523332479ee4`,
+CPython 3.12.3 in `/tmp/aiq-helm-p1`. The reproducible native command is
+`/tmp/aiq-helm-p1/bin/python -m pytest -q tests/native/test_helm_native.py`
+(3 passed, four MAGNET deprecation warnings). The test prepends the worker's
+`bin` directory to `PATH` so MAGNET invokes that environment's `helm-run`.
+
+The direct first attempt without that `PATH` used a global `helm-run` entrypoint
+whose interpreter lacked `helm` and failed with `ModuleNotFoundError`. A second
+attempt with `simple1` but no `model=` run expander failed because HELM required
+`--models-to-run`. The successful generic command, run from the worker Python
+with its `bin` first on `PATH`, was:
+
+`python -m magnet.backends.helm.cli.materialize_helm_run --run-entry 'simple1:model=simple/model1' --suite aiq-p1-fresh --max-eval-instances 1 --out-dpath /tmp/aiq-helm-fresh3 --mode compute_if_missing --num-threads 1`
+
+It ran HELM's real local SimpleClient, computed 30 requests, and wrote 57
+aggregate statistics and 30 per-instance trial rows (10 test IDs, three train
+trials). Native fixture `tests/fixtures/helm-native/simple1-fresh/` has
+`stats.json` SHA256 `d8b2b44018ce5360802f083030961b6977ecf57dcb9f31943c3e2db516f2ffdd`,
+`per_instance_stats.json` SHA256
+`3480ed7df61b97d9d3d87ca13e6a2ee7ac06b121c166130e8f643ef9bf0dc1e3`,
+and `scenario_state.json` SHA256
+`48a8c0eb817180e99a568a2843f216abd4ee92df8ad94d667b4a0de9d7e45e09`.
+The supplied `--max-eval-instances 1` did not reduce this simple1 scenario's
+10 test IDs; the observed output, rather than the CLI value, is the coverage
+claim.
+
+A separate fresh scored run used:
+
+`python -m magnet.backends.helm.cli.materialize_helm_run --run-entry 'simple_mcqa:model=simple/model1' --suite aiq-p1-scored --max-eval-instances 1 --out-dpath /tmp/aiq-helm-scored --mode compute_if_missing --num-threads 1`
+
+It made one new native request, produced 81 aggregate statistics including
+`exact_match` with count 1 and mean 0.0, and one per-instance row. A zero score
+is still a demonstrated native score; it is not called a successful answer.
+`tests/fixtures/helm-native/simple-mcqa-fresh/stats.json` SHA256
+`666ecfb4acd8e47a48fc325285838003f8768702d8bdef50d49feaec4735862e`;
+`per_instance_stats.json` SHA256
+`cf67c7007ff0f82e0a8ca77d75345f59f9042db8e1f54566b746732b545da885`;
+`scenario_state.json` SHA256
+`0521e14243eb6465b5d3bfd0b564a186a8a6fcd69d5aa4600819b24697ef58f5`.
+This closes fresh HELM execution for the tested local simple model. No external
+HELM provider is claimed.
+
+### EEE against newly captured HELM fixtures
+
+EEE revision `1eb9d39aed34505e15db637153de72318bd946d4` in the isolated
+HELM CPython 3.12.3 environment. Running `HELMAdapter().transform_from_directory`
+with `metadata_args={'file_uuid':'12345678-1234-4234-8234-123456789abc'}`
+and an output path converted `simple-mcqa-fresh` to one log and 24 evaluation
+results plus a samples JSONL. The same call on `simple1-fresh` raised
+`SourceRecordsError`: none of its generic generation metrics were recognized
+as a benchmark score. An initial run in the EEE/Inspect environment failed
+because the EEE `helm` extra's `dacite` dependency and HELM were absent there;
+using the isolated HELM environment with `dacite` resolved the import gate.
+This strengthens ADR-0008: even valid new HELM output does not always convert
+without an EEE metric policy change.
+
+### OLMo native multi-task suite — demonstrated
+
+`aiq-evals` revision `5ed0483`, OLMo revision and environment as above.
+Command: `PYTHONPATH=/home/joncrall/code/aiq-evals /tmp/olmo-eval-p1/.venv/bin/python -m pytest -q tests/native/test_olmo_native.py -k multi_task --basetemp=/tmp/aiq-olmo-multi`
+(1 passed). The registered `aiq_p1_multi` suite expanded to
+`aiq_p1_local` and `aiq_p1_local_alt`. The native run produced two complete
+scored result records, separate request/prediction files, and a native metrics
+file; native import preserved both records. The fixture
+`tests/fixtures/olmo-native/multi/metrics.json` SHA256 is
+`40f3716d04e4b7eb6b3af9ba6d5e6baf5cf162ea0f7a86db641d9eeb2145887f`.
+The two request and prediction file checksums are available from `sha256sum
+ tests/fixtures/olmo-native/multi/*`; the local-task prediction content is
+identical for both tasks, but separate native task records are proven by metrics
+and artifact paths.
+
+The MAGNET cardinality experiment now has real multi-result fixtures from both
+engines. It remains blocked at the MAGNET projection boundary: neither
+`build_tables` nor `KWDaggerProcessor.load_available_result_rows` reads these
+engine bundles directly, and `ClaimResultNamespace` accepts one already flat
+row. We did not add the later integration merely to make this spike pass.

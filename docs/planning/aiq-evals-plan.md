@@ -75,7 +75,7 @@ integration suggests it should work.
 - [x] Add source-checkout probes for exact git HEAD, clean state,
   `requires-python`, and `uv.lock` presence.
 - [x] Add a generic locked-`uv` worker command helper.
-- [ ] Select an exact tested HELM release/revision.
+- [x] Select an exact tested HELM release/revision for local compute and import.
 - [x] Select an exact tested Inspect release/revision.
 - [x] Select an exact tested OLMo Eval revision after comparing the original
   plan's inspected revision with the later `eval_audit` prototype revision.
@@ -104,7 +104,7 @@ it is design/prototype input that must be reproduced from this repository.
 
 ### P1-05 HELM native fixtures
 
-- [ ] Run a small HELM computation compatible with current MAGNET behavior.
+- [x] Run a small HELM computation compatible with current MAGNET behavior.
 - [x] Exercise cached reuse/materialization.
 - [x] Import an existing native run directory.
 - [x] Capture aggregate and per-instance data.

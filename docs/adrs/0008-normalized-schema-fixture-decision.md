@@ -11,7 +11,7 @@ commands, and failed conversions are in `docs/planning/phase1-evidence.md`.
 
 | Information | EEE 0.3.0 finding |
 | --- | --- |
-| HELM aggregate metrics and per-instance results | Represented through EEE's HELM converter; the fixture yielded 1 aggregate log, 48 evaluation results, and 80 instance rows for 10 sample IDs. |
+| HELM aggregate metrics and per-instance results | Represented through EEE's HELM converter; the historical MMLU fixture yielded 1 aggregate log, 48 evaluation results, and 80 instance rows for 10 sample IDs. A fresh scored MCQA fixture yielded 1 log and 24 results. A fresh generic-generation fixture failed conversion because its metrics are not recognized as benchmark scores. |
 | Inspect scored generation and tool traces | EEE's Inspect converter rejected both `.eval` and JSON fixtures because `fixture/local` is outside its closed model-developer mapping. The schema has tool calls, but typed argument values become strings. |
 | OLMo Eval scored generation and tool trajectory | No OLMo converter is present. Import would require a new adapter and mapping. |
 | Epoch, reducer, scorer identity, multiple result records | No unambiguous first-class representation for all of these in the inspected schema. These need more than a small field extension and converter changes. |
