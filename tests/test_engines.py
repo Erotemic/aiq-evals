@@ -1,6 +1,6 @@
 import pytest
 
-from aiq_evals.engines import ENGINE_SPECS, get_engine_spec
+from magnet_evals.engines import ENGINE_SPECS, get_engine_spec
 
 
 def test_engine_names():

@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from aiq_evals.contracts import EvaluationRequest
-from aiq_evals.runner import validate_request
+from magnet_evals.contracts import EvaluationRequest
+from magnet_evals.runner import validate_request
 
 EXAMPLES = sorted((Path(__file__).parents[1] / 'examples').glob('*.json'))
 

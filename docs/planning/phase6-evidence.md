@@ -6,7 +6,7 @@ Evidence producer: Claude Opus 5.5 (Anthropic, `claude-opus-5-5`, 1M context).
 
 ## Implementation
 
-- `aiq_evals.ensure.ensure_evaluation[_async]` follows ADR-0002. It resolves
+- `magnet_evals.ensure.ensure_evaluation[_async]` follows ADR-0002. It resolves
   (inside `worker_python` when one is given, through the new worker `resolve`
   command, which carries typed errors back), then checks reuse against the
   store. Without a valid canonical run it imports `import_source` or executes

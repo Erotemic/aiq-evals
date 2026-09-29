@@ -186,7 +186,7 @@ wheels = [
 ]
 
 [[package]]
-name = "aiq-evals"
+name = "aiq-magnet-evals"
 version = "0.1.0"
 source = { editable = "." }
 
@@ -208,7 +208,7 @@ tests = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiq-evals", extras = ["tests"], marker = "extra == 'dev'" },
+    { name = "aiq-magnet-evals", extras = ["tests"], marker = "extra == 'dev'" },
     { name = "inspect-ai", marker = "extra == 'inspect'", specifier = "==0.3.272" },
     { name = "pytest", marker = "extra == 'tests'", specifier = ">=8.1.1" },
     { name = "pytest-cov", marker = "extra == 'tests'", specifier = ">=5" },

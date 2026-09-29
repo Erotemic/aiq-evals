@@ -2,8 +2,8 @@ import subprocess
 
 import pytest
 
-from aiq_evals.errors import EngineCompatibilityError
-from aiq_evals.probes.source import verify_engine_revision
+from magnet_evals.errors import EngineCompatibilityError
+from magnet_evals.probes.source import verify_engine_revision
 
 
 def _git(root, *args):

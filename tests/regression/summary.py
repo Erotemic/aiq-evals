@@ -9,7 +9,7 @@ import json
 from collections import Counter
 from typing import Any
 
-from aiq_evals.contracts import EvaluationResult
+from magnet_evals.contracts import EvaluationResult
 
 
 def summarize(result: EvaluationResult) -> dict[str, Any]:

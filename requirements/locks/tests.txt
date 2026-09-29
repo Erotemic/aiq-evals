@@ -16,11 +16,11 @@ pygments==2.21.0
     # via pytest
 pytest==9.1.1
     # via
-    #   aiq-evals
+    #   aiq-magnet-evals
     #   pytest-cov
 pytest-cov==7.1.0
-    # via aiq-evals
+    # via aiq-magnet-evals
 tomli==2.4.1 ; python_full_version <= '3.11'
     # via coverage
 xdoctest==1.3.2
-    # via aiq-evals
+    # via aiq-magnet-evals

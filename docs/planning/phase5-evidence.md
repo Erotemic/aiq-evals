@@ -6,7 +6,7 @@ Evidence producer: Claude Opus 5.5 (Anthropic, `claude-opus-5-5`, 1M context).
 
 ## Design
 
-`aiq_evals.backends.helm` is a MAGNET-independent reimplementation of the
+`magnet_evals.backends.helm` is a MAGNET-independent reimplementation of the
 generic HELM compute/import behavior. MAGNET's HELM predictor APIs and its
 name-matching reuse stay in MAGNET.
 

@@ -1,6 +1,6 @@
 import json
 
-from aiq_evals.cli import main
+from magnet_evals.cli import main
 
 
 def test_status_json(capsys):

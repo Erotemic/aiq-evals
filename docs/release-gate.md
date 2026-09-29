@@ -43,7 +43,7 @@ Linux, using the phase-8 commit's scripts from fresh environments under a scratc
 | G4 | `MAGNET_DIR=/home/joncrall/code/aiq-magnet dev/ci/native_helm.sh`: fresh venv from constraints plus MAGNET; 16 passed, 8 skipped. The MAGNET checkout had the uncommitted demo edit noted in `phase1-evidence.md`, which these tests do not use. |
 | G5 | release_gate tests pass in G1 through G4 |
 | G6 | `dev/walkthrough.sh`: the engine-free core venv ran HELM, Inspect, and OLMo generation (with CLI reuse), the Inspect sandbox-tool example, and OLMo OpenAI Agents over a local endpoint with `required_secrets`; no secret value was found in the store. The first run exposed a fixture that required a test-only environment variable, so the example failed correctly, published as `failed`; the fixture was fixed. |
-| G7 | `uv build`: sdist and wheel `aiq_evals-0.1.0`; the wheel has 42 files including `py.typed`, no tests, and no runtime `Requires-Dist` (extras only) |
+| G7 | `uv build`: sdist and wheel `magnet_evals-0.1.0`; the wheel has 42 files including `py.typed`, no tests, and no runtime `Requires-Dist` (extras only) |
 | G8 | **Not run.** Requires pushing to GitHub. |
 
 Outcome: G1–G7 pass locally and G8 is pending, so the `experimental` labels stay.
@@ -56,7 +56,7 @@ Each job was reproduced locally:
 
 | Check | Result |
 | --- | --- |
-| G1 lint | `flake8 --select=E9,F63,F7,F82 ./aiq_evals`: 0 findings. `ty check ./aiq_evals`: clean, after fixing 27 diagnostics with typed helpers (`normalize_json_object`, `as_execution_status`) rather than ignores. Also `ruff check .`. |
+| G1 lint | `flake8 --select=E9,F63,F7,F82 ./magnet_evals`: 0 findings. `ty check ./magnet_evals`: clean, after fixing 27 diagnostics with typed helpers (`normalize_json_object`, `as_execution_status`) rather than ignores. Also `ruff check .`. |
 | G1 tests | Wheel built and installed with `[tests]` into fresh 3.11 (with `requirements/locks/tests.txt`) and 3.13 venvs. The generated command, `pytest --xdoctest --cov … $MOD_DPATH ../tests`, run from a sandbox directory, gave 126 passed, 16 skipped on both. The first attempt failed at collection: `tests` was not a package, and the suite had relied on the repo root being the working directory. `tests/__init__.py` fixes that. |
 | G2 | `dev/ci/native_inspect.sh`: 19 passed, 9 skipped |
 | G3 | `dev/ci/native_olmo.sh`: 12 passed, 8 skipped |

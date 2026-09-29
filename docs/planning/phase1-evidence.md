@@ -699,3 +699,14 @@ matches reusable runs by name tokens only: it does no hashing and checks no
 HELM version or model configuration. The aiq-evals HELM adapter (phase 5) does not
 inherit this behavior. See `phase5-evidence.md`; phase-6 reuse must stay
 identity-based.
+
+## 2026-09-29: package rename (no evidence change)
+
+The Python module `aiq_evals` is now `magnet_evals`, and the distribution
+`aiq-evals` is now `aiq-magnet-evals`, mirroring `aiq-magnet-theory`. Records
+above keep the module names that were used when they were made; read
+`aiq_evals.X` as `magnet_evals.X` today. Data-format identifiers are unchanged
+on purpose: the identity algorithm `aiq-evals-measurement-v2+sha256`, native
+log metadata keys such as `aiq_evals_measurement_identity`, and the committed
+fixtures. The repository and directory will be renamed to `aiq-magnet-evals`
+separately.

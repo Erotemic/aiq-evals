@@ -42,12 +42,12 @@ jobs:
     - name: Lint with flake8
       run: |-
         # stop the build if there are Python syntax errors or undefined names
-        flake8 ./aiq_evals --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 ./magnet_evals --count --select=E9,F63,F7,F82 --show-source --statistics
     - name: Typecheck
       run: |-
         python -m pip install ty
         pip install --prefer-binary -e ".[tests]"
-        ty check ./aiq_evals
+        ty check ./magnet_evals
   build_and_test_sdist:
     ##
     # Build the pure python package from source and test it in the
@@ -72,11 +72,11 @@ jobs:
         python -m pip install pip uv -U
         python -m uv pip install setuptools>=77 wheel build twine
         python -m build --sdist --outdir wheelhouse
-        python -m twine check ./wheelhouse/aiq_evals*.tar.gz
+        python -m twine check ./wheelhouse/aiq_magnet_evals*.tar.gz
     - name: Install sdist
       run: |-
         ls -al wheelhouse
-        python -m pip install --prefer-binary wheelhouse/aiq_evals*.tar.gz -v
+        python -m pip install --prefer-binary wheelhouse/aiq_magnet_evals*.tar.gz -v
     - name: Test minimal loose sdist
       env: {}
       run: |-
@@ -88,10 +88,10 @@ jobs:
         cd $WORKSPACE_DNAME
         # Run the tests
         # Get path to installed package
-        MOD_DPATH=$(python -c "import aiq_evals, os; print(os.path.dirname(aiq_evals.__file__))")
+        MOD_DPATH=$(python -c "import magnet_evals, os; print(os.path.dirname(magnet_evals.__file__))")
         echo "MOD_DPATH = $MOD_DPATH"
-        MOD_NAME=aiq_evals
-        python -m pytest --verbose --cov=aiq_evals $MOD_DPATH ../tests
+        MOD_NAME=magnet_evals
+        python -m pytest --verbose --cov=magnet_evals $MOD_DPATH ../tests
         cd ..
     - name: Test full loose sdist
       env: {}
@@ -105,16 +105,16 @@ jobs:
         cd $WORKSPACE_DNAME
         # Run the tests
         # Get path to installed package
-        MOD_DPATH=$(python -c "import aiq_evals, os; print(os.path.dirname(aiq_evals.__file__))")
+        MOD_DPATH=$(python -c "import magnet_evals, os; print(os.path.dirname(magnet_evals.__file__))")
         echo "MOD_DPATH = $MOD_DPATH"
-        MOD_NAME=aiq_evals
-        python -m pytest --verbose --cov=aiq_evals $MOD_DPATH ../tests
+        MOD_NAME=magnet_evals
+        python -m pytest --verbose --cov=magnet_evals $MOD_DPATH ../tests
         cd ..
     - uses: actions/upload-artifact@v6.0.0
       name: Upload sdist artifact
       with:
         name: sdist_wheels
-        path: ./wheelhouse/aiq_evals*.tar.gz
+        path: ./wheelhouse/aiq_magnet_evals*.tar.gz
   build_purepy_wheels:
     ##
     # Build the pure-python wheels independently on a per-platform basis.
@@ -144,7 +144,7 @@ jobs:
         python -m pip install pip uv -U
         python -m uv pip install setuptools>=77 wheel build twine
         python -m build --wheel --outdir wheelhouse
-        python -m twine check ./wheelhouse/aiq_evals*.whl
+        python -m twine check ./wheelhouse/aiq_magnet_evals*.whl
     - name: Show built files
       shell: bash
       run: ls -la wheelhouse
@@ -152,7 +152,7 @@ jobs:
       name: Upload wheels artifact
       with:
         name: wheels-${{ matrix.os }}-${{ matrix.arch }}
-        path: ./wheelhouse/aiq_evals*.whl
+        path: ./wheelhouse/aiq_magnet_evals*.whl
   test_purepy_wheels:
     ##
     # Download and test the pure-python wheels that were built in the
@@ -233,7 +233,7 @@ jobs:
             from packaging import tags
             from packaging.utils import parse_wheel_filename
             dist_dpath = pathlib.Path('wheelhouse')
-            wheels = sorted(dist_dpath.glob('aiq_evals*.whl'))
+            wheels = sorted(dist_dpath.glob('aiq_magnet_evals*.whl'))
             if wheels:
                 sys_tags = set(tags.sys_tags())
                 matching = []
@@ -246,7 +246,7 @@ jobs:
                         matching.append(w)
                 fpath = sorted(matching or wheels)[-1]
             else:
-                sdists = sorted(dist_dpath.glob('aiq_evals*.tar.gz'))
+                sdists = sorted(dist_dpath.glob('aiq_magnet_evals*.tar.gz'))
                 if not sdists:
                     raise SystemExit('No wheel artifacts found in wheelhouse')
                 fpath = sdists[-1]
@@ -292,8 +292,8 @@ jobs:
         pwd
         ls -altr
         # Get the path to the installed package and run the tests
-        export MOD_DPATH=$(python -c "import aiq_evals, os; print(os.path.dirname(aiq_evals.__file__))")
-        export MOD_NAME=aiq_evals
+        export MOD_DPATH=$(python -c "import magnet_evals, os; print(os.path.dirname(magnet_evals.__file__))")
+        export MOD_NAME=magnet_evals
         echo "
         ---
         MOD_DPATH = $MOD_DPATH

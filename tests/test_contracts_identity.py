@@ -2,9 +2,9 @@ from dataclasses import replace
 
 import pytest
 
-from aiq_evals.contracts import EvaluationRequest, ModelBinding
-from aiq_evals.errors import RequestValidationError
-from aiq_evals.identity import build_measurement_identity
+from magnet_evals.contracts import EvaluationRequest, ModelBinding
+from magnet_evals.errors import RequestValidationError
+from magnet_evals.identity import build_measurement_identity
 
 
 def make_request(**kwargs):
@@ -130,7 +130,7 @@ def test_task_source_digest_only_counts_when_it_is_an_identity_fact():
 
 
 def test_adapter_source_digest_tracks_package_source(tmp_path, monkeypatch):
-    from aiq_evals.identity import adapter_source_digest
+    from magnet_evals.identity import adapter_source_digest
 
     package = tmp_path / 'fake_adapter_pkg'
     package.mkdir()
@@ -143,8 +143,8 @@ def test_adapter_source_digest_tracks_package_source(tmp_path, monkeypatch):
 
 
 def test_metric_record_int_value_round_trips(tmp_path):
-    from aiq_evals.artifacts import RunBundle, publish_run
-    from aiq_evals.contracts import (
+    from magnet_evals.artifacts import RunBundle, publish_run
+    from magnet_evals.contracts import (
         EvaluationResult,
         ExecutionContext,
         MeasurementIdentity,

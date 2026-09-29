@@ -10,7 +10,7 @@ import os
 from collections import Counter
 from pathlib import Path
 
-from aiq_evals.contracts import (
+from magnet_evals.contracts import (
     CoverageFacts,
     EvaluationResult,
     MetricRecord,
@@ -18,7 +18,7 @@ from aiq_evals.contracts import (
     ResultRecord,
     SampleRecord,
 )
-from aiq_evals.identity import build_measurement_identity
+from magnet_evals.identity import build_measurement_identity
 
 EXECUTIONS: Counter = Counter()
 RESOLUTIONS: Counter = Counter()

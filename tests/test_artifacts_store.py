@@ -1,8 +1,13 @@
 
 import pytest
 
-from aiq_evals.artifacts import ATTEMPT_TERMINAL, RUN_COMPLETE, RunBundle, publish_run
-from aiq_evals.contracts import (
+from magnet_evals.artifacts import (
+    ATTEMPT_TERMINAL,
+    RUN_COMPLETE,
+    RunBundle,
+    publish_run,
+)
+from magnet_evals.contracts import (
     EvaluationRequest,
     EvaluationResult,
     ExecutionContext,
@@ -12,8 +17,8 @@ from aiq_evals.contracts import (
     ResolvedEvaluation,
     ResultRecord,
 )
-from aiq_evals.errors import ArtifactError
-from aiq_evals.store import ResultStore
+from magnet_evals.errors import ArtifactError
+from magnet_evals.store import ResultStore
 
 
 def make_resolved(*, reusable=True):
@@ -137,8 +142,8 @@ def _symlink_tree(tmp_path):
 
 @pytest.mark.parametrize('mode', ['exclude', 'raise', 'follow'])
 def test_external_symlinks_are_never_silently_copied(tmp_path, mode):
-    from aiq_evals.artifacts import copy_native_tree
-    from aiq_evals.errors import ArtifactError
+    from magnet_evals.artifacts import copy_native_tree
+    from magnet_evals.errors import ArtifactError
 
     native = _symlink_tree(tmp_path)
     dest = tmp_path / 'dest'

@@ -1,4 +1,4 @@
-from aiq_evals.probes.api_surface import API_SURFACES, resolve_symbol
+from magnet_evals.probes.api_surface import API_SURFACES, resolve_symbol
 
 
 def test_surfaces_cover_engines():

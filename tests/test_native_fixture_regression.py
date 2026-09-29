@@ -10,9 +10,14 @@ from pathlib import Path
 
 import pytest
 
-from aiq_evals.artifacts import ATTEMPT_TERMINAL, RUN_COMPLETE, RunBundle, publish_run
-from aiq_evals.backends.inspect_ai.normalize import normalize_inspect_logs
-from aiq_evals.contracts import ExecutionContext, MeasurementIdentity
+from magnet_evals.artifacts import (
+    ATTEMPT_TERMINAL,
+    RUN_COMPLETE,
+    RunBundle,
+    publish_run,
+)
+from magnet_evals.backends.inspect_ai.normalize import normalize_inspect_logs
+from magnet_evals.contracts import ExecutionContext, MeasurementIdentity
 from tests.regression.olmo import import_fixture
 from tests.regression.summary import summarize
 
@@ -58,7 +63,11 @@ def test_olmo_multi_task_samples_are_attributed_to_their_tasks():
     [('error__run-error', 'failed'), ('cancelled__cancelled', 'cancelled'), ('nonterminal__started', 'incomplete')],
 )
 def test_captured_non_success_logs_never_publish_success(tmp_path, name, terminal):
-    from aiq_evals.contracts import EvaluationRequest, ModelBinding, ResolvedEvaluation
+    from magnet_evals.contracts import (
+        EvaluationRequest,
+        ModelBinding,
+        ResolvedEvaluation,
+    )
 
     log = json.loads((FIXTURES / 'inspect-native' / 'json' / f'{name}.json').read_text())
     result = normalize_inspect_logs([log], identity=IDENTITY, fallback_task=name)
@@ -85,7 +94,7 @@ HELM_GOLDENS = json.loads((FIXTURES / 'helm-native' / 'expected-normalized.json'
 
 @pytest.mark.parametrize('name', sorted(HELM_GOLDENS))
 def test_helm_fixture_normalization(name):
-    from aiq_evals.backends.helm.normalize import normalize_helm_runs
+    from magnet_evals.backends.helm.normalize import normalize_helm_runs
 
     result = normalize_helm_runs([FIXTURES / 'helm-native' / name], identity=IDENTITY)
     assert summarize(result) == HELM_GOLDENS[name]

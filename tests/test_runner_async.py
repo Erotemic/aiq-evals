@@ -2,9 +2,9 @@ import asyncio
 
 import pytest
 
-from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
-from aiq_evals.errors import ActiveEventLoopError
-from aiq_evals.runner import run_evaluation
+from magnet_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
+from magnet_evals.errors import ActiveEventLoopError
+from magnet_evals.runner import run_evaluation
 
 
 def test_sync_facade_rejects_active_event_loop(tmp_path):

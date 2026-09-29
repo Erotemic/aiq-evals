@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from aiq_evals.probes.isolated import build_locked_uv_command, validate_git_revision
+from magnet_evals.probes.isolated import build_locked_uv_command, validate_git_revision
 
 
 def test_validate_git_revision():

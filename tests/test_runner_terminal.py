@@ -2,16 +2,16 @@ import asyncio
 
 import pytest
 
-from aiq_evals import runner as runner_mod
-from aiq_evals.artifacts import ATTEMPT_TERMINAL, RUN_COMPLETE, RunBundle
-from aiq_evals.contracts import (
+from magnet_evals import runner as runner_mod
+from magnet_evals.artifacts import ATTEMPT_TERMINAL, RUN_COMPLETE, RunBundle
+from magnet_evals.contracts import (
     EvaluationRequest,
     ExecutionContext,
     MeasurementIdentity,
     ModelBinding,
     ResolvedEvaluation,
 )
-from aiq_evals.errors import ExecutionError
+from magnet_evals.errors import ExecutionError
 
 
 def make_resolved():
@@ -58,7 +58,7 @@ def test_execution_error_publishes_failed_terminal_bundle(monkeypatch, tmp_path)
 
 
 def test_adapter_diagnostics_quoting_a_secret_are_redacted(monkeypatch, tmp_path):
-    from aiq_evals.contracts import EvaluationResult
+    from magnet_evals.contracts import EvaluationResult
 
     resolved = make_resolved()
 
@@ -125,7 +125,7 @@ def test_cancellation_publishes_cancelled_attempt_and_propagates(monkeypatch, tm
 def test_missing_required_secret_fails_before_execution(monkeypatch, tmp_path):
     from dataclasses import replace
 
-    from aiq_evals.errors import RequestValidationError
+    from magnet_evals.errors import RequestValidationError
 
     resolved = make_resolved()
     request = replace(

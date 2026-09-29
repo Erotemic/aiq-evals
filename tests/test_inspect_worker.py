@@ -1,10 +1,10 @@
 import asyncio
 from pathlib import Path
 
-from aiq_evals.backends.inspect_ai import adapter as inspect_adapter
-from aiq_evals.backends.inspect_ai.adapter import InspectAIBackend
-from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
-from aiq_evals.runner import run_evaluation_async
+from magnet_evals.backends.inspect_ai import adapter as inspect_adapter
+from magnet_evals.backends.inspect_ai.adapter import InspectAIBackend
+from magnet_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
+from magnet_evals.runner import run_evaluation_async
 
 
 def _request():

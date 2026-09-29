@@ -1,4 +1,4 @@
-from aiq_evals.probes.environment import host_facts, probe_all_engine_imports
+from magnet_evals.probes.environment import host_facts, probe_all_engine_imports
 
 
 def test_host_facts():

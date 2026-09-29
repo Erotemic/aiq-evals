@@ -2,15 +2,15 @@ import asyncio
 
 import pytest
 
-from aiq_evals.backends.registry import (
+from magnet_evals.backends.registry import (
     BackendRegistration,
     clear_backend_cache,
     register_backend,
     registrations,
 )
-from aiq_evals.contracts import EvaluationRequest, ModelBinding
-from aiq_evals.ensure import ensure_evaluation, ensure_evaluation_async
-from aiq_evals.store import ResultStore
+from magnet_evals.contracts import EvaluationRequest, ModelBinding
+from magnet_evals.ensure import ensure_evaluation, ensure_evaluation_async
+from magnet_evals.store import ResultStore
 from tests import fake_backend
 
 
@@ -152,7 +152,7 @@ def test_declared_secret_inherited_from_environment_is_redacted(tmp_path, monkey
 
 
 def test_secret_preflight_runs_before_resolution(tmp_path, monkeypatch):
-    from aiq_evals.errors import RequestValidationError
+    from magnet_evals.errors import RequestValidationError
 
     monkeypatch.delenv('AIQ_DECLARED_TOKEN', raising=False)
     request = make_request('ok', engine_options={'required_secrets': ['AIQ_DECLARED_TOKEN']})
@@ -168,8 +168,8 @@ def test_in_process_timeout_is_enforced(tmp_path):
 
 
 def test_run_and_import_resolve_through_the_worker_when_given(tmp_path, monkeypatch):
-    from aiq_evals import runner
-    from aiq_evals.contracts import ExecutionContext
+    from magnet_evals import runner
+    from magnet_evals.contracts import ExecutionContext
 
     seen = []
 
@@ -230,8 +230,8 @@ def test_promotion_keeps_symlink_notes(tmp_path):
 def test_tampered_bundles_fail_validation(tmp_path):
     import json
 
-    from aiq_evals.artifacts import RunBundle
-    from aiq_evals.errors import ArtifactError
+    from magnet_evals.artifacts import RunBundle
+    from magnet_evals.errors import ArtifactError
 
     store = ResultStore(tmp_path / 'store')
     run = ensure_evaluation(make_request(generation={'temperature': 0.0}), store).run

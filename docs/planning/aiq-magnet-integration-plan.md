@@ -15,7 +15,7 @@ MAGNET recipe / kwdagger campaign
 EvaluationNode
       |
       v
-aiq_evals.ensure/run/import
+magnet_evals.ensure/run/import
       |
       v
 EvaluationRun

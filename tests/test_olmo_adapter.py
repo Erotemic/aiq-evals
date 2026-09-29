@@ -4,11 +4,11 @@ from dataclasses import dataclass
 
 import pytest
 
-from aiq_evals.backends.olmo_eval import adapter as olmo_adapter
-from aiq_evals.backends.olmo_eval.adapter import OlmoEvalBackend
-from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
-from aiq_evals.errors import RequestValidationError
-from aiq_evals.runner import run_evaluation_async
+from magnet_evals.backends.olmo_eval import adapter as olmo_adapter
+from magnet_evals.backends.olmo_eval.adapter import OlmoEvalBackend
+from magnet_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
+from magnet_evals.errors import RequestValidationError
+from magnet_evals.runner import run_evaluation_async
 
 
 @dataclass
@@ -206,7 +206,7 @@ def _write_native_metrics(root, payload):
 
 
 def test_import_native_artifact_validates_task_model_provider(monkeypatch, tmp_path):
-    from aiq_evals.errors import ArtifactError
+    from magnet_evals.errors import ArtifactError
 
     patch_runtime(monkeypatch)
     backend = OlmoEvalBackend()

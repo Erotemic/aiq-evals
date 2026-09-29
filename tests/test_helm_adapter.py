@@ -2,10 +2,10 @@ import sys
 
 import pytest
 
-from aiq_evals.backends.helm.adapter import HelmBackend, build_run_entry
-from aiq_evals.backends.helm.normalize import normalize_helm_runs
-from aiq_evals.contracts import EvaluationRequest, MeasurementIdentity, ModelBinding
-from aiq_evals.errors import ArtifactError, RequestValidationError
+from magnet_evals.backends.helm.adapter import HelmBackend, build_run_entry
+from magnet_evals.backends.helm.normalize import normalize_helm_runs
+from magnet_evals.contracts import EvaluationRequest, MeasurementIdentity, ModelBinding
+from magnet_evals.errors import ArtifactError, RequestValidationError
 
 IDENTITY = MeasurementIdentity(algorithm='t', digest='0' * 64, reusable=False)
 

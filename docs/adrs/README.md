@@ -73,6 +73,6 @@ explicit replacement ADR:
 - **Deferred**: intentionally unresolved until named evidence exists.
 - **Superseded**: retained for history; a newer ADR is authoritative.
 
-The phase-6 freeze is recorded in ADR-0009: the `aiq_evals` exports and the
+The phase-6 freeze is recorded in ADR-0009: the `magnet_evals` exports and the
 v1 request/result/manifest schemas are now stable. Adapter internals are not
 public API.

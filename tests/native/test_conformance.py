@@ -25,10 +25,10 @@ from typing import Callable, ContextManager, Iterator
 
 import pytest
 
-from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
-from aiq_evals.ensure import ensure_evaluation, ensure_evaluation_async
-from aiq_evals.runner import resolve_evaluation, resolve_evaluation_async
-from aiq_evals.store import ResultStore
+from magnet_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
+from magnet_evals.ensure import ensure_evaluation, ensure_evaluation_async
+from magnet_evals.runner import resolve_evaluation, resolve_evaluation_async
+from magnet_evals.store import ResultStore
 
 OLMO_REVISION = "73ade80e24f796af55caeb8fd7b75a7f3fd607fd"
 ENGINE_MODULES = ("inspect_ai", "olmo_eval", "helm")
@@ -216,7 +216,7 @@ def test_ensure_executes_reuses_imports_and_reads_engine_free(profile: Profile, 
                 if name.split('.')[0] in {ENGINE_MODULES!r}:
                     raise ImportError('engine import blocked: ' + name)
         sys.meta_path.insert(0, Block())
-        from aiq_evals.artifacts import RunBundle
+        from magnet_evals.artifacts import RunBundle
         bundle = RunBundle.load(sys.argv[1])
         print(bundle.result.status, len(bundle.result.records))
         """

@@ -301,7 +301,7 @@ Implementation status: IMPLEMENTED; evidence in `phase6-evidence.md`.
 
 Requirements:
 
-- [x] implement the central operation (`aiq_evals.ensure_evaluation`, CLI `ensure`)
+- [x] implement the central operation (`magnet_evals.ensure_evaluation`, CLI `ensure`)
   with worker-side resolution;
 - [x] engine/version/config/code changes invalidate reuse;
 - [x] changed native imported artifacts get new identities;

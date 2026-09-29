@@ -15,8 +15,8 @@ from tests.native.chat_server import chat_server as _chat_server
 
 pytest.importorskip("olmo_eval")
 
-from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
-from aiq_evals.runner import import_evaluation, run_evaluation, run_evaluation_async
+from magnet_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
+from magnet_evals.runner import import_evaluation, run_evaluation, run_evaluation_async
 
 
 def test_registered_task_in_owned_worker(tmp_path: Path) -> None:
@@ -231,8 +231,8 @@ def test_active_event_loop_boundary(tmp_path: Path) -> None:
     # the aiq-evals sync facade refuses rather than nesting asyncio.run.
     import inspect
 
-    from aiq_evals.backends.olmo_eval import adapter as olmo_adapter
-    from aiq_evals.errors import ActiveEventLoopError
+    from magnet_evals.backends.olmo_eval import adapter as olmo_adapter
+    from magnet_evals.errors import ActiveEventLoopError
 
     request = EvaluationRequest(
         engine="olmo_eval",
@@ -276,7 +276,7 @@ def test_max_turns_limit_changes_native_trajectory(tmp_path: Path) -> None:
     # P7: max_turns is a native measurement input (it enters identity) and the
     # scaffold stops after one model turn: assistant/tool, no final assistant turn.
     pytest.importorskip("agents")
-    from aiq_evals.runner import resolve_evaluation
+    from magnet_evals.runner import resolve_evaluation
 
     with _chat_server() as port:
         unlimited = _tool_request(port)

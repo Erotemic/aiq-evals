@@ -22,7 +22,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from aiq_evals.contracts import MeasurementIdentity  # noqa: E402
+from magnet_evals.contracts import MeasurementIdentity  # noqa: E402
 from tests.regression.summary import summarize  # noqa: E402
 
 IDENTITY = MeasurementIdentity(algorithm='regression', digest='0' * 64, reusable=False)
@@ -46,7 +46,7 @@ def _write(path: Path, data: object) -> None:
 def regenerate_inspect() -> None:
     from inspect_ai.log import read_eval_log, write_eval_log
 
-    from aiq_evals.backends.inspect_ai.normalize import normalize_inspect_logs
+    from magnet_evals.backends.inspect_ai.normalize import normalize_inspect_logs
 
     out = INSPECT_ROOT / 'json'
     out.mkdir(exist_ok=True)
@@ -68,7 +68,7 @@ def regenerate_olmo() -> None:
 
 
 def regenerate_helm() -> None:
-    from aiq_evals.backends.helm.normalize import normalize_helm_runs
+    from magnet_evals.backends.helm.normalize import normalize_helm_runs
 
     goldens = {
         path.name: summarize(normalize_helm_runs([path], identity=IDENTITY))

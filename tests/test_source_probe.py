@@ -3,8 +3,8 @@ import subprocess
 
 import pytest
 
-from aiq_evals.probes.model import ProbeStatus
-from aiq_evals.probes.source import inspect_checkout
+from magnet_evals.probes.model import ProbeStatus
+from magnet_evals.probes.source import inspect_checkout
 
 
 @pytest.mark.skipif(shutil.which('git') is None, reason='git is required')

@@ -9,9 +9,9 @@ import pytest
 
 pytest.importorskip("helm")
 
-from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
-from aiq_evals.errors import ArtifactError, RequestValidationError
-from aiq_evals.runner import (
+from magnet_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
+from magnet_evals.errors import ArtifactError, RequestValidationError
+from magnet_evals.runner import (
     import_evaluation,
     resolve_evaluation,
     run_evaluation,

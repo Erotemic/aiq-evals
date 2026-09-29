@@ -25,7 +25,7 @@ Evidence is in `docs/planning/phase6-evidence.md`.
 The following surface is frozen as version 1. `tests/test_public_api_freeze.py`
 pins it:
 
-- the `aiq_evals` package exports (`aiq_evals.__all__`);
+- the `magnet_evals` package exports (`magnet_evals.__all__`);
 - request, result, and run-manifest schemas at `schema_version` 1, including the
   frozen `tests/fixtures/run-v1` bundle;
 - the measurement identity algorithm `aiq-evals-measurement-v2+sha256`
@@ -50,5 +50,5 @@ After this point:
 ## Consequences
 
 MAGNET integration (M1 onward in `aiq-magnet-integration-plan.md`) may depend on
-this surface. The `aiq_evals.backends.*` adapter modules and the worker
+this surface. The `magnet_evals.backends.*` adapter modules and the worker
 protocol are not public API.

@@ -1,6 +1,6 @@
 """ADR-0009 pins the first public surface; changing it must be deliberate."""
-import aiq_evals
-from aiq_evals import cli, contracts, identity
+import magnet_evals
+from magnet_evals import cli, contracts, identity
 
 FROZEN_EXPORTS = {
     'ENGINE_SPECS', 'EngineSpec', 'EnsureOutcome', 'EvaluationRequest', 'EvaluationResult',
@@ -17,9 +17,9 @@ FROZEN_COMMANDS = {
 
 def test_exports_are_a_superset_of_the_frozen_surface():
     # Additions are allowed; removals/renames need a superseding ADR.
-    assert FROZEN_EXPORTS <= set(aiq_evals.__all__)
+    assert FROZEN_EXPORTS <= set(magnet_evals.__all__)
     for name in FROZEN_EXPORTS:
-        assert hasattr(aiq_evals, name)
+        assert hasattr(magnet_evals, name)
 
 
 def test_schema_versions_and_identity_algorithm_are_frozen():

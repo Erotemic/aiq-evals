@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from aiq_evals.backends.inspect_ai import adapter as inspect_adapter
-from aiq_evals.backends.inspect_ai import normalize
-from aiq_evals.backends.inspect_ai.adapter import InspectAIBackend
-from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
-from aiq_evals.errors import ArtifactError, RequestValidationError
-from aiq_evals.runner import import_evaluation
+from magnet_evals.backends.inspect_ai import adapter as inspect_adapter
+from magnet_evals.backends.inspect_ai import normalize
+from magnet_evals.backends.inspect_ai.adapter import InspectAIBackend
+from magnet_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
+from magnet_evals.errors import ArtifactError, RequestValidationError
+from magnet_evals.runner import import_evaluation
 
 CALLS = []
 
@@ -421,8 +421,8 @@ def test_import_single_native_file_is_preserved_in_bundle(monkeypatch, tmp_path)
 
 
 def test_metric_score_dimension_roundtrips_and_filters(tmp_path):
-    from aiq_evals.artifacts import publish_run
-    from aiq_evals.outputs import select_metrics
+    from magnet_evals.artifacts import publish_run
+    from magnet_evals.outputs import select_metrics
 
     request = make_request(models=(make_request().models[0],))
     identity = inspect_adapter.build_measurement_identity(
@@ -432,7 +432,7 @@ def test_metric_score_dimension_roundtrips_and_filters(tmp_path):
         native_config={'test': True},
         resolved_facts={'engine_version': '0.3.272'},
     )
-    from aiq_evals.contracts import (
+    from magnet_evals.contracts import (
         CoverageFacts,
         EvaluationResult,
         MetricRecord,

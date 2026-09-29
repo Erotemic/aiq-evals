@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from aiq_evals.backends.olmo_eval.adapter import OlmoEvalBackend
-from aiq_evals.contracts import (
+from magnet_evals.backends.olmo_eval.adapter import OlmoEvalBackend
+from magnet_evals.contracts import (
     EvaluationRequest,
     EvaluationResult,
     ExecutionContext,

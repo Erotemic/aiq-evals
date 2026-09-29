@@ -1,10 +1,10 @@
 # aiq-evals API, CLI, and contracts (v1)
 
-This surface is frozen by ADR-0009. Adapter modules (`aiq_evals.backends.*`) and
+This surface is frozen by ADR-0009. Adapter modules (`magnet_evals.backends.*`) and
 the worker protocol are internal. What each engine/task/provider combination
 actually supports is recorded in `planning/phase1-capabilities.md`.
 
-## Python API (`import aiq_evals`)
+## Python API (`import magnet_evals`)
 
 | Name | Purpose |
 | --- | --- |
@@ -16,11 +16,11 @@ actually supports is recorded in `planning/phase1-capabilities.md`.
 | `import_evaluation[_async](request_or_resolved, source, context, *, allow_external_symlinks=False)` | Normalize existing native artifacts into a bundle. Resolution and native reading run in `context.worker_python` when given. |
 | `ensure_evaluation[_async](request, store, *, env, worker_python, timeout_seconds, import_source, allow_external_symlinks)` | Reuse a validated stored result, otherwise import or execute into a new attempt and promote a success. Returns `EnsureOutcome(action, run, resolved, attempt, reuse_reason)`. |
 | `ResultStore(root)` | Content-addressed store: `lookup`, `check_reuse`, `attempts(digest)`, `publish`, `promote`. |
-| `load_run(path)` | Engine-free bundle reader. `aiq_evals.outputs` also provides `select_metrics`, `sample_records`, `native_artifacts`, `trajectory_detail`, and related helpers. |
+| `load_run(path)` | Engine-free bundle reader. `magnet_evals.outputs` also provides `select_metrics`, `sample_records`, `native_artifacts`, `trajectory_detail`, and related helpers. |
 | `MeasurementIdentity`, `ResolvedEvaluation`, `EvaluationResult` | Result contracts. |
 | `ENGINE_SPECS`, `EngineSpec` | Verified pins and engine notes. |
 
-Errors derive from `aiq_evals.errors.AiqEvalsError`. The main ones are
+Errors derive from `magnet_evals.errors.AiqEvalsError`. The main ones are
 `RequestValidationError`, `MissingDependencyError`, `EngineCompatibilityError`,
 `ExecutionError`, `ArtifactError`, and `ActiveEventLoopError`.
 

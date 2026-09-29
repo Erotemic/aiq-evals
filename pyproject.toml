@@ -3,7 +3,7 @@ requires = ["setuptools>=80.9"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "aiq-evals"
+name = "aiq-magnet-evals"
 version = "0.1.0"
 description = "Backend-agnostic evaluation runtime and artifact interface for AIQ"
 readme = "README.md"
@@ -31,21 +31,21 @@ tests = [
   "xdoctest>=1.1.5",
 ]
 dev = [
-  "aiq-evals[tests]",
+  "aiq-magnet-evals[tests]",
   "ruff>=0.9",
 ]
 
 [project.scripts]
-aiq-evals = "aiq_evals.cli:main"
+aiq-evals = "magnet_evals.cli:main"
 
 [project.urls]
 Repository = "https://github.com/AIQ-Kitware/aiq-evals/"
 
 [tool.setuptools.packages.find]
-include = ["aiq_evals*"]
+include = ["magnet_evals*"]
 
 [tool.setuptools.package-data]
-aiq_evals = ["py.typed"]
+magnet_evals = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -66,16 +66,16 @@ lint.ignore = ["E501"]
 
 [tool.coverage.run]
 branch = true
-source = ["aiq_evals"]
+source = ["magnet_evals"]
 
 [tool.coverage.report]
 show_missing = true
 
 [tool.xcookie]
 tags = ["github", "purepy"]
-mod_name = "aiq_evals"
+mod_name = "magnet_evals"
 repo_name = "aiq-evals"
-pkg_name = "aiq-evals"
+pkg_name = "aiq-magnet-evals"
 typed = true
 os = ["linux"]
 min_python = "3.11"

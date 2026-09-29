@@ -1,7 +1,7 @@
 # Security review (plan phase 7)
 
 Date: 2026-09-29. Reviewer: Claude Opus 5.5 (Anthropic, `claude-opus-5-5`, 1M context).
-Scope: `aiq_evals` at the phase-7 commits, and the three adapters at their verified
+Scope: `magnet_evals` at the phase-7 commits, and the three adapters at their verified
 pins. This is a design and code review with targeted tests, not a penetration test.
 
 **Trust model.** A request names task code, plugins, tools, and model endpoints.

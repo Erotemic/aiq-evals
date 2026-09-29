@@ -14,9 +14,9 @@ import pytest
 
 pytest.importorskip("inspect_ai")
 
-from aiq_evals.artifacts import RunBundle
-from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
-from aiq_evals.runner import import_evaluation, run_evaluation, run_evaluation_async
+from magnet_evals.artifacts import RunBundle
+from magnet_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
+from magnet_evals.runner import import_evaluation, run_evaluation, run_evaluation_async
 
 
 def request(task: str, log_format: str = "eval") -> EvaluationRequest:
@@ -276,8 +276,8 @@ def test_active_event_loop_boundary(tmp_path: Path) -> None:
     # must refuse rather than nest asyncio.run.
     import inspect_ai
 
-    from aiq_evals.backends.inspect_ai.adapter import InspectAIBackend
-    from aiq_evals.errors import ActiveEventLoopError
+    from magnet_evals.backends.inspect_ai.adapter import InspectAIBackend
+    from magnet_evals.errors import ActiveEventLoopError
     from tests.native.inspect_fixture import generation
 
     req = request("generation")
