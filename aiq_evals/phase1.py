@@ -1,7 +1,8 @@
 """Machine-readable phase-1 checklist.
 
-The checklist mirrors the refined planning documents. Status here describes the
-repository snapshot, not external runtime validation performed elsewhere.
+Mirrors ``docs/planning/aiq-evals-plan.md``. A task is ``done`` only when its
+native evidence is recorded in ``docs/planning/phase1-evidence.md``; notes name
+what remains untested.
 """
 from __future__ import annotations
 
@@ -29,55 +30,59 @@ PHASE1_TASKS = (
     Phase1Task(
         'P1-02',
         'Select exact upstream pins and reproducible worker instructions',
-        'partial',
-        'Candidate history and source-probe tooling are recorded; exact tested pins remain open.',
+        'done',
+        'Inspect 0.3.272, OLMo 73ade80 (upstream uv.lock), HELM 0.5.14; '
+        'constraints in dev/environments/phase1/ reproduce identical environments.',
     ),
     Phase1Task(
         'P1-03',
         'Run OLMo Eval generation and agent/tool smokes',
-        'open',
-        'Requires an upstream checkout/runtime; do not infer success from the older eval_audit prototype.',
+        'done',
+        'Native generation, OpenAI Agents tool call, hard failure, multi-task suite, cancellation.',
     ),
     Phase1Task(
         'P1-04',
         'Run Inspect generation and agent/tool smokes',
-        'open',
-        'Requires selected Inspect pin and native fixtures.',
+        'done',
+        'Native generation, tool, roles, multi-log, epochs/reducers, sample/run errors, '
+        'cancelled/started logs, local-sandbox cleanup.',
     ),
     Phase1Task(
         'P1-05',
         'Exercise HELM compute and cached materialization/import',
-        'open',
-        'Requires MAGNET/HELM integration fixture execution.',
+        'done',
+        'Fresh local simple-model runs (incl. scored MCQA), MAGNET reuse, incomplete-coverage copy.',
     ),
     Phase1Task(
         'P1-06',
         'Verify worker imports, async boundaries, and cleanup behavior',
-        'open',
-        'Must be demonstrated against native runtimes.',
+        'done',
+        'Active-loop boundary and owned-process cleanup shown natively; Inspect local sandbox '
+        'removed on completion and cancellation. Docker/OLMo sandboxes untested.',
     ),
     Phase1Task(
         'P1-07',
         'Record initial capability/dependency matrix',
-        'partial',
-        'Architecture and candidate dependency strategy are documented; runtime capabilities remain unverified.',
+        'done',
+        'docs/planning/phase1-capabilities.md; untested cells stay T.',
     ),
     Phase1Task(
         'P1-08',
-        'Prove MAGNET one-artifact/one-row cardinality',
-        'open',
-        'Owned by the aiq-magnet integration plan, not by aiq-evals core.',
+        'Decide EEE normalization strategy from fixture conversions',
+        'done',
+        'ADR-0008: independent normalized schema; EEE rejects Inspect local models, lacks OLMo.',
     ),
     Phase1Task(
         'P1-09',
         'Make OLMo Eval packaging go/no-go decision',
-        'open',
-        'Requires clean worker installation and native smoke evidence.',
+        'done',
+        'Isolated pinned worker checkout with upstream lock; no co-installed extra.',
     ),
     Phase1Task(
         'P1-10',
         'Phase-1 acceptance gate',
-        'blocked',
-        'Blocked until P1-02 through P1-09 have runtime evidence.',
+        'done',
+        'Native conditions met. The MAGNET cardinality spike moved to integration gate M6, '
+        'which consumes the captured multi-result fixtures.',
     ),
 )

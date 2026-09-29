@@ -362,7 +362,9 @@ class InspectAIBackend:
     def capabilities(self) -> Mapping[str, Any]:
         return {
             'experimental': True,
-            'implementation_status': 'implemented-native-acceptance-open',
+            # Experimental until the phase-8 release gate; phase-1 native acceptance
+            # passed only for the combinations in docs/planning/phase1-capabilities.md.
+            'implementation_status': 'phase1-native-accepted',
             # Inspect's public evaluation entry point is synchronous. Running it
             # in an owned process gives aiq-evals hard cancellation semantics.
             'requires_worker_process': True,

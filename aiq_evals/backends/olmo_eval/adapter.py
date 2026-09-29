@@ -271,7 +271,9 @@ class OlmoEvalBackend:
         # task/provider combination supports each feature.
         return {
             'experimental': True,
-            'implementation_status': 'implemented-native-acceptance-open',
+            # Experimental until the phase-8 release gate; phase-1 native acceptance
+            # passed only for the combinations in docs/planning/phase1-capabilities.md.
+            'implementation_status': 'phase1-native-accepted',
             'capability_scope': 'request/task/provider combination; validate during resolution',
             'features': {
                 'generation': {'implemented': True, 'native_verified': False},

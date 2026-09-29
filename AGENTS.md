@@ -36,17 +36,20 @@ Do not add `kwdagger` or `aiq-magnet` as a core dependency.
 
 ## Native-evidence rule
 
-Phases 2, 3, and 4 now contain source-grounded implementations, but that does not
-close the native phase-1 acceptance gates. Do not claim an upstream capability
-from documentation, fake-native tests, or old code alone. A checkbox that
-concerns real runtime behavior requires a native fixture and a record in
-`docs/planning/phase1-evidence.md`.
+Phase 1 closed on 2026-09-29 with native fixtures recorded in
+`docs/planning/phase1-evidence.md`. That evidence covers only the tested
+engine/task/provider combinations in `docs/planning/phase1-capabilities.md`.
+Do not claim an upstream capability from documentation, fake-native tests, or old
+code alone. A checkbox that concerns real runtime behavior requires a native
+fixture and an evidence-ledger record; untested matrix cells stay untested.
 
-Exact upstream compatibility pins are evidence-backed decisions. Candidate pins
-are not supported pins. The OLMo adapter remains experimental until its native
-generation, tool, failure, cancellation, and packaging gates are recorded. The
-Inspect adapter's `0.3.272` target is likewise only a candidate until real
-generation, agent/tool, multi-log/epoch, import, and cancellation fixtures pass.
+Exact upstream compatibility pins are evidence-backed decisions. The verified
+pins are Inspect `0.3.272`, OLMo Eval `73ade80e24f796af55caeb8fd7b75a7f3fd607fd`
+(isolated worker only), and HELM `0.5.14`. Other versions are candidates, not
+supported pins. Adapters stay labeled experimental until the phase-8 release
+gate. Captured native outputs feed the dependency-free regression tests; if
+normalization changes, regenerate them with
+`dev/regenerate_native_regressions.py` and review the diff.
 
 ## Dependency rule
 

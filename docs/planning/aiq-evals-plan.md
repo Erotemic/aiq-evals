@@ -1,6 +1,6 @@
 # aiq-evals implementation plan
 
-Status: phases 2 and 3 implemented provisionally; native phase-1/phase-3 acceptance remains open.
+Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-4 implemented and natively accepted for the tested combinations; public API/schema provisional until phase 6.
 
 This is the standalone refinement of the earlier MAGNET backend-agnostic
 evaluation plan. It moves generic evaluation execution, import, identity, and
@@ -116,12 +116,13 @@ it is design/prototype input that must be reproduced from this repository.
 
 For OLMo Eval and Inspect:
 
-- [ ] verify public sync/async entry points at the selected pins;
-- [ ] prove no synchronous `asyncio.run` wrapper is called inside an active
+- [x] verify public sync/async entry points at the selected pins;
+- [x] prove no synchronous `asyncio.run` wrapper is called inside an active
   event loop;
 - [x] prove owned child workers are terminated on cancellation;
-- [ ] prove engine-owned sandboxes/resources are cleaned up;
-- [ ] document which process owns each lifecycle boundary.
+- [x] prove engine-owned sandboxes/resources are cleaned up (Inspect `local`
+  sandbox on completion and cancellation; Docker and OLMo sandboxes untested);
+- [x] document which process owns each lifecycle boundary.
 
 ### P1-07 Initial capability matrix
 
@@ -147,8 +148,8 @@ Unsupported combinations fail explicitly.
 Before freezing an `EvaluationResult` schema:
 
 - [x] map the HELM fixture into current EEE representations;
-- [ ] map the Inspect generation and agentic fixtures (converter rejects local model path);
-- [ ] map OLMo Eval generation and trajectory fixtures (no converter);
+- [x] attempt the Inspect generation fixtures (EEE converter rejects the local model path);
+- [x] attempt OLMo Eval fixtures (EEE has no OLMo converter);
 - [x] record demonstrated scientific-field losses and ambiguities;
 - [x] decide whether EEE is the normalized scientific payload, requires a small
   extension, or is unsuitable for the first `aiq-evals` contract.
@@ -158,14 +159,14 @@ cross-engine result schema immediately.
 
 ### P1-09 OLMo Eval packaging go/no-go
 
-- [ ] Test a clean co-installed optional extra only if dependency resolution and
-  both native smokes are reproducible.
+- [x] Co-installed optional extra: not pursued; the isolated worker path met the gate
+  and no reproducible co-installation was established.
 - [x] Select isolated-worker-only support with an immutable checkout and
   upstream committed lock authority.
 - [x] Verify generation, tool execution, import, cancellation, and engine-free
   result reading in the selected delivery mode.
-- [ ] If neither path works, leave the OLMo release capability blocked rather
-  than weakening core dependencies.
+- [x] Fallback not needed: the isolated worker path works; core dependencies
+  are unchanged.
 
 ### P1-10 Acceptance gate
 
@@ -178,11 +179,14 @@ Phase 1 closes only when:
 - worker cleanup is demonstrated;
 - the EEE normalization decision is recorded;
 - OLMo packaging has a supported path;
-- MAGNET's separate cardinality spike has passed for representative native
-  multi-result fixtures.
+- ~~MAGNET's separate cardinality spike has passed for representative native
+  multi-result fixtures.~~ Moved on 2026-09-29 to integration gate M6 in
+  `aiq-magnet-integration-plan.md`. MAGNET has no projection from an
+  `aiq-evals` bundle to a claim row yet, and that projection is scheduled after
+  the adapters. Phase 1 supplied the representative inputs it needs:
+  `tests/fixtures/inspect-native/multi/` and `tests/fixtures/olmo-native/multi/`.
 
-The last item is an external integration gate; it does not make MAGNET a core
-dependency of this repository.
+Status: **closed 2026-09-29**. See the closure record in `phase1-evidence.md`.
 
 ## Phase 2 - Shared contracts, identity, store, and engine-free artifacts
 
@@ -214,7 +218,7 @@ whether EEE becomes the long-term scientific payload. Native files remain author
 
 ## Phase 3 - OLMo Eval adapter
 
-Implementation status: PRESENT, EXPERIMENTAL; native acceptance remains open.
+Implementation status: PRESENT, EXPERIMENTAL; phase-1 native acceptance passed for tested combinations.
 
 - [x] Translate requests to task specs/overrides and `HarnessConfig` provider configuration.
 - [x] Require a full immutable upstream git SHA when `upstream_revision` is supplied.
@@ -228,16 +232,17 @@ Implementation status: PRESENT, EXPERIMENTAL; native acceptance remains open.
 - [x] Treat a raised hard-failure gate as failed even when OLMo already wrote `metrics.json`.
 - [x] Implement native artifact import with task/model/provider validation and explicit incomplete-task status.
 - [x] Map OLMo top-level per-task errors into failed normalized records.
-- [ ] Execute the real deterministic generation fixture at the selected OLMo pin.
-- [ ] Execute the real multi-turn tool fixture and capture trajectory evidence.
-- [ ] Verify owned worker-process and native runner cancellation cleanup against the real runtime.
-- [ ] Select the supported packaging mode/pin and close P1-09.
-- [ ] Mark the adapter supported only after those native gates pass.
+- [x] Execute the real deterministic generation fixture at the selected OLMo pin.
+- [x] Execute the real multi-turn tool fixture and capture trajectory evidence.
+- [x] Verify owned worker-process and native runner cancellation cleanup against the real runtime.
+- [x] Select the supported packaging mode/pin and close P1-09.
+- [x] Mark the adapter supported only after those native gates pass (tested
+  combinations only; the release label stays experimental until phase 8).
 
 ## Phase 4 - Inspect adapter
 
-Implementation status: PRESENT, EXPERIMENTAL; native acceptance remains open.
-Candidate API target: `inspect-ai==0.3.272`.
+Implementation status: PRESENT, EXPERIMENTAL; phase-1 native acceptance passed for tested combinations.
+Verified API target: `inspect-ai==0.3.272`.
 
 - [x] Resolve native task references and explicit serialized importable factories.
 - [x] Hash concrete local/importable task source when available for measurement identity.
@@ -255,12 +260,12 @@ Candidate API target: `inspect-ai==0.3.272`.
 - [x] Conservatively map error/cancelled/nonterminal statuses.
 - [x] Recover diagnostic logs when native execution raises after writing artifacts.
 - [x] Support task-native solver/agent/tool execution and explicit `solver` eval options without nesting an Inspect eval-set scheduler.
-- [ ] Run deterministic generation against the real candidate pin.
-- [ ] Run a real multi-turn solver/agent tool fixture and verify normalized native events.
-- [ ] Run real model-role, multi-log, multi-scorer, and epoch/reducer fixtures.
-- [ ] Verify `.eval` and JSON imports against real Inspect log files.
-- [ ] Verify live cancellation and native sandbox/process cleanup.
-- [ ] Promote a tested Inspect version from candidate to supported only after the native gates pass.
+- [x] Run deterministic generation against the real candidate pin.
+- [x] Run a real multi-turn solver/agent tool fixture and verify normalized native events.
+- [x] Run real model-role, multi-log, multi-scorer, and epoch/reducer fixtures.
+- [x] Verify `.eval` and JSON imports against real Inspect log files.
+- [x] Verify live cancellation and native sandbox/process cleanup (local sandbox).
+- [x] Promote a tested Inspect version from candidate to supported only after the native gates pass.
 
 ## Phase 5 - HELM adapter
 

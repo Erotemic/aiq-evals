@@ -533,3 +533,149 @@ these native tests and was left untouched.
   HELM native: 3 passed, 4 MAGNET deprecation warnings.
 
 The MAGNET cardinality spike is unchanged and still blocks P1-10.
+
+## 2026-09-29 follow-up 3: review corrections, P1-06 lifecycle, and closure
+
+Evidence producer: Claude Opus 5.5 (Anthropic, `claude-opus-5-5`, 1M context).
+This follows an external review of the Phase-1 work. Environments are
+unchanged from the records above.
+
+### Identity and provenance corrections (`fbf84d0`)
+
+- `measurement_inputs()` had hashed only `engine_revision` from
+  `resolved_facts`. Editing an Inspect task file, or an OLMo/Inspect
+  registration module, therefore left a *reusable* digest unchanged, which
+  violates ADR-0003. Adapters now pass an explicit, path-free `identity_facts`
+  subset (task source digest and module digests), and that subset enters the
+  digest. A module without hashable source makes identity non-reusable. The
+  identity algorithm is now `aiq-evals-measurement-v2`.
+- Adapter behavior changed during Phase 1 while `ADAPTER_VERSION` stayed
+  `0.1.0`. Both adapters are now `0.2.0`, and `adapter_source_sha256` (a
+  digest of the adapter package's Python source) also enters identity.
+- `upstream_revision` had been recorded without being checked. The new
+  `verify_engine_revision()` observes the revision from the imported module's
+  tracked git checkout, or else from PEP 610 metadata. It rejects a
+  contradicting request; an unverifiable claim or a dirty checkout makes
+  identity non-reusable. Natively, in the OLMo environment, the request
+  `73ade80…` resolved as reusable with `engine_revision_source=git-checkout`.
+  Requesting the `eval_audit` SHA `c84828e…` against that checkout raised
+  `EngineCompatibilityError`.
+
+### Secret redaction of returned results (`b2f199f`, refined in `ee7fe7a`)
+
+Adapter diagnostics, including native exception text and tracebacks, were
+published unscrubbed. Every key and string leaf of the returned result is now
+scrubbed of `ExecutionContext.env` values of at least 8 characters. The first
+native sandbox run showed that scrubbing the value `"1"` corrupted the
+measurement digest, so shorter values are skipped and named in
+`env_values_not_redacted_as_too_short`, and the resolved identity is always
+kept. Worker log files are still scrubbed of every value. Native engine
+artifacts are retained unmodified: an engine that writes a credential into its
+own log is not covered.
+
+### Engine-free fixture regression (`273cfbe`)
+
+`tests/test_native_fixture_regression.py` runs in the dependency-free suite.
+Inspect `.eval` entries are zstd-compressed (zip method 93), which the stdlib
+cannot read before Python 3.14. `dev/regenerate_native_regressions.py`
+therefore writes each fixture through Inspect's own JSON writer into
+`inspect-native/json/`, and records goldens normalized from the native
+`EvalLog` objects. The tests normalize the plain JSON dicts and must reproduce
+those goldens. OLMo import is already engine-free.
+
+This surfaced a real OLMo import bug: prediction files were attributed to tasks
+by substring. In the native two-task suite, the `aiq_p1_local_alt` sample was
+therefore assigned to a nonexistent task named `aiq_p1_local_alt_494d4e`, so the
+earlier "native import preserved both records" held for records but not for
+samples. Attribution now follows upstream's `<sanitized spec>[_<hash6>]`
+naming (`write_predictions_jsonl` at the pin). The native multi-task test now
+asserts sample attribution after both execution and import.
+
+**Fixture paths changed.** The OLMo generation and tool fixtures had been
+committed with the native filename prefix removed, so native import (which
+discovers `*-predictions.jsonl`) never read them. Contents and SHA256 values are
+unchanged; see `tests/fixtures/olmo-native/README.md`:
+
+- `olmo-native/metrics.json` → `olmo-native/generation/metrics.json`;
+- `olmo-native/{predictions,requests}.jsonl` →
+  `olmo-native/generation/aiq_p1_local-{predictions,requests}.jsonl`;
+- `olmo-native/tool/{predictions,requests}.jsonl` →
+  `olmo-native/tool/aiq_p1_tool-{predictions,requests}.jsonl`.
+
+### P1-06: active-loop boundary and lifecycle — demonstrated (`ee7fe7a`)
+
+Entry points at the pins:
+
+| Engine | Public sync entry | Inside an active loop | Public async entry used by aiq-evals |
+| --- | --- | --- | --- |
+| Inspect 0.3.272 | `inspect_ai.eval()` | raises `RuntimeError: Already running asyncio in this thread` | none: `eval()` runs in an owned worker's main thread (`execute_blocking`), or via `asyncio.to_thread` in-process; `eval_async` exists but is unused |
+| OLMo 73ade80 | `AsyncEvalRunner.run()` = `asyncio.run(run_async())` | raises `asyncio.run() cannot be called from a running event loop` | `AsyncEvalRunner.run_async()` awaited directly |
+
+`test_active_event_loop_boundary` in both native suites shows the following
+from inside a running loop:
+
+- the native sync entry fails;
+- `run_evaluation()` raises `ActiveEventLoopError` instead of nesting;
+- the adapter's `execute()` succeeds in-process;
+- `run_evaluation_async()` with a worker succeeds.
+
+Sandbox cleanup. `inspect_sandbox_fixture.sandbox_task` runs its tool through
+`sandbox().exec` in Inspect's `local` sandbox, whose `TemporaryDirectory` is
+removed by `sample_cleanup`.
+
+- On completion: tool result `4`, and the recorded directory is gone.
+- On cancellation, before this change: SIGTERM to the worker group killed
+  Inspect before `sample_cleanup`, and `/tmp/tmpkhp4t1o3` leaked. The owned
+  processes were gone and only a `started`-status log remained.
+- On cancellation, after this change: the runner sends SIGINT, waits up to
+  `CANCEL_GRACE_SECONDS` (15), then escalates to SIGTERM (5 s) and SIGKILL.
+  The worker runs Inspect's `eval()` on its main thread, so Inspect handles the
+  interrupt: the sandbox directory is removed, the sandbox `sleep` child is
+  gone, and Inspect writes a `cancelled` log. That log's records are published
+  with `ATTEMPT_TERMINAL=cancelled` and no `RUN_COMPLETE`.
+- Docker sandboxes were not tested: the test user cannot access the Docker
+  socket. OLMo sandboxes were not tested.
+
+OLMo cancellation passes, but it took 15.9 s: the fixture's slow task blocks its
+event loop with synchronous `time.sleep`, so asyncio cannot deliver the SIGINT
+cancellation, and the SIGTERM escalation cleaned up. Cooperative OLMo cleanup
+under SIGINT is therefore not demonstrated.
+
+Lifecycle ownership:
+
+| Boundary | Owner | Termination / cleanup |
+| --- | --- | --- |
+| Worker process group (`start_new_session`) | `aiq-evals` runner | SIGINT, then 15 s grace, SIGTERM, 5 s, SIGKILL, and a final group SIGKILL |
+| Worker stdout/stderr | runner (files under `native/aiq_worker/`) | redacted after exit, retained in the bundle |
+| Work directory and atomic publication | runner/`publish_run` | removed after publication; terminal markers always written |
+| Inspect eval loop, samples, sandboxes, logs | Inspect, in the worker's main thread | Inspect's SIGINT handling, `sample_cleanup` |
+| OLMo `AsyncEvalRunner` and its spawned inference workers | OLMo, in the worker's asyncio task | task cancellation (SIGINT via `asyncio.run`), runner `finally` |
+| HELM run through MAGNET | MAGNET/HELM | not an aiq-evals adapter yet (phase 5) |
+
+### P1-10: Phase 1 closed
+
+The MAGNET cardinality spike moved to integration gate M6
+(`aiq-magnet-integration-plan.md`). It needs the MAGNET projection scheduled after
+the adapters, and Phase 1 supplied its native multi-result inputs. The remaining
+conditions have records in this ledger:
+
+| Condition | Evidence |
+| --- | --- |
+| exact pins/environments for all three engines | P1-02 records, `dev/environments/phase1/`, OLMo `uv.lock` |
+| native scored generation in all three | OLMo `contains_42`, Inspect `match`/`includes`, HELM MCQA `exact_match` |
+| real multi-turn tool execution in OLMo and Inspect | OLMo Agents `double`, Inspect `use_tools` `double` and sandbox tool |
+| failure/cancellation fixtures | OLMo hard failure; Inspect sample/run error, cancelled, started; cancellation of both |
+| worker cleanup | owned child processes (both); Inspect local sandbox |
+| EEE decision | ADR-0008 |
+| OLMo packaging path | isolated pinned worker (P1-09) |
+
+Still untested, and still marked T in the matrix: log probabilities, resume,
+rescore, Docker/OLMo sandboxes, HELM cancellation, and external providers.
+
+### Validation at this record
+
+- `python -m pytest -q`: 78 passed, 3 native skips. The same result holds on
+  the engine-free `/tmp/aiq-core-p1` CPython 3.11.15, where `find_spec`
+  returns `None` for `inspect_ai`, `olmo_eval`, and `helm`.
+- `ruff check .`: passed.
+- Inspect native: 13 passed. OLMo native: 6 passed. HELM native: 3 passed.

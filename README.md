@@ -28,11 +28,12 @@ its results and decide how a selected metric becomes claim evidence.
 
 ## Current status
 
-Phases 2, 3, and 4 now have implementations, while the native phase-1 acceptance
-gates remain deliberately open. The OLMo adapter targets the API seam inspected
-at commit `73ade80e24f796af55caeb8fd7b75a7f3fd607fd`. The Inspect adapter targets
-candidate release `inspect-ai==0.3.272` through its public eval/log APIs. Neither
-adapter is declared supported until its native generation/tool/cancellation gates pass.
+Phase 1 (native validation) closed on 2026-09-29. The adapters passed native
+fixtures at verified pins: Inspect `inspect-ai==0.3.272`, OLMo Eval
+`73ade80e24f796af55caeb8fd7b75a7f3fd607fd` (isolated worker checkout), and
+HELM `crfm-helm==0.5.14` through MAGNET. Support is limited to the tested
+combinations in `docs/planning/phase1-capabilities.md`. The public API and schema
+remain provisional until the phase-6 conformance freeze.
 
 Implemented now:
 
@@ -55,9 +56,10 @@ Implemented now:
 - automatic owned-worker execution for synchronous native runtimes such as Inspect;
 - Inspect `.eval`/JSON import and native model/task-argument validation.
 
-The implementation is intentionally provisional. Native OLMo/Inspect acceptance,
-OLMo packaging selection, EEE gap analysis, HELM, and MAGNET integration remain
-open and are tracked under `docs/planning/`.
+The implementation is intentionally provisional. Remaining work, including
+reuse/`ensure` semantics and conformance, is tracked in
+`docs/planning/aiq-evals-plan.md`. MAGNET integration is tracked separately in
+`docs/planning/aiq-magnet-integration-plan.md`.
 
 ## Bootstrap
 
@@ -102,7 +104,7 @@ aiq-evals validate request.json
 aiq-evals validate examples/inspect_ai_request.json
 ```
 
-To install the candidate Inspect runtime in the same environment:
+To install the verified Inspect runtime in the same environment:
 
 ```bash
 python -m pip install -e '.[inspect]'
@@ -127,8 +129,9 @@ aiq-evals phase1-probe \
     --output phase1-artifacts/local-probe.json
 ```
 
-The probe is deliberately non-executing. Native generation/tool/cancellation
-fixtures are the next phase-1 acceptance work.
+The probe is deliberately non-executing. The native acceptance suites live in
+`tests/native/` and run only inside the matching engine environment (see
+`docs/planning/phase1-evidence.md` for the exact environments).
 
 ## Architecture review target
 

@@ -124,3 +124,19 @@ OLMo agent/failure evidence. All have model attribution trailers.
   P1-08 Inspect/OLMo EEE mapping, which is blocked upstream.
 - Current validation: base 49 passed/3 skipped; Inspect native 10; OLMo native
   5; HELM native 3. See the ledger's "follow-up 2" section.
+
+## Update — review correction pass (Claude Opus 5.5)
+
+Phase 1 is **closed**; see "follow-up 3" in `phase1-evidence.md`. The MAGNET
+cardinality spike moved to integration gate M6. That pass fixed several issues:
+- identity hashing of task/module source;
+- adapter source identity;
+- verification of the executing engine revision;
+- redaction of returned results;
+- OLMo prediction-to-task attribution;
+- SIGINT-first cancellation, which lets Inspect clean up its sandbox.
+
+It also added engine-free fixture regression tests and brought
+`phase1.py`, `engines.py`, the README, AGENTS.md, and the plans up to date.
+The next work is plan phase 5 (HELM adapter), then phase 6 (reuse and
+conformance).

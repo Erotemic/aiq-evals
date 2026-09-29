@@ -46,7 +46,13 @@ Remaining before phase-2 API freeze:
 
 ## Phase 3 - OLMo Eval adapter
 
-Status: IMPLEMENTED, EXPERIMENTAL; NATIVE ACCEPTANCE OPEN.
+Status: IMPLEMENTED, EXPERIMENTAL; phase-1 native acceptance PASSED for the
+tested combinations (2026-09-29).
+
+> Update 2026-09-29: all six gates listed under "Native gates still open" below
+> are now recorded in `phase1-evidence.md`. The adapter also verifies the
+> executing checkout against `upstream_revision` and hashes task-module source
+> into identity. The text below is the pre-acceptance implementation record.
 
 The adapter is source-grounded against the candidate revision originally inspected
 by the MAGNET plan:
@@ -76,7 +82,7 @@ Implemented behavior:
 Repository tests use a narrow fake-native surface matching the inspected public API.
 They do not count as the native P1-03/P1-06 acceptance fixtures.
 
-## Native gates still open
+## Native gates (closed 2026-09-29; see `phase1-evidence.md`)
 
 Do not mark the OLMo adapter supported until the selected real upstream environment
 records all of the following in `phase1-evidence.md`:

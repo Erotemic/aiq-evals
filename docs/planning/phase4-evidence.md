@@ -1,6 +1,13 @@
 # Phase-4 implementation evidence: Inspect adapter
 
-Status: IMPLEMENTED, EXPERIMENTAL; NATIVE ACCEPTANCE OPEN.
+Status: IMPLEMENTED, EXPERIMENTAL; phase-1 native acceptance PASSED for the
+tested combinations (2026-09-29).
+
+> Update 2026-09-29: `inspect-ai==0.3.272` is verified for the combinations in
+> `phase1-capabilities.md`, and every native item listed at the end of this file is
+> recorded in `phase1-evidence.md`. Two exceptions remain: CI installation of the
+> pin (phase 8) and Docker sandboxes (untested; the `local` sandbox is covered).
+> The text below is the pre-acceptance implementation record.
 
 This ledger separates repository implementation evidence from native-runtime
 acceptance. The adapter is implemented against the public Inspect APIs documented
@@ -102,5 +109,4 @@ Do not mark the Inspect adapter supported until a pinned real environment record
 - a decision to promote `0.3.272` (or a later tested version) from candidate to
   supported.
 
-These are P1-04/P1-06/P1-07 evidence items and remain unchecked in
-`phase1-evidence.md`.
+These were P1-04/P1-06/P1-07 evidence items; see `phase1-evidence.md` for their records.

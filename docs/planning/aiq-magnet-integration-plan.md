@@ -112,7 +112,13 @@ Examples:
 ## M6 - Cardinality acceptance experiment
 
 This remains an early MAGNET integration gate even though native fixture capture
-happens in `aiq-evals`.
+happens in `aiq-evals`. On 2026-09-29 it moved here from the `aiq-evals` P1-10
+acceptance gate, because it needs the M4/M5 projection, which does not exist
+yet. Representative native inputs are committed in `aiq-evals`:
+`tests/fixtures/inspect-native/multi/` (three task logs, two epochs, auxiliary
+role) and `tests/fixtures/olmo-native/multi/` (one suite expanded to two
+prefix-overlapping task names). Engine-free `json/` renderings of the Inspect
+logs and `expected-normalized.json` goldens sit beside them.
 
 Using representative multi-result fixtures:
 
