@@ -20,9 +20,10 @@ performs its own attempt, exactly as if it had arrived afterwards.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, Mapping
+from typing import AsyncIterator, Literal, Mapping
 
 from magnet_evals.artifacts import RunBundle, native_source_identity
 from magnet_evals.contracts import (
@@ -77,7 +78,16 @@ async def ensure_evaluation_async(
     allow_external_symlinks: bool = False,
     model_endpoints: Mapping[str, str] | None = None,
     verify_checksums: bool = True,
+    lock_held: bool = False,
 ) -> EnsureOutcome:
+    """See the module docstring.
+
+    ``lock_held=True`` means the caller already holds this acquisition's lock
+    (``store.acquisition_lock``) in another process, for example a scheduler
+    gate that decides under the lock whether an endpoint lease is needed and
+    then runs ``ensure`` inside that lease. ``ensure`` then skips taking the
+    lock (which that process could never get) but keeps every other check.
+    """
     store = store if isinstance(store, ResultStore) else ResultStore(store)
     # Operational context; output_dir is replaced by the attempt location.
     base = ExecutionContext(
@@ -94,6 +104,8 @@ async def ensure_evaluation_async(
     )
 
     if import_source is not None:
+        if lock_held:
+            raise ValueError('lock_held applies to execution; imports acquire their own content lock')
         return await _ensure_import(
             resolved, store, base, import_source, allow_external_symlinks, verify_checksums,
         )
@@ -105,16 +117,16 @@ async def ensure_evaluation_async(
         attempt = await run_evaluation_async(resolved, _attempt_context(base, store, resolved))
         return EnsureOutcome('executed', attempt, resolved, attempt, decision.reason)
 
-    async with store.acquisition_lock(resolved.identity.digest) as lock:
+    async with _held_or_acquire(store, lock_held, resolved.identity.digest) as waited:
         # Another caller may have published between the check and the lock.
         decision = store.check_reuse(resolved, verify_checksums=verify_checksums)
         if decision.bundle is not None:
-            return EnsureOutcome('reused', decision.bundle, resolved, None, decision.reason, waited=lock.waited)
+            return EnsureOutcome('reused', decision.bundle, resolved, None, decision.reason, waited=waited)
         attempt = await run_evaluation_async(resolved, _attempt_context(base, store, resolved))
         run = attempt
         if attempt.result.status == 'succeeded':
             run = await _finish_in_thread(store.promote, attempt)
-    return EnsureOutcome('executed', run, resolved, attempt, decision.reason, waited=lock.waited)
+    return EnsureOutcome('executed', run, resolved, attempt, decision.reason, waited=waited)
 
 
 async def _ensure_import(
@@ -161,6 +173,16 @@ async def _ensure_import(
     # actually imported.
     imported_identity = str(attempt.manifest.get('native_artifact_identity') or source_identity)
     return EnsureOutcome('imported', run, resolved, attempt, decision.reason, imported_identity, lock.waited)
+
+
+@contextlib.asynccontextmanager
+async def _held_or_acquire(store: ResultStore, lock_held: bool, digest: str) -> AsyncIterator[bool]:
+    """Yield whether we waited; take the acquisition lock unless the caller holds it."""
+    if lock_held:
+        yield False
+        return
+    async with store.acquisition_lock(digest) as lock:
+        yield lock.waited
 
 
 async def _finish_in_thread(func, attempt: RunBundle):

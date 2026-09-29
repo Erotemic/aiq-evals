@@ -205,14 +205,21 @@ def _load_registration_modules(modules: list[str]) -> dict[str, str | None]:
     return digests
 
 
-def _endpoint_for_primary(context: ExecutionContext) -> str | None:
-    """Operational endpoint override (e.g. a leased URL); only the primary role."""
-    extra = sorted(set(context.model_endpoints) - {'primary'})
-    if extra:
+def _role_endpoints(context: ExecutionContext, model_roles: dict[str, str]) -> dict[str, str]:
+    """Operational endpoint overrides (e.g. leased URLs) for auxiliary roles.
+
+    The primary role's override is applied as ``model_base_url``; every other
+    overridden role must be an auxiliary role of the request. Endpoints are
+    operational: identity keeps the role's model binding.
+    """
+    endpoints = {role: url for role, url in context.model_endpoints.items() if role != 'primary'}
+    unknown = sorted(set(endpoints) - set(model_roles))
+    if unknown:
         raise RequestValidationError(
-            f'Inspect endpoint overrides are supported for the primary role only, got {extra}'
+            f'endpoint overrides for roles the request does not bind: {unknown}; '
+            f'bound auxiliary roles: {sorted(model_roles)}'
         )
-    return context.model_endpoints.get('primary')
+    return endpoints
 
 
 def _merge_native_config(request: EvaluationRequest) -> dict[str, Any]:
@@ -493,14 +500,21 @@ class InspectAIBackend:
         _load_registration_modules(list(config.get('registration_modules') or []))
         task = _materialize_task_reference(str(config['task_reference']))
         kwargs = dict(config.get('eval_options') or {})
-        model_base_url = _endpoint_for_primary(context) or config.get('model_base_url')
+        model_base_url = context.model_endpoints.get('primary') or config.get('model_base_url')
+        model_roles: dict[str, Any] = dict(config.get('model_roles') or {})
+        role_endpoints = _role_endpoints(context, model_roles)
+        if role_endpoints:
+            get_model = importlib.import_module('inspect_ai.model').get_model
+            for role, url in role_endpoints.items():
+                # An overridden role gets its own Model bound to that endpoint.
+                model_roles[role] = get_model(model_roles[role], role=role, base_url=url, memoize=False)
         try:
             returned = eval_fn(
                 tasks=task,
                 model=str(config['model']),
                 model_base_url=model_base_url,
                 model_args=dict(config.get('model_args') or {}),
-                model_roles=dict(config.get('model_roles') or {}) or None,
+                model_roles=model_roles or None,
                 task_args=dict(config.get('task_args') or {}),
                 log_dir=str(log_dir),
                 log_format=str(config.get('log_format', 'eval')),

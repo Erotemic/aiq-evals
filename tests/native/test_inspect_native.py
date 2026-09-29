@@ -499,3 +499,37 @@ def test_leased_endpoint_override_reaches_the_provider(tmp_path: Path) -> None:
     assert bundle.result.status == "succeeded", bundle.result.diagnostics
     assert calls == 2
     assert bundle.attempt["execution_context"]["model_endpoint_roles"] == ["primary"]
+
+
+def test_leased_endpoint_override_for_an_auxiliary_role(tmp_path: Path) -> None:
+    # M8 multi-role leasing: the grader role (Inspect's real `openai` provider)
+    # is reached only through its ExecutionContext.model_endpoints override;
+    # the primary stays on the local fixture provider.
+    pytest.importorskip("openai")
+    from tests.native.chat_server import DeterministicChatHandler, chat_server
+
+    with chat_server() as port:
+        request = EvaluationRequest(
+            engine="inspect_ai",
+            task="python:tests.native.inspect_fixture:role_task",
+            data_revision="fixture-v1",
+            models=(
+                ModelBinding(role="primary", model="local", provider="fixture", revision="local-v1"),
+                ModelBinding(role="grader", model="gpt-4o-mini", provider="openai", revision="local-script-v1"),
+            ),
+            engine_options={"registration_modules": ["tests.native.inspect_fixture"]},
+        )
+        bundle = run_evaluation(
+            request,
+            ExecutionContext(
+                output_dir=tmp_path / "run", worker_python=sys.executable,
+                env={"OPENAI_API_KEY": "local-fixture-key"},
+                model_endpoints={"grader": f"http://127.0.0.1:{port}/v1"},
+            ),
+        )
+        calls = DeterministicChatHandler.calls
+    assert bundle.result.status == "succeeded", bundle.result.diagnostics
+    assert calls >= 1  # the grader's requests reached the overridden endpoint
+    assert bundle.attempt["execution_context"]["model_endpoint_roles"] == ["grader"]
+    assert not any("local-fixture-key" in p.read_text(errors="ignore") for p in (tmp_path / "run").rglob("*.json"))
+

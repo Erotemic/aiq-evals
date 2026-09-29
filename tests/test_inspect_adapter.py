@@ -260,9 +260,10 @@ def test_model_endpoint_override_is_operational(monkeypatch, tmp_path):
     assert captured['model_base_url'] == 'http://leased:1/v1'
     assert backend.resolve(make_request()).identity == resolved.identity
     assert context.public_dict()['model_endpoint_roles'] == ['primary']
-    with pytest.raises(RequestValidationError, match='primary role only'):
+    # Auxiliary roles can be overridden only when the request binds them.
+    with pytest.raises(RequestValidationError, match='roles the request does not bind'):
         asyncio.run(backend.execute(
-            resolved, ExecutionContext(output_dir=tmp_path / 'x', model_endpoints={'grader': 'http://g/v1'})
+            resolved, ExecutionContext(output_dir=tmp_path / 'x', model_endpoints={'judge': 'http://g/v1'})
         ))
 
 

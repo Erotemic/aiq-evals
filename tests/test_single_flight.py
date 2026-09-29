@@ -399,3 +399,20 @@ def test_resolution_can_skip_the_secret_check(tmp_path, monkeypatch):
         asyncio.run(resolve_evaluation_async(request, context))
     resolved = asyncio.run(resolve_evaluation_async(request, context, require_secrets=False))
     assert resolved.identity.reusable
+
+
+def test_lock_held_lets_the_lock_holders_delegate_execute(tmp_path):
+    # A scheduler gate holds the acquisition lock and runs ensure() in a child
+    # (e.g. inside an endpoint lease); the child must not wait for itself.
+    store = ResultStore(tmp_path / 'store')
+    resolved = fake_backend.FakeBackend().resolve(make_request('ok'))
+
+    async def scenario():
+        async with store.acquisition_lock(resolved.identity.digest):
+            return await asyncio.wait_for(ensure_evaluation_async(resolved, store, lock_held=True), 5)
+
+    outcome = asyncio.run(scenario())
+    assert outcome.action == 'executed' and not outcome.waited
+    assert ensure_evaluation(resolved, store).reused
+    with pytest.raises(ValueError, match='lock_held applies to execution'):
+        ensure_evaluation(resolved, store, lock_held=True, import_source=_native(tmp_path / 'n', 0.5))
