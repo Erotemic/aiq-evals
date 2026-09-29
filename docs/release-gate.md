@@ -37,7 +37,7 @@ Linux, using the phase-8 commit's scripts from fresh environments under a scratc
 
 | Check | Result |
 | --- | --- |
-| G1 | `PYTHON_VERSION=3.11` and `3.13` `dev/ci/engine_free.sh`: ruff clean; 116 passed, 4 native-module skips, 12 native deselected each. The engine-absence assertion passed. |
+| G1 | `PYTHON_VERSION=3.11` and `3.13` `dev/ci/engine_free.sh`: ruff clean; 118 passed, 4 native-module skips, 12 native deselected each (re-run at the phase-8 commit). The engine-absence assertion passed. |
 | G2 | `dev/ci/native_inspect.sh`: fresh venv from constraints; 19 passed, 9 skipped (other engines' conformance profiles; the `openai`-only test) |
 | G3 | `dev/ci/native_olmo.sh`: fresh `git clone` from GitHub at `73ade80e`, clean tree, `uv sync --frozen` (lock SHA256 `8c3ac8e8…217e`, as recorded in Phase 1); 12 passed, 8 skipped |
 | G4 | `MAGNET_DIR=/home/joncrall/code/aiq-magnet dev/ci/native_helm.sh`: fresh venv from constraints plus MAGNET; 16 passed, 8 skipped. The MAGNET checkout had the uncommitted demo edit noted in `phase1-evidence.md`, which these tests do not use. |
