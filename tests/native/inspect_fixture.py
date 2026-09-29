@@ -8,11 +8,11 @@ import asyncio
 import os
 import subprocess
 
-from inspect_ai import Task, task
+from inspect_ai import Epochs, Task, task
 from inspect_ai.dataset import Sample
-from inspect_ai.model import ModelAPI, ModelOutput, modelapi
+from inspect_ai.model import ModelAPI, ModelOutput, get_model, modelapi
 from inspect_ai.scorer import includes, match
-from inspect_ai.solver import generate, use_tools
+from inspect_ai.solver import generate, solver, use_tools
 from inspect_ai.tool import tool
 
 
@@ -62,4 +62,25 @@ def tool_task():
         dataset=[Sample(input="Use double on two.", target="4")],
         solver=[use_tools(double()), generate()],
         scorer=match(),
+    )
+
+
+@solver
+def auxiliary_probe():
+    async def solve(state, generate):
+        del generate
+        output = await get_model(role="grader", required=True).generate("Say 4")
+        state.metadata["grader_output"] = output.completion
+        return state
+
+    return solve
+
+
+@task
+def role_task():
+    return Task(
+        dataset=[Sample(input="Two plus two?", target="4")],
+        solver=[auxiliary_probe(), generate()],
+        scorer=match(),
+        epochs=Epochs(2, reducer=["mean", "mode"]),
     )

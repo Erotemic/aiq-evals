@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import importlib
 import importlib.metadata
+import os
 import re
 import traceback
 from pathlib import Path
@@ -44,6 +45,7 @@ _FULL_GIT_SHA = re.compile(r'^[0-9a-fA-F]{40}$')
 _ALLOWED_ENGINE_OPTIONS = {
     'eval_options',
     'log_format',
+    'registration_modules',
     'upstream_revision',
 }
 _PROTECTED_EVAL_OPTIONS = {
@@ -176,7 +178,24 @@ def _materialize_task_reference(reference: str) -> Any:
     if reference.startswith('python:'):
         value, _facts = _import_python_task(reference)
         return value
+    if Path(reference).is_absolute() and Path(reference).is_file():
+        # Inspect's public file loader passes this to Path.glob(), which
+        # rejects absolute patterns on Python 3.11.
+        return os.path.relpath(reference, Path.cwd())
     return reference
+
+
+def _load_registration_modules(modules: list[str]) -> dict[str, str | None]:
+    digests: dict[str, str | None] = {}
+    for name in modules:
+        try:
+            module = importlib.import_module(name)
+        except Exception as ex:
+            raise RequestValidationError(f'cannot import Inspect registration module {name!r}: {ex}') from ex
+        source = getattr(module, '__file__', None)
+        path = Path(source).resolve() if source else None
+        digests[name] = sha256_file(path) if path is not None and path.is_file() else None
+    return digests
 
 
 def _merge_native_config(request: EvaluationRequest) -> dict[str, Any]:
@@ -195,6 +214,11 @@ def _merge_native_config(request: EvaluationRequest) -> dict[str, Any]:
     log_format = str(options.get('log_format', 'eval'))
     if log_format not in {'eval', 'json'}:
         raise RequestValidationError("inspect_ai log_format must be 'eval' or 'json'")
+    registration_modules = options.get('registration_modules', [])
+    if not isinstance(registration_modules, list) or any(
+        not isinstance(module, str) or not module.strip() for module in registration_modules
+    ):
+        raise RequestValidationError('inspect_ai registration_modules must be a list of importable module names')
 
     raw_eval_options = options.get('eval_options') or {}
     if not isinstance(raw_eval_options, Mapping):
@@ -240,6 +264,7 @@ def _merge_native_config(request: EvaluationRequest) -> dict[str, Any]:
         'model_roles': model_roles,
         'eval_options': eval_options,
         'log_format': log_format,
+        'registration_modules': registration_modules,
     }
 
 
@@ -373,6 +398,7 @@ class InspectAIBackend:
         self.validate_request(request)
         api, _eval_fn, _list_logs, _read_log = _native_symbols()
         native_config = _merge_native_config(request)
+        registration_digests = _load_registration_modules(native_config['registration_modules'])
         task_facts = _resolve_task_reference(request.task)
         engine_version = _distribution_version(api)
         engine_revision = request.engine_options.get('upstream_revision')
@@ -383,6 +409,7 @@ class InspectAIBackend:
             'native_api': 'inspect_ai.eval + inspect_ai.log public APIs',
             'candidate_version': CANDIDATE_INSPECT_VERSION,
             'candidate_version_match': engine_version == CANDIDATE_INSPECT_VERSION,
+            'registration_module_digests': registration_digests,
         }
         identity = build_measurement_identity(
             request,
@@ -416,6 +443,7 @@ class InspectAIBackend:
         log_dir = native_root / 'logs'
         log_dir.mkdir(parents=True, exist_ok=True)
         config = dict(resolved.native_config)
+        _load_registration_modules(list(config.get('registration_modules') or []))
         task = _materialize_task_reference(str(config['task_reference']))
         kwargs = dict(config.get('eval_options') or {})
         try:

@@ -122,7 +122,7 @@ def _coverage(log: Any) -> CoverageFacts:
 
     if expected is None or processed is None:
         status = 'unknown'
-    elif processed >= expected:
+    elif processed >= expected and not failed:
         status = 'complete'
     else:
         status = 'partial'

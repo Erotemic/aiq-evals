@@ -18,7 +18,7 @@ def request(task: str, log_format: str = "eval") -> EvaluationRequest:
         task=f"python:tests.native.inspect_fixture:{task}",
         models=(
             ModelBinding(role="primary", model="local", provider="fixture", revision="local-v1"),
-            ModelBinding(role="grader", model="local", provider="fixture", revision="local-v1"),
+            ModelBinding(role="grader", model="grader", provider="fixture", revision="local-v1"),
         ),
         engine_options={"log_format": log_format, "eval_options": {"epochs": 2}},
     )
@@ -101,3 +101,76 @@ def test_cancel_terminates_owned_child(tmp_path: Path) -> None:
         assert not (tmp_path / "cancelled" / "RUN_COMPLETE").exists()
 
     asyncio.run(exercise())
+
+
+def test_multi_log_and_auxiliary_role(tmp_path: Path) -> None:
+    source = Path(__file__).with_name("inspect_fixture.py").resolve()
+    req = EvaluationRequest(
+        engine="inspect_ai",
+        task=str(source),
+        models=(
+            ModelBinding(role="primary", model="local", provider="fixture", revision="local-v1"),
+            ModelBinding(role="grader", model="grader", provider="fixture", revision="local-v1"),
+        ),
+        engine_options={
+            "registration_modules": ["tests.native.inspect_fixture"],
+            "eval_options": {"epochs": 2},
+        },
+    )
+    bundle = run_evaluation(
+        req,
+        ExecutionContext(output_dir=tmp_path / "multi", worker_python=sys.executable),
+    )
+    assert bundle.result.status == "succeeded", bundle.result.diagnostics
+    assert {record.task for record in bundle.result.records} == {
+        "generation", "tool_task", "role_task"
+    }
+    assert len(list((tmp_path / "multi" / "native" / "inspect_ai" / "logs").glob("*.eval"))) == 3
+    role_samples = [sample for sample in bundle.result.samples if sample.task == "role_task" and sample.epoch]
+    assert len(role_samples) == 2
+    assert all(sample.native["metadata"]["grader_output"] == "4" for sample in role_samples)
+    assert all(
+        {event.get("model") for event in sample.trajectory["events"] if event.get("event") == "model"}
+        == {"fixture/grader", "fixture/local"}
+        for sample in role_samples
+    )
+    imported = import_evaluation(
+        req,
+        tmp_path / "multi" / "native" / "inspect_ai" / "logs",
+        ExecutionContext(output_dir=tmp_path / "multi-import"),
+    )
+    assert imported.result.status == "succeeded"
+    assert len(imported.result.records) == 3
+
+
+def test_explicit_epoch_reducers(tmp_path: Path) -> None:
+    req = request("role_task")
+    req = EvaluationRequest(
+        engine=req.engine,
+        task=req.task,
+        models=req.models,
+    )
+    bundle = run_evaluation(
+        req,
+        ExecutionContext(output_dir=tmp_path / "reducers", worker_python=sys.executable),
+    )
+    assert bundle.result.status == "succeeded", bundle.result.diagnostics
+    assert {sample.epoch for sample in bundle.result.samples if sample.epoch} == {1, 2}
+    reductions = [sample for sample in bundle.result.samples if sample.native.get("kind") == "epoch_reduction"]
+    assert {sample.native["reducer"] for sample in reductions} == {"mean", "mode"}
+
+
+def test_sample_error_is_partial(tmp_path: Path) -> None:
+    req = EvaluationRequest(
+        engine="inspect_ai",
+        task="python:tests.native.inspect_failure_fixture:partial_task",
+        models=(ModelBinding(role="primary", model="local", provider="fixture", revision="local-v1"),),
+        engine_options={"registration_modules": ["tests.native.inspect_fixture"]},
+    )
+    bundle = run_evaluation(
+        req,
+        ExecutionContext(output_dir=tmp_path / "partial", worker_python=sys.executable),
+    )
+    assert len(bundle.result.records) == 1
+    assert bundle.result.records[0].coverage.status == "partial"
+    assert bundle.result.records[0].coverage.failed == 1
