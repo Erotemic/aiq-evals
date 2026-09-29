@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import os
+import secrets
 import shutil
 import signal
 import sys
@@ -108,14 +110,55 @@ def _worker_result_path(work_dir: Path) -> Path:
     return work_dir / '.aiq-evals-worker' / 'result.json'
 
 
+_WORKER_PATH_CACHE: dict[Path, str] = {}
+
+
+def worker_package_path() -> str:
+    """A directory that exposes exactly this ``magnet_evals`` package to a worker.
+
+    Engine workers run in their own environments, which need not have
+    ``magnet_evals`` installed. Putting the parent of this package on their
+    path would also expose everything installed beside it: for a wheel that is
+    the caller's whole ``site-packages``, which would shadow the engine's own
+    dependencies (possibly built for another Python). Instead a private
+    directory holds one symlink, ``magnet_evals``, to this package. It goes on
+    ``PYTHONPATH`` so engine-spawned children inherit it too.
+    """
+    package = Path(__file__).resolve().parent
+    cached = _WORKER_PATH_CACHE.get(package)
+    if cached is not None and (Path(cached) / 'magnet_evals').resolve() == package:
+        return cached
+    digest = hashlib.sha256(str(package).encode()).hexdigest()[:16]
+    cache_home = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache')
+    candidates = [cache_home / 'magnet_evals' / 'worker-path' / digest]
+    for root in candidates:
+        try:
+            root.mkdir(parents=True, exist_ok=True, mode=0o700)
+            link = root / 'magnet_evals'
+            if not link.is_symlink() or link.resolve() != package:
+                staged = root / f'.magnet_evals.{os.getpid()}.{secrets.token_hex(4)}'
+                staged.symlink_to(package, target_is_directory=True)
+                os.replace(staged, link)  # atomic for concurrent workers
+            if root.stat().st_uid == os.getuid() and link.resolve() == package:
+                _WORKER_PATH_CACHE[package] = str(root)
+                return str(root)
+        except OSError:
+            continue
+    # Unwritable cache: a private per-process directory.
+    root = Path(tempfile.mkdtemp(prefix='magnet-evals-worker-path-'))
+    (root / 'magnet_evals').symlink_to(package, target_is_directory=True)
+    _WORKER_PATH_CACHE[package] = str(root)
+    return str(root)
+
+
 def _worker_env(context: ExecutionContext) -> dict[str, str]:
     env = os.environ.copy()
     env.update(context.env)
-    # Make source-tree execution work without requiring an editable install in
-    # the worker environment. Installed distributions also work with this path.
-    package_parent = str(Path(__file__).resolve().parent.parent)
+    # The worker environment need not have magnet_evals installed; expose this
+    # package, and nothing installed beside it, ahead of any existing path.
+    package_path = worker_package_path()
     old_pythonpath = env.get('PYTHONPATH')
-    env['PYTHONPATH'] = package_parent if not old_pythonpath else package_parent + os.pathsep + old_pythonpath
+    env['PYTHONPATH'] = package_path if not old_pythonpath else package_path + os.pathsep + old_pythonpath
     return env
 
 
@@ -203,7 +246,7 @@ async def resolve_evaluation_async(
 
     Resolution imports the native engine (and task/plugin code), so it belongs
     in the engine's worker environment (ADR-0002). Errors raised there keep
-    their aiq-evals error type.
+    their aiq-magnet-evals error type.
     """
     if context is not None:
         # Before any task/plugin code runs, in-process or in the worker.
