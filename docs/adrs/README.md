@@ -47,6 +47,7 @@ turn that record into a MAGNET claim or verdict.
 - [ADR-0006](0006-scheduler-and-magnet-boundary.md): `aiq-evals` owns one evaluation; MAGNET/kwdagger owns campaign scheduling and claim projection.
 - [ADR-0007](0007-normalized-schema-strategy.md): retain native truth and decide EEE from fixture evidence.
 - [ADR-0008](0008-normalized-schema-fixture-decision.md): fixture gaps require the independent normalized result schema for Phase 1.
+- [ADR-0011](0011-single-flight-and-content-keyed-imports.md): acquiring a reusable measurement is single-flight in the store; explicit imports are keyed by native content.
 - [ADR-0010](0010-no-freeze-before-release.md): no API/schema freeze until a PyPI release; data-safety rules (version rejection, identity algorithms, tamper detection) stay.
 
 ## Superseded decisions

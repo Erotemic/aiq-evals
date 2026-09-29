@@ -67,8 +67,13 @@ The four checks:
 The first HELM run failed inside the test's own metric-sorting helper
 (`None` vs `str`), not in the adapter; the helper now sorts with a total key.
 
-## Not covered
+## Not covered (at the time of this record)
 
-No cross-process lock prevents two callers from executing the same measurement
-at once. Both attempts are kept and one canonical run wins. Deduplicating work
-belongs to the scheduler (ADR-0006).
+No cross-process lock prevented two callers from executing the same measurement
+at once; this record deferred it to the scheduler. That was wrong: kwdagger
+cannot see that differently selected nodes share a measurement. It is fixed by
+ADR-0011 (single-flight acquisition); see `integration-evidence.md`.
+
+The "changed native imported artifacts get new identities" row above was
+tested only across two stores. In one store, a changed import was silently
+ignored. ADR-0011 keys imports by native content; see `integration-evidence.md`.

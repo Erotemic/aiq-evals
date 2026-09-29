@@ -220,6 +220,8 @@ def _ensure(args: argparse.Namespace) -> int:
         'status': outcome.run.result.status,
         'measurement_identity': outcome.resolved.identity.to_dict(),
         'reuse_reason': outcome.reuse_reason,
+        'import_identity': outcome.import_identity,
+        'waited': outcome.waited,
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0 if outcome.run.result.status == 'succeeded' else 2

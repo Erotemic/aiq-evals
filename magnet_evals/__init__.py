@@ -1,6 +1,7 @@
 """Backend-agnostic evaluation runtime and artifact interface."""
 
 from magnet_evals._version import __version__
+from magnet_evals.artifacts import native_source_identity
 from magnet_evals.contracts import (
     EvaluationRequest,
     EvaluationResult,
@@ -44,6 +45,7 @@ __all__ = [
     'import_evaluation',
     'import_evaluation_async',
     'load_run',
+    'native_source_identity',
     'resolve_evaluation',
     'resolve_evaluation_async',
     'run_evaluation',

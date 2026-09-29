@@ -104,6 +104,7 @@ def test_stale_or_tampered_canonical_is_rejected(tmp_path):
 
 
 def test_import_then_reuse_and_changed_artifact_identity(tmp_path):
+    # The review's same-store case: a changed import is imported, not ignored.
     store = ResultStore(tmp_path / 'store')
     source = tmp_path / 'native-a'
     source.mkdir()
@@ -114,11 +115,11 @@ def test_import_then_reuse_and_changed_artifact_identity(tmp_path):
     other = tmp_path / 'native-b'
     other.mkdir()
     (other / 'value.txt').write_text('0.7\n')
-    import_b = ensure_evaluation(
-        make_request('imp'), ResultStore(tmp_path / 'store-b'), import_source=other
-    )
-    # Same measurement identity, different native content -> different normalized identity.
+    import_b = ensure_evaluation(make_request('imp'), store, import_source=other)
+    assert import_b.action == 'imported' and import_b.run.result.records[0].metrics[0].value == 0.7
+    # Same measurement identity, different native content -> different artifact identities.
     assert import_b.resolved.identity == imported.resolved.identity
+    assert import_b.import_identity != imported.import_identity
     assert (
         import_b.run.manifest['normalized_artifact_identity']
         != imported.run.manifest['normalized_artifact_identity']

@@ -15,8 +15,9 @@ actually supports is recorded in `planning/phase1-capabilities.md`.
 | `resolve_evaluation(request)` / `resolve_evaluation_async(request, context)` | Native resolution and measurement identity. The async form runs inside `context.worker_python` when one is given. |
 | `run_evaluation[_async](request_or_resolved, context)` | Execute once and atomically publish a run bundle at `context.output_dir`. The sync form refuses to run inside an active event loop. |
 | `import_evaluation[_async](request_or_resolved, source, context, *, allow_external_symlinks=False)` | Normalize existing native artifacts into a bundle. Resolution and native reading run in `context.worker_python` when given. |
-| `ensure_evaluation[_async](request, store, *, env, worker_python, timeout_seconds, import_source, allow_external_symlinks)` | Reuse a validated stored result, otherwise import or execute into a new attempt and promote a success. Returns `EnsureOutcome(action, run, resolved, attempt, reuse_reason)`. |
-| `ResultStore(root)` | Content-addressed store: `lookup`, `check_reuse`, `attempts(digest)`, `publish`, `promote`. |
+| `ensure_evaluation[_async](request, store, *, env, worker_python, timeout_seconds, import_source, allow_external_symlinks, model_endpoints)` | Reuse a validated stored result, otherwise import or execute into a new attempt and promote a success. Single-flight per reusable identity (ADR-0011). With `import_source`, reuse only an import of the same native content. Returns `EnsureOutcome(action, run, resolved, attempt, reuse_reason, import_identity, waited)`. |
+| `native_source_identity(source, *, allow_external_symlinks=False)` | Engine-free content identity of native artifacts, equal to the `native_artifact_identity` their import publishes. |
+| `ResultStore(root)` | Content-addressed store: `lookup`, `check_reuse`, `check_import_reuse`, `attempts(digest)`, `publish`, `promote`, `promote_import`, `acquisition_lock`. |
 | `load_run(path)` | Engine-free bundle reader. `magnet_evals.outputs` also provides `select_metrics`, `sample_records`, `native_artifacts`, `trajectory_detail`, and related helpers. |
 | `MeasurementIdentity`, `ResolvedEvaluation`, `EvaluationResult` | Result contracts. |
 | `ENGINE_SPECS`, `EngineSpec` | Verified pins and engine notes. |
@@ -31,7 +32,7 @@ Errors derive from `magnet_evals.errors.AiqEvalsError`. The main ones are
 | --- | --- |
 | `validate REQUEST` | Static validation |
 | `resolve REQUEST [--worker-python PY] [--output F]` | Print the resolved request and its identity |
-| `ensure REQUEST --store DIR [--worker-python PY] [--timeout S] [--import-source SRC] [--allow-external-symlinks]` | The central operation; prints the action, path, status, identity, and reuse reason |
+| `ensure REQUEST --store DIR [--worker-python PY] [--timeout S] [--import-source SRC] [--allow-external-symlinks]` | The central operation; prints the action, path, status, identity, reuse reason, import identity, and whether it waited for a concurrent acquisition |
 | `run REQUEST --output DIR [--worker-python PY] [--timeout S]` | Execute once |
 | `import-native REQUEST SOURCE --output DIR [--worker-python PY] [--allow-external-symlinks]` | Import native artifacts |
 | `show RUN_DIR [--no-verify]` | Inspect a bundle without engines |
@@ -92,7 +93,9 @@ coverage (`complete`, `partial`, `unknown`), as ADR-0004 requires.
 
 ```text
 runs/<dd>/<digest>/                    canonical successful runs (reusable)
+imports/<dd>/<digest>/<native-id>/     successful imports, keyed by native content
 attempts/<dd>/<digest>/<utc>-<rand>/   every terminal attempt
 attempts/_unkeyed/<utc>-<rand>/        attempts with non-reusable identity
-quarantine/<digest>-<utc>-<rand>/      canonical runs that later failed validation
+quarantine/<name>-<utc>-<rand>/        published runs that later failed validation
+locks/<dd>/<key>.lock                  single-flight acquisition locks (flock)
 ```

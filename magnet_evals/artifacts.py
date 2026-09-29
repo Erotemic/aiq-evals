@@ -47,22 +47,46 @@ def _load_json(path: Path) -> dict[str, Any]:
     return data
 
 
+def _inventory_order(rel: str) -> tuple[str, ...]:
+    # Path order (component by component), which the published v1 bundles use.
+    return tuple(rel.split('/'))
+
+
+def _artifact_refs(files: list[tuple[str, Path]], role: str) -> tuple[ArtifactReference, ...]:
+    return tuple(
+        ArtifactReference(path=rel, sha256=sha256_file(path), size_bytes=path.stat().st_size, role=role)
+        for rel, path in sorted(files, key=lambda item: _inventory_order(item[0]))
+    )
+
+
 def inventory_tree(root: Path, *, role: str = 'native') -> tuple[ArtifactReference, ...]:
     """Checksum all regular files below *root* using POSIX relative paths."""
     if not root.exists():
         return ()
-    refs: list[ArtifactReference] = []
-    for path in sorted(p for p in root.rglob('*') if p.is_file()):
-        rel = path.relative_to(root).as_posix()
-        refs.append(
-            ArtifactReference(
-                path=rel,
-                sha256=sha256_file(path),
-                size_bytes=path.stat().st_size,
-                role=role,
-            )
-        )
-    return tuple(refs)
+    files = [(p.relative_to(root).as_posix(), p) for p in root.rglob('*') if p.is_file()]
+    return _artifact_refs(files, role)
+
+
+def native_artifact_identity(refs: tuple[ArtifactReference, ...] | list[ArtifactReference]) -> str:
+    """Digest of a native inventory: the content identity of native artifacts."""
+    return sha256_json([ref.to_dict() for ref in refs])
+
+
+def native_source_identity(source: str | Path, *, allow_external_symlinks: bool = False) -> str:
+    """Content identity of a native artifact source, before importing it.
+
+    Equals the ``native_artifact_identity`` of the bundle that importing
+    ``source`` publishes (same traversal, links, and ordering), so a store can
+    key an import by its content without copying it first. Editing any file,
+    even at the same path, changes it. Engine-free: it only reads bytes.
+    """
+    source = Path(source).expanduser().absolute()
+    if source.is_file():
+        return native_artifact_identity(_artifact_refs([(source.name, source.resolve())], 'native'))
+    if not source.is_dir():
+        raise ArtifactError(f'native artifact source does not exist: {source}')
+    files, _, _ = _walk_native_tree(source, 'follow' if allow_external_symlinks else 'raise')
+    return native_artifact_identity(_artifact_refs(files, 'native'))
 
 
 @dataclass(frozen=True)
@@ -124,7 +148,7 @@ class RunBundle:
             extra = sorted(present - listed)
             if extra:
                 raise ArtifactError(f'native files not in the manifest inventory: {extra[:5]}')
-            native_identity = sha256_json([ref.to_dict() for ref in refs])
+            native_identity = native_artifact_identity(refs)
             if manifest.get('native_artifact_identity') != native_identity:
                 raise ArtifactError('native artifact identity does not match manifest inventory')
             normalized_identity = sha256_json(
@@ -144,13 +168,15 @@ class RunBundle:
 _EXTERNAL_SYMLINK_MODES = ('exclude', 'raise', 'follow')
 
 
-def copy_native_tree(source: Path, dest: Path, *, external_symlinks: str = 'exclude') -> dict[str, list[str]]:
-    """Copy a native artifact tree without silently following links out of it.
+def _walk_native_tree(
+    source: Path, external_symlinks: str,
+) -> tuple[list[tuple[str, Path]], dict[str, list[str]], list[str]]:
+    """Files (relative path, real path) and directories a native tree publishes.
 
-    Links resolving inside ``source`` are copied as their content. Special files
-    (FIFOs, sockets, devices) and dangling links are never copied. Returns manifest notes listing
-    relative paths of excluded or followed external links and skipped
-    non-regular files.
+    Links resolving inside ``source`` count as their content. Special files
+    (FIFOs, sockets, devices) and dangling links never count. External links
+    are excluded, refused, or followed per ``external_symlinks``. Returns the
+    files, manifest notes, and every directory (so empty ones survive a copy).
     """
     if external_symlinks not in _EXTERNAL_SYMLINK_MODES:
         raise ValueError(f'external_symlinks must be one of {_EXTERNAL_SYMLINK_MODES}')
@@ -160,11 +186,12 @@ def copy_native_tree(source: Path, dest: Path, *, external_symlinks: str = 'excl
         'followed_external_symlinks': [],
         'skipped_non_regular_files': [],
     }
+    files: list[tuple[str, Path]] = []
+    directories: list[str] = []
 
-    def visit(directory: Path, target_dir: Path, *, followed: bool) -> None:
-        target_dir.mkdir(parents=True, exist_ok=True)
+    def visit(directory: Path, prefix: str, *, followed: bool) -> None:
         for entry in sorted(directory.iterdir()):
-            rel = (target_dir / entry.name).relative_to(dest).as_posix()
+            rel = f'{prefix}{entry.name}'
             real = entry.resolve()
             inside = real == root or root in real.parents
             if entry.is_symlink() and not inside and not followed:
@@ -181,13 +208,31 @@ def copy_native_tree(source: Path, dest: Path, *, external_symlinks: str = 'excl
             if real.is_dir():
                 if entry.is_symlink() and inside and real in (directory.resolve(), *directory.resolve().parents):
                     continue  # a link back up the tree would recurse forever
-                visit(entry, target_dir / entry.name, followed=is_followed)
+                directories.append(rel)
+                visit(entry, rel + '/', followed=is_followed)
             elif real.is_file():
-                shutil.copy2(real, target_dir / entry.name)
+                files.append((rel, real))
             else:
                 notes['skipped_non_regular_files'].append(rel)
 
-    visit(source, dest, followed=False)
+    visit(source, '', followed=False)
+    return files, notes, directories
+
+
+def copy_native_tree(source: Path, dest: Path, *, external_symlinks: str = 'exclude') -> dict[str, list[str]]:
+    """Copy a native artifact tree without silently following links out of it.
+
+    Links resolving inside ``source`` are copied as their content. Special files
+    (FIFOs, sockets, devices) and dangling links are never copied. Returns manifest notes listing
+    relative paths of excluded or followed external links and skipped
+    non-regular files.
+    """
+    files, notes, directories = _walk_native_tree(source, external_symlinks)
+    dest.mkdir(parents=True, exist_ok=True)
+    for rel in directories:
+        (dest / rel).mkdir(parents=True, exist_ok=True)
+    for rel, real in files:
+        shutil.copy2(real, dest / rel)
     return notes
 
 
@@ -250,13 +295,13 @@ def publish_run(
         }
         attempt.update(dict(attempt_metadata or {}))
         _write_json(staging / 'attempt.json', attempt)
-        native_artifact_identity = sha256_json([ref.to_dict() for ref in native_refs])
+        native_identity = native_artifact_identity(native_refs)
         normalized_artifact_identity = sha256_json(
             {
                 'measurement_identity': resolved.identity.digest,
                 'adapter_version': resolved.adapter_version,
                 'result_schema_version': result.schema_version,
-                'native_artifact_identity': native_artifact_identity,
+                'native_artifact_identity': native_identity,
                 'result': result.to_dict(),
             }
         )
@@ -270,7 +315,7 @@ def publish_run(
             'result_schema_version': result.schema_version,
             'request_schema_version': resolved.request.schema_version,
             'native_artifacts': [ref.to_dict() for ref in native_refs],
-            'native_artifact_identity': native_artifact_identity,
+            'native_artifact_identity': native_identity,
             'normalized_artifact_identity': normalized_artifact_identity,
             # Integrity of the bundle's own metadata files (optional when
             # loading: older bundles without it still load).

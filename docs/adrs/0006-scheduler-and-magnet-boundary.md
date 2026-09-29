@@ -35,6 +35,10 @@ Native within-evaluation concurrency is allowed. Campaign-level automatic retrie
 cache policy, and node attempts stay with the outer orchestrator unless an
 explicit future ADR changes that authority.
 
+Preventing two callers from computing the same stored measurement is store
+integrity, not scheduling: the store makes acquisition single-flight
+(ADR-0011). That neither schedules nor retries anything.
+
 ## Consequences
 
 Do not add kwdagger as an `aiq-evals` dependency. Do not nest Inspect `eval_set()`
