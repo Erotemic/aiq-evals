@@ -32,6 +32,13 @@ as applicable:
 Secrets are never identity inputs. Secret *names* or required capabilities may
 be persisted where needed; secret values may not.
 
+Operational request fields are not identity inputs either (identity algorithm
+v3, 2026-09-29): `engine_options.required_secrets` (which credentials a run
+needs) and a model binding's `provider_options.base_url` (where an endpoint is
+reached), including an adapter's copy of that URL in its native config. The
+model's identity is its `revision`/`cache_token`, which a reusable identity
+requires. Every other provider option still counts.
+
 ### Normalized-artifact identity — owned by `aiq-magnet-evals`
 
 Adds to measurement lineage the native artifact content digest, normalization

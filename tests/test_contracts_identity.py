@@ -167,3 +167,26 @@ def test_metric_record_int_value_round_trips(tmp_path):
     )
     publish_run(tmp_path / 'r', resolved=resolved, result=result, context=ExecutionContext(output_dir=tmp_path / 'r'))
     RunBundle.load(tmp_path / 'r')
+
+
+def test_operational_request_fields_do_not_change_the_measurement():
+    # Secret names and endpoint URLs say how a measurement is reached, not what
+    # it is (identity v3). Everything else in provider_options still counts.
+    def digest(**kwargs):
+        return build_measurement_identity(
+            make_request(**kwargs), adapter_version='a', engine_version='1',
+            native_config={}, resolved_facts={},
+        ).digest
+
+    def binding(**options):
+        return (ModelBinding(role='primary', model='model-a', provider='mock', revision='model-sha',
+                             provider_options=options),)
+
+    base = digest(engine_options={'required_secrets': ['KEY_A']}, models=binding(base_url='http://a/v1'))
+    assert digest(engine_options={'required_secrets': ['KEY_B']}, models=binding(base_url='http://a/v1')) == base
+    assert digest(engine_options={}, models=binding(base_url='http://b/v1')) == base
+    assert digest(engine_options={}, models=binding()) == base
+    assert digest(engine_options={}, models=binding(temperature_scale=2)) != base
+    identity = build_measurement_identity(make_request(), adapter_version='a', engine_version='1',
+                                          native_config={}, resolved_facts={})
+    assert identity.algorithm == 'aiq-evals-measurement-v3+sha256'

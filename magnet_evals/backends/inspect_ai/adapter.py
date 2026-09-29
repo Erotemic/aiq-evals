@@ -465,6 +465,7 @@ class InspectAIBackend:
             native_config=native_config,
             resolved_facts=resolved_facts,
             identity_facts=identity_facts,
+            operational_native_paths=[('model_base_url',)],
         )
         return ResolvedEvaluation(
             request=request,

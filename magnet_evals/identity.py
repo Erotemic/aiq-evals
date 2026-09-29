@@ -11,7 +11,37 @@ from magnet_evals.jsonutil import normalize_json_object, sha256_file, sha256_jso
 
 # v2: resolved content digests (``identity_facts``) and adapter source identity
 # participate in the digest; v1 hashed neither.
-IDENTITY_ALGORITHM = 'aiq-evals-measurement-v2+sha256'
+# v3: operational request fields (endpoint URLs, required secret names) no
+# longer participate; they change how a measurement is reached, not what it is.
+IDENTITY_ALGORITHM = 'aiq-evals-measurement-v3+sha256'
+
+
+def _without_path(value: Any, path: Sequence[str]) -> Any:
+    """``value`` with the key at ``path`` removed (a deep copy along the path)."""
+    if not path or not isinstance(value, Mapping) or path[0] not in value:
+        return value
+    head, rest = path[0], path[1:]
+    copied = dict(value)
+    if rest:
+        copied[head] = _without_path(copied[head], rest)
+    else:
+        del copied[head]
+    return copied
+
+
+def identity_request(request: EvaluationRequest) -> dict[str, Any]:
+    """The request as a measurement input, without its operational fields.
+
+    ``engine_options.required_secrets`` names credentials the run needs, and a
+    model binding's ``provider_options.base_url`` says where an endpoint is
+    reached. Neither changes what is measured: the model's identity is its
+    ``revision``/``cache_token``, which a reusable identity requires anyway.
+    """
+    data = _without_path(request.to_dict(), ('engine_options', 'required_secrets'))
+    data['models'] = [
+        _without_path(binding, ('provider_options', 'base_url')) for binding in data['models']
+    ]
+    return data
 
 
 def adapter_source_digest(package: str | None) -> str:
@@ -65,6 +95,7 @@ def measurement_inputs(
     native_config: Mapping[str, Any],
     resolved_facts: Mapping[str, Any],
     identity_facts: Mapping[str, Any] | None = None,
+    operational_native_paths: Sequence[Sequence[str]] = (),
 ) -> dict[str, Any]:
     """Build the canonical scientific inputs to the measurement.
 
@@ -74,16 +105,20 @@ def measurement_inputs(
     ``resolved_facts`` is informational and may contain machine-specific paths;
     only ``engine_revision`` is taken from it. ``identity_facts`` is the explicit,
     path-free subset of resolution results (content digests, adapter source
-    identity) that affects the measurement.
+    identity) that affects the measurement. ``operational_native_paths`` names
+    keys of ``native_config`` that carry operational request fields (e.g. an
+    adapter's copy of the endpoint URL); they are left out like the request's.
     """
+    for path in operational_native_paths:
+        native_config = _without_path(native_config, tuple(path))
     return normalize_json_object(
         {
-            'identity_schema': 2,
+            'identity_schema': 3,
             'engine': request.engine,
             'adapter_version': adapter_version,
             'engine_version': engine_version,
             'engine_revision': resolved_facts.get('engine_revision'),
-            'request': request.to_dict(),
+            'request': identity_request(request),
             'native_config': dict(native_config),
             'identity_facts': dict(identity_facts or {}),
         }
@@ -98,6 +133,7 @@ def build_measurement_identity(
     native_config: Mapping[str, Any],
     resolved_facts: Mapping[str, Any],
     identity_facts: Mapping[str, Any] | None = None,
+    operational_native_paths: Sequence[Sequence[str]] = (),
 ) -> MeasurementIdentity:
     inputs = measurement_inputs(
         request,
@@ -106,6 +142,7 @@ def build_measurement_identity(
         native_config=native_config,
         resolved_facts=resolved_facts,
         identity_facts=identity_facts,
+        operational_native_paths=operational_native_paths,
     )
     reasons = _unknown_identity_reasons(request, resolved_facts, identity_facts or {})
     return MeasurementIdentity(

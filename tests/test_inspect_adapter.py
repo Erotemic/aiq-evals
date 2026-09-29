@@ -479,3 +479,17 @@ def test_metric_score_dimension_roundtrips_and_filters(tmp_path):
     selected = select_metrics(bundle, scorer='judge', score='rationale', group='aux')
     assert len(selected) == 1
     assert selected[0].value == 0.5
+
+
+def test_endpoint_url_is_not_a_measurement_input(monkeypatch):
+    patch_runtime(monkeypatch)
+    backend = InspectAIBackend()
+
+    def with_url(url):
+        primary = ModelBinding(role='primary', model='model-a', provider='mock', revision='model-rev',
+                               provider_options={'timeout': 30, 'base_url': url})
+        return backend.resolve(make_request(models=(primary, make_request().models[1])))
+
+    a, b = with_url('http://a/v1'), with_url('http://b/v1')
+    assert a.identity == b.identity
+    assert a.native_config['model_base_url'] == 'http://a/v1'  # still used to execute

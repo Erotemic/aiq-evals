@@ -331,3 +331,17 @@ def test_adapter_preserves_cancellation_for_runner_cleanup(monkeypatch, tmp_path
 
     asyncio.run(scenario())
     assert CancellingRunner.cleaned is True
+
+
+def test_endpoint_url_is_not_a_measurement_input(monkeypatch):
+    patch_runtime(monkeypatch)
+    backend = OlmoEvalBackend()
+
+    def with_url(url):
+        primary = ModelBinding(role='primary', model='model-a', provider='mock', revision='model-rev',
+                               provider_options={'base_url': url})
+        return backend.resolve(make_request(models=(primary,)))
+
+    a, b = with_url('http://a/v1'), with_url('http://b/v1')
+    assert a.identity == b.identity
+    assert a.native_config['harness_config']['provider']['base_url'] == 'http://a/v1'
