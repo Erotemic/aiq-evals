@@ -74,3 +74,16 @@ def chat_server(tool_name: str = "double"):
         server.server_close()
         thread.join()
         DeterministicChatHandler.tool_name = "double"
+
+
+if __name__ == "__main__":
+    # Standalone use (dev/walkthrough.sh): serve until killed, writing the port.
+    import argparse
+    import pathlib
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port-file", required=True)
+    args = parser.parse_args()
+    with chat_server() as port:
+        pathlib.Path(args.port_file).write_text(str(port))
+        threading.Event().wait()

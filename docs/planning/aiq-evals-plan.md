@@ -1,6 +1,6 @@
 # aiq-evals implementation plan
 
-Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-7 implemented; all three engines pass the shared conformance suite; first public API/schema frozen (ADR-0009).
+Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-8 implemented; all three engines pass the shared conformance suite; first public API/schema frozen (ADR-0009); release gate G1-G7 pass locally, G8 (hosted CI) pending.
 
 This is the standalone refinement of the earlier MAGNET backend-agnostic
 evaluation plan. It moves generic evaluation execution, import, identity, and
@@ -335,14 +335,24 @@ A worker container alone is not a security guarantee.
 
 ## Phase 8 - Packaging and release verification
 
-- document API/CLI/contracts and capability matrix;
-- publish engine-free and per-engine CI;
-- retain frozen schema fixtures across releases;
-- keep paid/GPU/sandbox/external tests separate from deterministic CI;
-- classify external failures and bound retries;
-- never let quarantine turn a required release gate green;
-- run clean-environment walkthroughs for generation and agentic examples;
-- remove experimental labels only after the release gate passes.
+Implementation status: DONE locally; hosted CI (G8 in `../release-gate.md`) pending a push.
+
+- [x] document API/CLI/contracts and capability matrix (`../api.md`,
+  `phase1-capabilities.md`);
+- [x] publish engine-free and per-engine CI (`.github/workflows/tests.yml`
+  calling `dev/ci/*.sh`; every script passed locally from fresh environments;
+  no hosted run yet);
+- [x] retain frozen schema fixtures across releases (`release_gate` tests; ADR-0009);
+- [x] keep paid/GPU/sandbox/external tests separate from deterministic CI
+  (markers `paid`, `gpu`, `docker_sandbox`, `external`; CI runs deterministic suites only);
+- [x] classify external failures and bound retries (`external-unavailable`
+  classification at most once per test; install steps retried at most 3 times);
+- [x] never let quarantine turn a required release gate green (`tests/conftest.py`,
+  `tests/test_ci_policy.py`);
+- [x] run clean-environment walkthroughs for generation and agentic examples
+  (`dev/walkthrough.sh`);
+- [ ] remove experimental labels only after the release gate passes: G8 (hosted CI)
+  has not run, so the labels stay.
 
 ## Validation groups
 

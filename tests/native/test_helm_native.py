@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 pytest.importorskip("helm")
+pytest.importorskip("magnet")  # MAGNET compatibility tests; the adapter suite needs only helm
 
 from magnet.backends.helm.cli.materialize_helm_run import MaterializeHelmRunConfig
 from magnet.backends.helm.helm_outputs import HelmRun

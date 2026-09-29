@@ -48,6 +48,14 @@ aiq_evals = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+  "native: needs a real engine environment (tests/native, auto-applied)",
+  "release_gate: required for release; can never be quarantined",
+  "external: depends on a network service outside this repository",
+  "paid: consumes a paid API",
+  "gpu: needs a GPU",
+  "docker_sandbox: needs a Docker daemon for engine sandboxes",
+]
 
 [tool.ruff]
 target-version = "py311"

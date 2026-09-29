@@ -1,0 +1,49 @@
+# Release gate (plan phase 8)
+
+A release may drop the adapters' `experimental` label only when **every**
+required check below passes on the release commit. Quarantine cannot satisfy a
+required check: `release_gate` tests are refused by `tests/conftest.py` if they
+are listed in `tests/quarantine.txt`.
+
+| # | Required check | How |
+| --- | --- | --- |
+| G1 | Lint and the engine-free suite on CPython 3.11 and 3.13, with no engine installed | `dev/ci/engine_free.sh` (CI job `engine-free`) |
+| G2 | Inspect native acceptance and conformance at the verified pin | `dev/ci/native_inspect.sh` (`native-inspect`) |
+| G3 | OLMo native acceptance and conformance in the locked isolated checkout | `dev/ci/native_olmo.sh` (`native-olmo`) |
+| G4 | HELM adapter native acceptance and conformance at the verified pin (MAGNET compatibility when reachable) | `dev/ci/native_helm.sh` (`native-helm`) |
+| G5 | Frozen schema/API fixtures unchanged, or a new version with migration code | `release_gate` tests: `test_schema_compat.py`, `test_public_api_freeze.py`, `test_native_fixture_regression.py` |
+| G6 | Clean-environment walkthrough of generation and agentic examples | `dev/walkthrough.sh` |
+| G7 | Sdist/wheel build with no runtime dependencies, including `py.typed` and excluding tests | `uv build` and inspect the wheel |
+| G8 | G1–G4 green on hosted CI (`.github/workflows/tests.yml`) for the release commit | GitHub Actions |
+
+Never in the gate: tests marked `paid`, `gpu`, `external`, or
+`docker_sandbox`. A network error in an `external` test is reported as
+`external-unavailable` at most once per session. It never applies to
+`release_gate` tests, and a second failure is a real failure. Dependency
+installation in the CI scripts is retried at most three times with backoff.
+
+## Status at 2026-09-29
+
+See the record appended below. G8 has not run: nothing has been pushed, because
+pushing is an outward-facing action left to the maintainers. The adapters
+therefore keep `experimental: True`. Remove that label only after G8 passes on
+the release commit.
+
+## Record: 2026-09-29 local run of the gate
+
+Recorded by Claude Opus 5.5 (Anthropic, `claude-opus-5-5`, 1M context) on x86_64
+Linux, using the phase-8 commit's scripts from fresh environments under a scratch
+`RUNNER_TEMP`.
+
+| Check | Result |
+| --- | --- |
+| G1 | `PYTHON_VERSION=3.11` and `3.13` `dev/ci/engine_free.sh`: ruff clean; 116 passed, 4 native-module skips, 12 native deselected each. The engine-absence assertion passed. |
+| G2 | `dev/ci/native_inspect.sh`: fresh venv from constraints; 19 passed, 9 skipped (other engines' conformance profiles; the `openai`-only test) |
+| G3 | `dev/ci/native_olmo.sh`: fresh `git clone` from GitHub at `73ade80e`, clean tree, `uv sync --frozen` (lock SHA256 `8c3ac8e8…217e`, as recorded in Phase 1); 12 passed, 8 skipped |
+| G4 | `MAGNET_DIR=/home/joncrall/code/aiq-magnet dev/ci/native_helm.sh`: fresh venv from constraints plus MAGNET; 16 passed, 8 skipped. The MAGNET checkout had the uncommitted demo edit noted in `phase1-evidence.md`, which these tests do not use. |
+| G5 | release_gate tests pass in G1 through G4 |
+| G6 | `dev/walkthrough.sh`: the engine-free core venv ran HELM, Inspect, and OLMo generation (with CLI reuse), the Inspect sandbox-tool example, and OLMo OpenAI Agents over a local endpoint with `required_secrets`; no secret value was found in the store. The first run exposed a fixture that required a test-only environment variable, so the example failed correctly, published as `failed`; the fixture was fixed. |
+| G7 | `uv build`: sdist and wheel `aiq_evals-0.1.0`; the wheel has 42 files including `py.typed`, no tests, and no runtime `Requires-Dist` (extras only) |
+| G8 | **Not run.** Requires pushing to GitHub. |
+
+Outcome: G1–G7 pass locally and G8 is pending, so the `experimental` labels stay.

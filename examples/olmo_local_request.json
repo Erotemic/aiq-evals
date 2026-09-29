@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "engine": "olmo_eval",
+  "task": "aiq_p1_local",
+  "task_revision": "fixture-v1",
+  "data_revision": "fixture-v1",
+  "models": [
+    {"role": "primary", "model": "mock", "provider": "mock", "revision": "local-v1",
+     "cache_token": null, "provider_options": {}}
+  ],
+  "task_options": {},
+  "generation": {},
+  "engine_options": {
+    "upstream_revision": "73ade80e24f796af55caeb8fd7b75a7f3fd607fd",
+    "task_modules": ["tests.native.olmo_fixture"]
+  }
+}

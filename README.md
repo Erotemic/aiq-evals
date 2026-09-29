@@ -135,6 +135,13 @@ The probe is deliberately non-executing. The native acceptance suites live in
 `tests/native/` and run only inside the matching engine environment (see
 `docs/planning/phase1-evidence.md` for the exact environments).
 
+## Documentation
+
+- `docs/api.md`: public API, CLI, contracts, bundle and store layout.
+- `docs/security-review.md`: trust model and security findings.
+- `docs/release-gate.md`: release checks and the latest local record.
+- `dev/ci/*.sh`: the CI jobs, runnable locally; `dev/walkthrough.sh`: the clean-environment walkthrough.
+
 ## Architecture review target
 
 Reviewers should start with `docs/adrs/README.md`. The ADRs define the intended architecture and reviewer invariants independently of roadmap status. `docs/planning/` tracks implementation progress and evidence.

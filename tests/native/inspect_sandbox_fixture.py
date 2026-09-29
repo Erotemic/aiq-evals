@@ -23,8 +23,10 @@ def sandbox_double():
             value: Integer to double.
         """
         where = await sandbox().exec(["sh", "-c", "pwd"])
-        with open(os.environ["AIQ_P1_SANDBOX_RECORD"], "a") as file:
-            file.write(where.stdout.strip() + "\n")
+        record = os.environ.get("AIQ_P1_SANDBOX_RECORD")
+        if record:  # tests use this to check the sandbox directory is removed
+            with open(record, "a") as file:
+                file.write(where.stdout.strip() + "\n")
         if os.environ.get("AIQ_P1_SANDBOX_SLOW"):
             # Owned by the sandbox exec; cancellation arrives while it runs.
             await sandbox().exec(["sh", "-c", "echo $$ > child.pid; exec sleep 120"])
