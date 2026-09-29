@@ -119,6 +119,56 @@ class RunBundle:
         return cls(root, resolved, result, manifest, attempt)
 
 
+_EXTERNAL_SYMLINK_MODES = ('exclude', 'raise', 'follow')
+
+
+def copy_native_tree(source: Path, dest: Path, *, external_symlinks: str = 'exclude') -> dict[str, list[str]]:
+    """Copy a native artifact tree without silently following links out of it.
+
+    Links resolving inside ``source`` are copied as their content. Special files
+    (FIFOs, sockets, devices) and dangling links are never copied. Returns manifest notes listing
+    relative paths of excluded or followed external links and skipped
+    non-regular files.
+    """
+    if external_symlinks not in _EXTERNAL_SYMLINK_MODES:
+        raise ValueError(f'external_symlinks must be one of {_EXTERNAL_SYMLINK_MODES}')
+    root = source.resolve()
+    notes: dict[str, list[str]] = {
+        'excluded_external_symlinks': [],
+        'followed_external_symlinks': [],
+        'skipped_non_regular_files': [],
+    }
+
+    def visit(directory: Path, target_dir: Path, *, followed: bool) -> None:
+        target_dir.mkdir(parents=True, exist_ok=True)
+        for entry in sorted(directory.iterdir()):
+            rel = (target_dir / entry.name).relative_to(dest).as_posix()
+            real = entry.resolve()
+            inside = real == root or root in real.parents
+            if entry.is_symlink() and not inside and not followed:
+                if external_symlinks == 'raise':
+                    raise ArtifactError(
+                        f'native artifact {rel!r} is a symlink outside the source tree; '
+                        'pass allow_external_symlinks=True only for a trusted source'
+                    )
+                if external_symlinks == 'exclude':
+                    notes['excluded_external_symlinks'].append(rel)
+                    continue
+                notes['followed_external_symlinks'].append(rel)
+            is_followed = followed or (entry.is_symlink() and not inside)
+            if real.is_dir():
+                if entry.is_symlink() and inside and real in (directory.resolve(), *directory.resolve().parents):
+                    continue  # a link back up the tree would recurse forever
+                visit(entry, target_dir / entry.name, followed=is_followed)
+            elif real.is_file():
+                shutil.copy2(real, target_dir / entry.name)
+            else:
+                notes['skipped_non_regular_files'].append(rel)
+
+    visit(source, dest, followed=False)
+    return notes
+
+
 def publish_run(
     destination: str | Path,
     *,
@@ -127,8 +177,15 @@ def publish_run(
     context: ExecutionContext,
     native_dir: str | Path | None = None,
     replace: bool = False,
+    external_symlinks: str = 'exclude',
 ) -> RunBundle:
     """Atomically publish one terminal run bundle.
+
+    ``external_symlinks`` controls links in ``native_dir`` whose targets lie
+    outside it: ``'exclude'`` (default) leaves them out, ``'raise'`` refuses,
+    and ``'follow'`` copies their content. Copying an arbitrary link target
+    into a bundle could publish unrelated host files. Whatever happens is
+    recorded in the manifest.
 
     Failed/cancelled/incomplete attempts are terminal and inspectable but do not
     receive ``RUN_COMPLETE`` and are therefore never reusable as successful
@@ -141,13 +198,16 @@ def publish_run(
     staging = Path(tempfile.mkdtemp(prefix=f'.{destination.name}.', dir=destination.parent))
     try:
         native_out = staging / 'native'
+        link_notes: dict[str, list[str]] = {}
         if native_dir is not None:
-            source = Path(native_dir).expanduser().resolve()
+            source = Path(native_dir).expanduser().absolute()
             if source.is_dir():
-                shutil.copytree(source, native_out, dirs_exist_ok=True)
+                link_notes = copy_native_tree(
+                    source, native_out, external_symlinks=external_symlinks
+                )
             elif source.is_file():
                 native_out.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source, native_out / source.name)
+                shutil.copy2(source.resolve(), native_out / source.name)
         native_refs = inventory_tree(native_out)
         # Artifacts in result are adapter-declared semantic references; manifest
         # inventory is authoritative for bundle integrity.
@@ -183,6 +243,9 @@ def publish_run(
             'native_artifact_identity': native_artifact_identity,
             'normalized_artifact_identity': normalized_artifact_identity,
         }
+        # Optional (ADR-0009 allows additions): symlink handling is recorded so
+        # a reader can tell which native paths were followed or left out.
+        manifest.update({key: value for key, value in link_notes.items() if value})
         _write_json(staging / 'run_manifest.json', manifest)
         (staging / ATTEMPT_TERMINAL).write_text(result.status + '\n')
         if result.status == 'succeeded':

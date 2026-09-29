@@ -55,6 +55,7 @@ async def ensure_evaluation_async(
     worker_python: str | None = None,
     timeout_seconds: float | None = None,
     import_source: str | Path | None = None,
+    allow_external_symlinks: bool = False,
     verify_checksums: bool = True,
 ) -> EnsureOutcome:
     store = store if isinstance(store, ResultStore) else ResultStore(store)
@@ -84,7 +85,10 @@ async def ensure_evaluation_async(
     )
     if import_source is not None:
         action: EnsureAction = 'imported'
-        attempt = await asyncio.to_thread(import_evaluation, resolved, import_source, context)
+        attempt = await asyncio.to_thread(
+            import_evaluation, resolved, import_source, context,
+            allow_external_symlinks=allow_external_symlinks,
+        )
     else:
         action = 'executed'
         attempt = await run_evaluation_async(resolved, context)

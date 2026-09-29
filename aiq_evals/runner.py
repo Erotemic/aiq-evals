@@ -20,8 +20,16 @@ from aiq_evals.contracts import (
     ExecutionContext,
     ResolvedEvaluation,
 )
-from aiq_evals.errors import ActiveEventLoopError, ExecutionError
-from aiq_evals.jsonutil import MIN_REDACTED_VALUE_LENGTH, redact_values
+from aiq_evals.errors import (
+    ActiveEventLoopError,
+    ExecutionError,
+    RequestValidationError,
+)
+from aiq_evals.jsonutil import (
+    MIN_REDACTED_VALUE_LENGTH,
+    redact_values,
+    required_secret_names,
+)
 
 
 def validate_request(request: EvaluationRequest) -> None:
@@ -278,6 +286,22 @@ def _redacted_exception_text(ex: BaseException, env: dict[str, str] | Any) -> st
     return text
 
 
+def check_required_secrets(request: EvaluationRequest, context: ExecutionContext) -> None:
+    """Fail before any worker starts when a declared secret is unavailable.
+
+    Names come from ``required_secrets`` lists in the request; values must be
+    supplied through ``ExecutionContext.env`` or the inherited environment.
+    """
+    missing = [
+        name for name in required_secret_names(request.to_dict())
+        if not (context.env.get(name) or os.environ.get(name))
+    ]
+    if missing:
+        raise RequestValidationError(
+            f'required secrets are not set in ExecutionContext.env or the environment: {missing}'
+        )
+
+
 def _redact_result(result: EvaluationResult, context: ExecutionContext) -> EvaluationResult:
     # Adapters retain native exception text/tracebacks, which can quote
     # credentials supplied through the environment; never publish those values.
@@ -335,6 +359,7 @@ async def run_evaluation_async(
         if isinstance(request_or_resolved, EvaluationRequest)
         else request_or_resolved
     )
+    check_required_secrets(resolved.request, context)
     destination = context.output_dir
     destination.parent.mkdir(parents=True, exist_ok=True)
     work_dir = Path(tempfile.mkdtemp(prefix='.aiq-evals-work-', dir=destination.parent))
@@ -398,8 +423,15 @@ def import_evaluation(
     request_or_resolved: EvaluationRequest | ResolvedEvaluation,
     source: str | Path,
     context: ExecutionContext,
+    *,
+    allow_external_symlinks: bool = False,
 ) -> RunBundle:
-    """Import native artifacts and atomically publish an engine-free run bundle."""
+    """Import native artifacts and atomically publish an engine-free run bundle.
+
+    Symlinks in ``source`` that point outside it are refused unless
+    ``allow_external_symlinks`` is set for a trusted source (for example MAGNET's
+    symlinked HELM materializations); followed links are listed in the manifest.
+    """
     resolved = (
         resolve_evaluation(request_or_resolved)
         if isinstance(request_or_resolved, EvaluationRequest)
@@ -413,4 +445,5 @@ def import_evaluation(
         result=result,
         context=context,
         native_dir=source,
+        external_symlinks='follow' if allow_external_symlinks else 'raise',
     )

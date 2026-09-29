@@ -107,6 +107,21 @@ def find_secret_paths(value: Any, *, path: str = '$') -> list[str]:
     return found
 
 
+def required_secret_names(value: Any) -> list[str]:
+    """Collect environment-variable names listed under any ``required_secrets`` key."""
+    names: list[str] = []
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            if str(key) in _SECRET_NAME_FIELDS and isinstance(item, Sequence) and not isinstance(item, str):
+                names.extend(str(name) for name in item)
+            else:
+                names.extend(required_secret_names(item))
+    elif isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        for item in value:
+            names.extend(required_secret_names(item))
+    return sorted(set(names))
+
+
 # Environment values shorter than this are not scrubbed from structured data:
 # replacing e.g. "1" would corrupt sample IDs and digests, and a value that short
 # is not a credential. Free-text worker logs are still scrubbed of every value.

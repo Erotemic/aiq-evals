@@ -119,3 +119,41 @@ def test_content_addressed_store(tmp_path):
             result=make_result(nonreusable.identity),
             context=context,
         )
+
+
+def _symlink_tree(tmp_path):
+    native = tmp_path / 'native'
+    outside = tmp_path / 'outside'
+    (native / 'sub').mkdir(parents=True)
+    outside.mkdir()
+    (outside / 'id_rsa').write_text('PRIVATE-KEY-MATERIAL\n')
+    (native / 'log.txt').write_text('native log\n')
+    (native / 'innocent.log').symlink_to(outside / 'id_rsa')
+    (native / 'dirlink').symlink_to(outside, target_is_directory=True)
+    (native / 'sub' / 'internal.txt').symlink_to(native / 'log.txt')
+    (native / 'loop').symlink_to(native, target_is_directory=True)
+    return native
+
+
+@pytest.mark.parametrize('mode', ['exclude', 'raise', 'follow'])
+def test_external_symlinks_are_never_silently_copied(tmp_path, mode):
+    from aiq_evals.artifacts import copy_native_tree
+    from aiq_evals.errors import ArtifactError
+
+    native = _symlink_tree(tmp_path)
+    dest = tmp_path / 'dest'
+    if mode == 'raise':
+        with pytest.raises(ArtifactError, match='outside the source tree'):
+            copy_native_tree(native, dest, external_symlinks=mode)
+        return
+    notes = copy_native_tree(native, dest, external_symlinks=mode)
+    copied = {p.relative_to(dest).as_posix() for p in dest.rglob('*') if p.is_file()}
+    assert {'log.txt', 'sub/internal.txt'} <= copied
+    leaked = any('PRIVATE-KEY' in (dest / p).read_text() for p in copied)
+    if mode == 'exclude':
+        assert not leaked
+        assert sorted(notes['excluded_external_symlinks']) == ['dirlink', 'innocent.log']
+    else:
+        assert leaked
+        assert sorted(notes['followed_external_symlinks']) == ['dirlink', 'innocent.log']
+    assert not any(p.is_symlink() for p in dest.rglob('*'))

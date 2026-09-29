@@ -77,6 +77,10 @@ def _parser() -> argparse.ArgumentParser:
     ensure.add_argument('--worker-python')
     ensure.add_argument('--timeout', type=float)
     ensure.add_argument('--import-source', type=Path, help='Import these native artifacts instead of executing.')
+    ensure.add_argument(
+        '--allow-external-symlinks', action='store_true',
+        help='Follow symlinks leaving the import source (trusted sources only).',
+    )
 
     run = sub.add_parser('run', help='Execute a request and atomically publish a run bundle.')
     run.add_argument('request', type=Path)
@@ -91,6 +95,10 @@ def _parser() -> argparse.ArgumentParser:
     imp.add_argument('request', type=Path)
     imp.add_argument('source', type=Path)
     imp.add_argument('--output', type=Path, required=True)
+    imp.add_argument(
+        '--allow-external-symlinks', action='store_true',
+        help='Follow symlinks leaving the import source (trusted sources only).',
+    )
 
     show = sub.add_parser('show', help='Inspect a published run without engine dependencies.')
     show.add_argument('run_dir', type=Path)
@@ -203,6 +211,7 @@ def _ensure(args: argparse.Namespace) -> int:
         worker_python=args.worker_python,
         timeout_seconds=args.timeout,
         import_source=args.import_source,
+        allow_external_symlinks=args.allow_external_symlinks,
     )
     payload = {
         'action': outcome.action,
@@ -230,7 +239,9 @@ def _run(args: argparse.Namespace) -> int:
 def _import_native(args: argparse.Namespace) -> int:
     request = _load_request(args.request)
     context = ExecutionContext(output_dir=args.output)
-    bundle = import_evaluation(request, args.source, context)
+    bundle = import_evaluation(
+        request, args.source, context, allow_external_symlinks=args.allow_external_symlinks
+    )
     print(bundle.path)
     return 0 if bundle.result.status == 'succeeded' else 2
 

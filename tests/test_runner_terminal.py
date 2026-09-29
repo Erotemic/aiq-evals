@@ -120,3 +120,43 @@ def test_cancellation_publishes_cancelled_attempt_and_propagates(monkeypatch, tm
     assert bundle.result.status == 'cancelled'
     assert not bundle.complete
     assert (destination / ATTEMPT_TERMINAL).is_file()
+
+
+def test_missing_required_secret_fails_before_execution(monkeypatch, tmp_path):
+    from dataclasses import replace
+
+    from aiq_evals.errors import RequestValidationError
+
+    resolved = make_resolved()
+    request = replace(
+        resolved.request,
+        engine_options={'harness_config': {'provider': {'required_secrets': ['AIQ_TEST_TOKEN']}}},
+    )
+    resolved = replace(resolved, request=request)
+    started = []
+
+    async def never(*args, **kwargs):
+        started.append(True)
+
+    monkeypatch.setattr(runner_mod, '_execute_resolved', never)
+    monkeypatch.delenv('AIQ_TEST_TOKEN', raising=False)
+    with pytest.raises(RequestValidationError, match='AIQ_TEST_TOKEN'):
+        asyncio.run(runner_mod.run_evaluation_async(resolved, ExecutionContext(output_dir=tmp_path / 'r')))
+    assert not started and not (tmp_path / 'r').exists()
+    # Supplied through the context: the run proceeds.
+    monkeypatch.setattr(runner_mod, '_execute_resolved', failing := _failing_execution())
+    bundle = asyncio.run(
+        runner_mod.run_evaluation_async(
+            resolved, ExecutionContext(output_dir=tmp_path / 'ok', env={'AIQ_TEST_TOKEN': 'x' * 12})
+        )
+    )
+    assert bundle.result.status == 'failed' and failing.calls == 1
+
+
+def _failing_execution():
+    async def run(*args, **kwargs):
+        run.calls += 1
+        raise ExecutionError('stub')
+
+    run.calls = 0
+    return run

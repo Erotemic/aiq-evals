@@ -106,6 +106,7 @@ def test_helm_fresh_scored_generation(tmp_path: Path, monkeypatch: pytest.Monkey
 def test_aiq_evals_imports_magnet_materialized_symlinked_run(tmp_path: Path) -> None:
     """Phase-5 compatibility seam: MAGNET HELM outputs import through aiq-evals."""
     from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
+    from aiq_evals.errors import ArtifactError
     from aiq_evals.runner import import_evaluation, resolve_evaluation
 
     precomputed = tmp_path / "precomputed" / "benchmark_output" / "runs" / "source"
@@ -132,7 +133,13 @@ def test_aiq_evals_imports_magnet_materialized_symlinked_run(tmp_path: Path) -> 
             models=(ModelBinding(role="primary", model="openai/gpt2"),),
         )
     )
-    bundle = import_evaluation(resolved, output, ExecutionContext(output_dir=tmp_path / "import"))
+    # MAGNET links reused runs outside the output tree: refused unless trusted.
+    with pytest.raises(ArtifactError, match="symlink outside the source tree"):
+        import_evaluation(resolved, output, ExecutionContext(output_dir=tmp_path / "refused"))
+    bundle = import_evaluation(
+        resolved, output, ExecutionContext(output_dir=tmp_path / "import"), allow_external_symlinks=True
+    )
+    assert bundle.manifest["followed_external_symlinks"]
     assert bundle.result.status == "succeeded"
     assert [record.task for record in bundle.result.records] == [RUN_NAME]
     assert bundle.result.records[0].coverage.processed == 10
