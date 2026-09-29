@@ -1,0 +1,107 @@
+"""Small JSON/canonicalization helpers used by public contracts."""
+from __future__ import annotations
+
+import hashlib
+import json
+import math
+from collections.abc import Mapping, Sequence
+from pathlib import Path
+from typing import Any
+
+from aiq_evals.errors import RequestValidationError
+
+JSONScalar = None | bool | int | float | str
+JSONValue = JSONScalar | list['JSONValue'] | dict[str, 'JSONValue']
+
+_SECRET_FRAGMENTS = (
+    'api_key',
+    'apikey',
+    'password',
+    'passwd',
+    'secret',
+    'credential',
+    'access_token',
+    'auth_token',
+)
+
+# These fields contain *names* of environment variables, not credential values.
+_SECRET_NAME_FIELDS = {'required_secrets'}
+
+
+def normalize_json(value: Any, *, path: str = '$') -> JSONValue:
+    """Return a strict JSON value with deterministic mapping keys.
+
+    Tuples are accepted as input convenience and normalized to lists. Paths and
+    arbitrary Python objects are rejected so request identity never depends on
+    ``repr`` or object identity.
+    """
+    if value is None or isinstance(value, (bool, int, str)):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise RequestValidationError(f'{path} contains non-finite float {value!r}')
+        return value
+    if isinstance(value, Path):
+        raise RequestValidationError(
+            f'{path} contains Path {value!r}; use an immutable string reference instead'
+        )
+    if isinstance(value, Mapping):
+        out: dict[str, JSONValue] = {}
+        for key in sorted(value):
+            if not isinstance(key, str):
+                raise RequestValidationError(f'{path} has non-string key {key!r}')
+            out[key] = normalize_json(value[key], path=f'{path}.{key}')
+        return out
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return [normalize_json(item, path=f'{path}[{idx}]') for idx, item in enumerate(value)]
+    raise RequestValidationError(
+        f'{path} contains non-JSON value of type {type(value).__name__}'
+    )
+
+
+def canonical_json_bytes(value: Any) -> bytes:
+    """Serialize a JSON value in the canonical form used for identities."""
+    normalized = normalize_json(value)
+    return json.dumps(
+        normalized,
+        sort_keys=True,
+        separators=(',', ':'),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode('utf8')
+
+
+def sha256_json(value: Any) -> str:
+    return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
+
+
+def sha256_file(path: str | Path, *, chunk_size: int = 1024 * 1024) -> str:
+    hasher = hashlib.sha256()
+    with Path(path).open('rb') as file:
+        while True:
+            chunk = file.read(chunk_size)
+            if not chunk:
+                break
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
+def find_secret_paths(value: Any, *, path: str = '$') -> list[str]:
+    """Find keys that look credential-bearing.
+
+    Evaluation requests are persisted and hashed, so secrets belong in
+    :class:`ExecutionContext.env`, never in request/native option dictionaries.
+    """
+    found: list[str] = []
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            key_text = str(key).lower().replace('-', '_')
+            child = f'{path}.{key}'
+            if key_text not in _SECRET_NAME_FIELDS:
+                if any(fragment in key_text for fragment in _SECRET_FRAGMENTS):
+                    found.append(child)
+                found.extend(find_secret_paths(item, path=child))
+    elif isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        for idx, item in enumerate(value):
+            found.extend(find_secret_paths(item, path=f'{path}[{idx}]'))
+    return found

@@ -1,0 +1,45 @@
+{
+  "adapter_version": "fixture-adapter-v1",
+  "engine_version": "fixture-engine-v1",
+  "identity": {
+    "algorithm": "aiq-evals-measurement-v1+sha256",
+    "digest": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+    "reusable": true,
+    "unknown_reasons": []
+  },
+  "native_config": {
+    "resolved_task_specs": [
+      "fixture-task"
+    ],
+    "task_specs": [
+      "fixture-task"
+    ]
+  },
+  "request": {
+    "data_revision": "fixture-data-revision",
+    "engine": "olmo_eval",
+    "engine_options": {
+      "upstream_revision": "0123456789abcdef0123456789abcdef01234567"
+    },
+    "generation": {
+      "temperature": 0.0
+    },
+    "models": [
+      {
+        "cache_token": null,
+        "model": "fixture-model",
+        "provider": "mock",
+        "provider_options": {},
+        "revision": "fixture-model-revision",
+        "role": "primary"
+      }
+    ],
+    "schema_version": 1,
+    "task": "fixture-task",
+    "task_options": {},
+    "task_revision": "fixture-task-revision"
+  },
+  "resolved_facts": {
+    "engine_revision": "0123456789abcdef0123456789abcdef01234567"
+  }
+}

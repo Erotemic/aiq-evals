@@ -32,14 +32,17 @@ Keep these in `aiq-magnet`:
 
 Do not add `kwdagger` or `aiq-magnet` as a core dependency.
 
-## Phase-1 rule
+## Native-evidence rule
 
-Do not claim an upstream capability from documentation or old code alone. A
-phase-1 checkbox that concerns runtime behavior requires a native fixture and a
-record in `docs/planning/phase1-evidence.md`.
+Phases 2 and 3 now contain source-grounded implementations, but that does not
+close the native phase-1 acceptance gates. Do not claim an upstream capability
+from documentation, fake-native tests, or old code alone. A checkbox that
+concerns real runtime behavior requires a native fixture and a record in
+`docs/planning/phase1-evidence.md`.
 
 Exact upstream compatibility pins are evidence-backed decisions. Candidate pins
-are not supported pins.
+are not supported pins. The OLMo adapter remains experimental until its native
+generation, tool, failure, cancellation, and packaging gates are recorded.
 
 ## Dependency rule
 

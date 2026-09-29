@@ -1,0 +1,20 @@
+{
+  "engine": "olmo_eval",
+  "identity_algorithm": "aiq-evals-measurement-v1+sha256",
+  "identity_unknown_reasons": [],
+  "measurement_identity": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+  "native_artifact_identity": "9bd3da3570a3d07aa951da647feaee23d6ee89c21b7302a29ed6d0b33a0d6e07",
+  "native_artifacts": [
+    {
+      "path": "metrics.json",
+      "role": "native",
+      "sha256": "2026dce1225acebf981a3a1db6b96dfe278582829a08f9d6f1ffbc47d8d57651",
+      "size_bytes": 25
+    }
+  ],
+  "normalized_artifact_identity": "e5498e07811b5d0511d60cb07ef3389e82950044beb56683eee978f5c33bbeb1",
+  "request_schema_version": 1,
+  "result_schema_version": 1,
+  "reusable": true,
+  "schema_version": 1
+}

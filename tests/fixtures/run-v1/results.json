@@ -1,0 +1,42 @@
+{
+  "artifacts": [],
+  "diagnostics": {},
+  "engine": "olmo_eval",
+  "identity": {
+    "algorithm": "aiq-evals-measurement-v1+sha256",
+    "digest": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+    "reusable": true,
+    "unknown_reasons": []
+  },
+  "records": [
+    {
+      "coverage": {
+        "expected": 4,
+        "failed": 0,
+        "processed": 4,
+        "saved": 4,
+        "status": "complete"
+      },
+      "error": null,
+      "metrics": [
+        {
+          "denominator": 4,
+          "metric": "accuracy",
+          "model_role": "primary",
+          "reducer": null,
+          "scorer": "exact",
+          "task": "fixture-task",
+          "value": 0.75
+        }
+      ],
+      "model_role": "primary",
+      "native_config": {},
+      "native_status": "succeeded",
+      "primary_metric": "accuracy:exact",
+      "task": "fixture-task"
+    }
+  ],
+  "samples": [],
+  "schema_version": 1,
+  "status": "succeeded"
+}

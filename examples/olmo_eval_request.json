@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "engine": "olmo_eval",
+  "task": "replace-with-registered-task",
+  "task_revision": "replace-with-immutable-task-revision",
+  "data_revision": "replace-with-immutable-data-revision",
+  "models": [
+    {
+      "role": "primary",
+      "model": "replace-with-model",
+      "provider": "mock",
+      "revision": "replace-with-immutable-model-revision",
+      "cache_token": null,
+      "provider_options": {}
+    }
+  ],
+  "task_options": {
+    "limit": 4
+  },
+  "generation": {
+    "temperature": 0.0
+  },
+  "engine_options": {
+    "upstream_revision": "73ade80e24f796af55caeb8fd7b75a7f3fd607fd",
+    "save_predictions": true,
+    "save_requests": true,
+    "shuffle_seed": 42,
+    "harness_config": {
+      "name": "aiq-evals-example"
+    }
+  }
+}

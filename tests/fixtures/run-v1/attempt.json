@@ -1,0 +1,11 @@
+{
+  "diagnostics": {},
+  "execution_context": {
+    "env_keys": [],
+    "output_dir": "<fixture-output-dir>",
+    "timeout_seconds": null,
+    "worker_python": null
+  },
+  "schema_version": 1,
+  "status": "succeeded"
+}

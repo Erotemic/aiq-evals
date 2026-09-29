@@ -1,0 +1,41 @@
+"""Private subprocess protocol for isolated native engine execution."""
+from __future__ import annotations
+
+import argparse
+import asyncio
+import json
+from pathlib import Path
+
+from aiq_evals.backends.registry import get_backend
+from aiq_evals.contracts import EvaluationResult, ExecutionContext, ResolvedEvaluation
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog='python -m aiq_evals.worker')
+    sub = parser.add_subparsers(dest='command', required=True)
+    execute = sub.add_parser('execute')
+    execute.add_argument('--resolved', type=Path, required=True)
+    execute.add_argument('--output-dir', type=Path, required=True)
+    execute.add_argument('--result', type=Path, required=True)
+    return parser
+
+
+async def _execute(args: argparse.Namespace) -> int:
+    resolved = ResolvedEvaluation.from_dict(json.loads(args.resolved.read_text()))
+    backend = get_backend(resolved.request.engine)
+    context = ExecutionContext(output_dir=args.output_dir)
+    result = await backend.execute(resolved, context)
+    args.result.parent.mkdir(parents=True, exist_ok=True)
+    args.result.write_text(json.dumps(result.to_dict(), indent=2, sort_keys=True) + '\n')
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    if args.command == 'execute':
+        return asyncio.run(_execute(args))
+    raise AssertionError(args.command)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

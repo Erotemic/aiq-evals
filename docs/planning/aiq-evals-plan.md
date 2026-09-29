@@ -1,6 +1,6 @@
 # aiq-evals implementation plan
 
-Status: phase-1 foundation implemented; native runtime acceptance remains open.
+Status: phases 2 and 3 implemented provisionally; native phase-1/phase-3 acceptance remains open.
 
 This is the standalone refinement of the earlier MAGNET backend-agnostic
 evaluation plan. It moves generic evaluation execution, import, identity, and
@@ -185,39 +185,53 @@ dependency of this repository.
 
 ## Phase 2 - Shared contracts, identity, store, and engine-free artifacts
 
-After phase 1 supplies native evidence:
+Implementation status: PRESENT, PROVISIONAL. Native phase-1 evidence is still
+required before the public contract can freeze.
 
-- define a versioned `EvaluationRequest` and resolved request;
-- define `ExecutionContext` separately from measurement inputs;
-- define task/model/provider roles and typed engine options;
-- implement static validation without importing task factories;
-- implement preflight resolution before reusable cache assignment;
-- implement canonical measurement identity;
-- implement unknown-identity/no-reuse behavior;
-- implement a lazy engine registry;
-- implement sync/async/import facades;
-- implement a filesystem content-addressed result store;
-- implement atomic terminal run publication;
-- implement native artifact references/checksums/lineage;
-- implement engine-free normalized readers;
-- implement schema versioning and frozen compatibility fixtures;
-- keep selected MAGNET metrics and evidence policies out of measurement identity.
+- [x] Define versioned `EvaluationRequest`, `ResolvedEvaluation`, and result contracts.
+- [x] Define `ExecutionContext` separately from measurement inputs.
+- [x] Define task/model/provider roles with adapter-validated engine options.
+- [x] Implement static validation without importing native engine packages or task factories.
+- [x] Implement preflight native resolution before reusable cache assignment.
+- [x] Implement canonical measurement identity.
+- [x] Implement explicit unknown-identity/no-reuse behavior.
+- [x] Implement a lazy engine registry.
+- [x] Implement sync/async/native-import facades.
+- [x] Implement an isolated worker-interpreter path with timeout/cancellation termination.
+- [x] Implement a filesystem content-addressed result store.
+- [x] Implement atomic terminal run publication.
+- [x] Implement native artifact inventory/checksums and normalized artifact identity lineage.
+- [x] Implement engine-free run/sample/metric readers.
+- [x] Implement schema version checks, conservative future-version rejection, and a frozen v1 fixture.
+- [x] Keep MAGNET metric selection and evidence policy out of measurement identity.
+- [ ] Add explicit migration code when a schema-N+1 actually exists; v1 readers currently reject unknown versions.
+- [ ] Freeze the phase-2 public API only after OLMo, Inspect, and HELM production adapters pass.
 
-The phase-2 API is provisional until all three production adapters pass.
+The dependency-free result structures are a provisional normalized envelope, not
+a declaration that `aiq-evals` should replace Every Eval Ever. P1-08 still decides
+whether EEE becomes the long-term scientific payload. Native files remain authoritative.
 
 ## Phase 3 - OLMo Eval adapter
 
-- translate resolved requests to task specs/overrides and harness/provider
-  configuration;
-- call native validation explicitly;
-- preserve registered tasks, providers, judges, scaffolds, tools, and sandboxes;
-- use runner-owned lifecycle behavior;
-- normalize all task results/samples without flattening nested scorer identity;
-- retain predictions, requests, trajectories, and native diagnostics;
-- map processed/saved/failed counts;
-- implement native artifact import;
-- ensure failure gates never publish a successful terminal computation merely
-  because `metrics.json` exists.
+Implementation status: PRESENT, EXPERIMENTAL; native acceptance remains open.
+
+- [x] Translate requests to task specs/overrides and `HarnessConfig` provider configuration.
+- [x] Require a full immutable upstream git SHA when `upstream_revision` is supplied.
+- [x] Validate task/generation overrides against selected upstream dataclass fields.
+- [x] Preserve harness auxiliary providers, tools, scaffolds, sandboxes, judge/scorer settings, and required secret *names*.
+- [x] Call `AsyncEvalRunner.validate()` explicitly and use `run_async()`.
+- [x] Preserve cancellation rather than converting it to a successful/failed result, allowing native cleanup `finally` blocks to run.
+- [x] Normalize all returned tasks without flattening metric/scorer identity.
+- [x] Map saved/processed/failed instance accounting to coverage facts.
+- [x] Retain prediction samples and trajectories when present; preserve request/prediction/native diagnostics in the native bundle.
+- [x] Treat a raised hard-failure gate as failed even when OLMo already wrote `metrics.json`.
+- [x] Implement native artifact import with task/model/provider validation and explicit incomplete-task status.
+- [x] Map OLMo top-level per-task errors into failed normalized records.
+- [ ] Execute the real deterministic generation fixture at the selected OLMo pin.
+- [ ] Execute the real multi-turn tool fixture and capture trajectory evidence.
+- [ ] Verify owned worker-process and native runner cancellation cleanup against the real runtime.
+- [ ] Select the supported packaging mode/pin and close P1-09.
+- [ ] Mark the adapter supported only after those native gates pass.
 
 ## Phase 4 - Inspect adapter
 

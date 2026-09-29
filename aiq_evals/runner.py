@@ -1,0 +1,259 @@
+"""Shared resolve/execute/import facades."""
+from __future__ import annotations
+
+import asyncio
+import json
+import os
+import shutil
+import signal
+import tempfile
+from pathlib import Path
+from typing import Any
+
+from aiq_evals.artifacts import RunBundle, publish_run
+from aiq_evals.backends.registry import get_backend
+from aiq_evals.contracts import (
+    EvaluationRequest,
+    EvaluationResult,
+    ExecutionContext,
+    ResolvedEvaluation,
+)
+from aiq_evals.errors import ActiveEventLoopError, ExecutionError
+
+
+def validate_request(request: EvaluationRequest) -> None:
+    """Perform engine-specific static validation without importing the engine."""
+    get_backend(request.engine).validate_request(request)
+
+
+def resolve_evaluation(request: EvaluationRequest) -> ResolvedEvaluation:
+    """Resolve native configuration and measurement identity in the engine runtime."""
+    backend = get_backend(request.engine)
+    backend.validate_request(request)
+    return backend.resolve(request)
+
+
+async def _terminate_process_tree(process: asyncio.subprocess.Process) -> None:
+    if process.returncode is not None:
+        return
+    if os.name == 'posix':
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            return
+    else:
+        process.terminate()
+    try:
+        await asyncio.wait_for(process.wait(), timeout=5)
+    except TimeoutError:
+        if os.name == 'posix':
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                return
+        else:
+            process.kill()
+        await process.wait()
+
+
+async def _execute_in_worker(
+    resolved: ResolvedEvaluation,
+    context: ExecutionContext,
+    work_dir: Path,
+) -> EvaluationResult:
+    assert context.worker_python is not None
+    protocol_dir = work_dir / '.aiq-evals-worker'
+    protocol_dir.mkdir(parents=True, exist_ok=True)
+    resolved_path = protocol_dir / 'resolved.json'
+    result_path = protocol_dir / 'result.json'
+    stdout_path = protocol_dir / 'stdout.log'
+    stderr_path = protocol_dir / 'stderr.log'
+    resolved_path.write_text(json.dumps(resolved.to_dict(), indent=2, sort_keys=True) + '\n')
+    command = [
+        context.worker_python,
+        '-m',
+        'aiq_evals.worker',
+        'execute',
+        '--resolved',
+        str(resolved_path),
+        '--output-dir',
+        str(work_dir),
+        '--result',
+        str(result_path),
+    ]
+    env = os.environ.copy()
+    env.update(context.env)
+    # Make source-tree execution work without requiring an editable install in
+    # the worker environment. Installed distributions also work with this path.
+    package_parent = str(Path(__file__).resolve().parent.parent)
+    old_pythonpath = env.get('PYTHONPATH')
+    env['PYTHONPATH'] = package_parent if not old_pythonpath else package_parent + os.pathsep + old_pythonpath
+    process = await asyncio.create_subprocess_exec(
+        *command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+        env=env,
+        start_new_session=(os.name == 'posix'),
+    )
+    try:
+        communicate = process.communicate()
+        if context.timeout_seconds is None:
+            stdout, stderr = await communicate
+        else:
+            stdout, stderr = await asyncio.wait_for(communicate, context.timeout_seconds)
+    except (asyncio.CancelledError, TimeoutError):
+        await _terminate_process_tree(process)
+        raise
+    stdout_path.write_bytes(stdout)
+    stderr_path.write_bytes(stderr)
+    if process.returncode != 0:
+        detail = stderr.decode('utf8', errors='replace')[-4000:]
+        raise ExecutionError(
+            f'evaluation worker exited with code {process.returncode}: {detail}'
+        )
+    try:
+        payload = json.loads(result_path.read_text())
+    except (FileNotFoundError, json.JSONDecodeError) as ex:
+        raise ExecutionError('evaluation worker did not produce a valid result protocol file') from ex
+    return EvaluationResult.from_dict(payload)
+
+
+async def _execute_resolved(
+    resolved: ResolvedEvaluation,
+    context: ExecutionContext,
+    work_dir: Path,
+) -> EvaluationResult:
+    backend = get_backend(resolved.request.engine)
+    worker_context = ExecutionContext(
+        output_dir=work_dir,
+        env={} if context.worker_python is not None else context.env,
+        worker_python=None,
+        timeout_seconds=context.timeout_seconds,
+    )
+    if context.worker_python is not None:
+        return await _execute_in_worker(resolved, context, work_dir)
+    return await backend.execute(resolved, worker_context)
+
+
+def _redacted_exception_text(ex: BaseException, env: dict[str, str] | Any) -> str:
+    text = f'{type(ex).__name__}: {ex}'
+    for key, value in dict(env).items():
+        if value:
+            text = text.replace(value, f'<redacted:{key}>')
+    return text
+
+
+def _terminal_error_result(
+    resolved: ResolvedEvaluation,
+    *,
+    status: str,
+    kind: str,
+    detail: str,
+) -> EvaluationResult:
+    return EvaluationResult(
+        engine=resolved.request.engine,
+        identity=resolved.identity,
+        status=status,  # type: ignore[arg-type]
+        records=(),
+        diagnostics={
+            'runner_failure_kind': kind,
+            'runner_error': detail,
+        },
+    )
+
+
+async def run_evaluation_async(
+    request_or_resolved: EvaluationRequest | ResolvedEvaluation,
+    context: ExecutionContext,
+) -> RunBundle:
+    """Execute and atomically publish one evaluation run.
+
+    This is intentionally *not* ``ensure`` yet: phase 6 owns cache lookup/reuse
+    semantics. Phase 2 provides the content-addressed store primitives separately.
+    """
+    resolved = (
+        resolve_evaluation(request_or_resolved)
+        if isinstance(request_or_resolved, EvaluationRequest)
+        else request_or_resolved
+    )
+    destination = context.output_dir
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    work_dir = Path(tempfile.mkdtemp(prefix='.aiq-evals-work-', dir=destination.parent))
+    try:
+        try:
+            result = await _execute_resolved(resolved, context, work_dir)
+        except asyncio.CancelledError as ex:
+            # Preserve an inspectable terminal attempt, but do not consume task
+            # cancellation: callers still receive CancelledError.
+            cancelled = _terminal_error_result(
+                resolved,
+                status='cancelled',
+                kind='cancelled',
+                detail=_redacted_exception_text(ex, context.env),
+            )
+            try:
+                publish_run(
+                    destination,
+                    resolved=resolved,
+                    result=cancelled,
+                    context=context,
+                    native_dir=work_dir / 'native',
+                )
+            except Exception:
+                # Cancellation semantics take precedence over a secondary
+                # publication failure. There may simply be no terminal bundle.
+                pass
+            raise
+        except (ExecutionError, TimeoutError, OSError) as ex:
+            result = _terminal_error_result(
+                resolved,
+                status='failed',
+                kind='execution',
+                detail=_redacted_exception_text(ex, context.env),
+            )
+        return publish_run(
+            destination,
+            resolved=resolved,
+            result=result,
+            context=context,
+            native_dir=work_dir / 'native',
+        )
+    finally:
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+
+def run_evaluation(
+    request_or_resolved: EvaluationRequest | ResolvedEvaluation,
+    context: ExecutionContext,
+) -> RunBundle:
+    """Synchronous facade; use ``run_evaluation_async`` inside an event loop."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(run_evaluation_async(request_or_resolved, context))
+    raise ActiveEventLoopError(
+        'run_evaluation() cannot be called from an active event loop; '
+        'await run_evaluation_async() instead'
+    )
+
+
+def import_evaluation(
+    request_or_resolved: EvaluationRequest | ResolvedEvaluation,
+    source: str | Path,
+    context: ExecutionContext,
+) -> RunBundle:
+    """Import native artifacts and atomically publish an engine-free run bundle."""
+    resolved = (
+        resolve_evaluation(request_or_resolved)
+        if isinstance(request_or_resolved, EvaluationRequest)
+        else request_or_resolved
+    )
+    backend = get_backend(resolved.request.engine)
+    result = backend.import_results(resolved, str(Path(source).expanduser().resolve()), context)
+    return publish_run(
+        context.output_dir,
+        resolved=resolved,
+        result=result,
+        context=context,
+        native_dir=source,
+    )

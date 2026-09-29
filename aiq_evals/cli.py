@@ -5,18 +5,27 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from aiq_evals.backends.registry import registrations
+from aiq_evals.contracts import EvaluationRequest, ExecutionContext
 from aiq_evals.engines import ENGINE_SPECS
+from aiq_evals.outputs import load_run
 from aiq_evals.phase1 import PHASE1_TASKS
 from aiq_evals.probes.api_surface import probe_all_api_surfaces
 from aiq_evals.probes.environment import host_facts, probe_all_engine_imports
 from aiq_evals.probes.model import ProbeReport
 from aiq_evals.probes.source import inspect_checkout
+from aiq_evals.runner import (
+    import_evaluation,
+    resolve_evaluation,
+    run_evaluation,
+    validate_request,
+)
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog='aiq-evals',
-        description='Research and runtime tooling for backend-agnostic evaluations.',
+        description='Backend-agnostic evaluation runtime and artifact tooling.',
     )
     sub = parser.add_subparsers(dest='command', required=True)
 
@@ -38,7 +47,48 @@ def _parser() -> argparse.ArgumentParser:
 
     engines = sub.add_parser('engines', help='Show phase-1 engine research metadata.')
     engines.add_argument('--json', action='store_true')
+
+    backends = sub.add_parser('backends', help='Show implemented lazy backend adapters.')
+    backends.add_argument('--json', action='store_true')
+
+    validate = sub.add_parser(
+        'validate',
+        help='Statically validate a request without importing the native engine.',
+    )
+    validate.add_argument('request', type=Path)
+
+    resolve = sub.add_parser(
+        'resolve',
+        help='Resolve a request in the native engine environment and print its identity.',
+    )
+    resolve.add_argument('request', type=Path)
+    resolve.add_argument('--output', type=Path)
+
+    run = sub.add_parser('run', help='Execute a request and atomically publish a run bundle.')
+    run.add_argument('request', type=Path)
+    run.add_argument('--output', type=Path, required=True)
+    run.add_argument('--worker-python')
+    run.add_argument('--timeout', type=float)
+
+    imp = sub.add_parser(
+        'import-native',
+        help='Import native engine artifacts into an engine-free run bundle.',
+    )
+    imp.add_argument('request', type=Path)
+    imp.add_argument('source', type=Path)
+    imp.add_argument('--output', type=Path, required=True)
+
+    show = sub.add_parser('show', help='Inspect a published run without engine dependencies.')
+    show.add_argument('run_dir', type=Path)
+    show.add_argument('--no-verify', action='store_true')
     return parser
+
+
+def _load_request(path: Path) -> EvaluationRequest:
+    data = json.loads(path.read_text())
+    if not isinstance(data, dict):
+        raise SystemExit(f'request must be a JSON object: {path}')
+    return EvaluationRequest.from_dict(data)
 
 
 def _parse_checkouts(values: list[str]) -> dict[str, str]:
@@ -79,6 +129,16 @@ def _engines(as_json: bool) -> int:
     return 0
 
 
+def _backends(as_json: bool) -> int:
+    rows = {key: registration.__dict__ for key, registration in registrations().items()}
+    if as_json:
+        print(json.dumps(rows, indent=2, sort_keys=True))
+    else:
+        for key, row in sorted(rows.items()):
+            print(f'{key}: {row["module"]}:{row["factory"]} experimental={row["experimental"]}')
+    return 0
+
+
 def _phase1_probe(args: argparse.Namespace) -> int:
     records = probe_all_engine_imports()
     records.extend(probe_all_api_surfaces())
@@ -98,6 +158,61 @@ def _phase1_probe(args: argparse.Namespace) -> int:
     return 0
 
 
+def _validate(path: Path) -> int:
+    request = _load_request(path)
+    validate_request(request)
+    print(json.dumps({'valid': True, 'engine': request.engine}, sort_keys=True))
+    return 0
+
+
+def _resolve(path: Path, output: Path | None) -> int:
+    resolved = resolve_evaluation(_load_request(path))
+    text = json.dumps(resolved.to_dict(), indent=2, sort_keys=True) + '\n'
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(text)
+        print(output)
+    else:
+        print(text, end='')
+    return 0
+
+
+def _run(args: argparse.Namespace) -> int:
+    request = _load_request(args.request)
+    context = ExecutionContext(
+        output_dir=args.output,
+        worker_python=args.worker_python,
+        timeout_seconds=args.timeout,
+    )
+    bundle = run_evaluation(request, context)
+    print(bundle.path)
+    return 0 if bundle.result.status == 'succeeded' else 2
+
+
+def _import_native(args: argparse.Namespace) -> int:
+    request = _load_request(args.request)
+    context = ExecutionContext(output_dir=args.output)
+    bundle = import_evaluation(request, args.source, context)
+    print(bundle.path)
+    return 0 if bundle.result.status == 'succeeded' else 2
+
+
+def _show(args: argparse.Namespace) -> int:
+    bundle = load_run(args.run_dir, verify_checksums=not args.no_verify)
+    payload = {
+        'path': str(bundle.path),
+        'complete': bundle.complete,
+        'engine': bundle.result.engine,
+        'status': bundle.result.status,
+        'measurement_identity': bundle.resolved.identity.to_dict(),
+        'records': [record.to_dict() for record in bundle.result.records],
+        'sample_count': len(bundle.result.samples),
+        'manifest': dict(bundle.manifest),
+    }
+    print(json.dumps(payload, indent=2, sort_keys=True))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == 'phase1-status':
@@ -106,4 +221,16 @@ def main(argv: list[str] | None = None) -> int:
         return _phase1_probe(args)
     if args.command == 'engines':
         return _engines(args.json)
+    if args.command == 'backends':
+        return _backends(args.json)
+    if args.command == 'validate':
+        return _validate(args.request)
+    if args.command == 'resolve':
+        return _resolve(args.request, args.output)
+    if args.command == 'run':
+        return _run(args)
+    if args.command == 'import-native':
+        return _import_native(args)
+    if args.command == 'show':
+        return _show(args)
     raise AssertionError(args.command)
