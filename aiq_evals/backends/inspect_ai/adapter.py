@@ -12,6 +12,7 @@ import importlib
 import importlib.metadata
 import os
 import re
+import sys
 import traceback
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -35,10 +36,14 @@ from aiq_evals.errors import (
     MissingDependencyError,
     RequestValidationError,
 )
-from aiq_evals.identity import build_measurement_identity
+from aiq_evals.identity import adapter_source_digest, build_measurement_identity
 from aiq_evals.jsonutil import normalize_json, sha256_file
+from aiq_evals.probes.source import verify_engine_revision
 
-ADAPTER_VERSION = '0.1.0'
+# 0.2.0: native phase-1 fixes (worker registration, task paths, coverage of
+# results-less logs, native log locations). adapter_source_sha256 also enters
+# identity, so reuse never spans unversioned edits.
+ADAPTER_VERSION = '0.2.0'
 CANDIDATE_INSPECT_VERSION = '0.3.272'
 _FULL_GIT_SHA = re.compile(r'^[0-9a-fA-F]{40}$')
 
@@ -401,8 +406,13 @@ class InspectAIBackend:
         registration_digests = _load_registration_modules(native_config['registration_modules'])
         task_facts = _resolve_task_reference(request.task)
         engine_version = _distribution_version(api)
-        engine_revision = request.engine_options.get('upstream_revision')
+        engine_revision, revision_facts, revision_reasons = verify_engine_revision(
+            request.engine_options.get('upstream_revision'),
+            module_file=getattr(sys.modules.get('inspect_ai'), '__file__', None),
+            distribution='inspect-ai',
+        )
         resolved_facts = {
+            **revision_facts,
             **task_facts,
             'engine_version': engine_version,
             'engine_revision': engine_revision,
@@ -411,12 +421,24 @@ class InspectAIBackend:
             'candidate_version_match': engine_version == CANDIDATE_INSPECT_VERSION,
             'registration_module_digests': registration_digests,
         }
+        identity_facts = {
+            'adapter_source_sha256': adapter_source_digest(__package__),
+            'task_source_sha256': task_facts.get('task_source_sha256'),
+            'registration_module_digests': registration_digests,
+        }
+        unhashed = sorted(name for name, digest in registration_digests.items() if digest is None)
+        unknown_reasons = list(revision_reasons)
+        if unhashed:
+            unknown_reasons.append(f'registration modules have no hashable source: {unhashed}')
+        if unknown_reasons:
+            resolved_facts['identity_unknown_reasons'] = unknown_reasons
         identity = build_measurement_identity(
             request,
             adapter_version=self.adapter_version,
             engine_version=engine_version,
             native_config=native_config,
             resolved_facts=resolved_facts,
+            identity_facts=identity_facts,
         )
         return ResolvedEvaluation(
             request=request,

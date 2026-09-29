@@ -210,6 +210,18 @@ def test_resolve_python_factory_hashes_source(monkeypatch, tmp_path):
     assert resolved.identity.reusable
 
 
+def test_editing_task_file_changes_measurement_identity(monkeypatch, tmp_path):
+    patch_runtime(monkeypatch)
+    task_file = tmp_path / 'edited_task.py'
+    task_file.write_text('# v1\n')
+    request = make_request(task=f'{task_file}@task_a', task_revision=None)
+    before = InspectAIBackend().resolve(request).identity
+    task_file.write_text('# v2\n')
+    after = InspectAIBackend().resolve(request).identity
+    assert before.reusable and after.reusable
+    assert before.digest != after.digest
+
+
 def test_execute_multi_log_preserves_metric_identity_and_trajectories(monkeypatch, tmp_path):
     CALLS.clear()
     patch_runtime(monkeypatch)

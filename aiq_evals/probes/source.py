@@ -102,3 +102,76 @@ def inspect_checkout(engine: str, checkout: str | Path) -> list[ProbeRecord]:
         )
     )
     return records
+
+
+def _installed_vcs_commit(distribution: str) -> str | None:
+    """PEP 610 ``direct_url.json`` commit of a VCS (non-editable) install."""
+    import importlib.metadata
+    import json
+
+    try:
+        text = importlib.metadata.distribution(distribution).read_text('direct_url.json')
+    except importlib.metadata.PackageNotFoundError:
+        return None
+    if not text:
+        return None
+    try:
+        commit = json.loads(text).get('vcs_info', {}).get('commit_id')
+    except (ValueError, AttributeError):
+        return None
+    return str(commit) if commit else None
+
+
+def verify_engine_revision(
+    requested: str | None,
+    *,
+    module_file: str | None,
+    distribution: str,
+) -> tuple[str | None, dict[str, Any], list[str]]:
+    """Determine the executing engine's source revision instead of trusting a request.
+
+    Returns ``(engine_revision, facts, identity_unknown_reasons)``. The revision is
+    observed from the imported module's git checkout, else from PEP 610 install
+    metadata. A requested revision that contradicts the observed one raises; one
+    that cannot be verified is recorded but not used as identity.
+    """
+    from aiq_evals.errors import EngineCompatibilityError
+
+    facts: dict[str, Any] = {'requested_engine_revision': requested}
+    reasons: list[str] = []
+    observed: str | None = None
+    dirty = False
+    if module_file:
+        path = Path(module_file).resolve()
+        try:
+            root = Path(_git(path.parent, 'rev-parse', '--show-toplevel'))
+            # A site-packages install inside an unrelated repository (e.g. a
+            # project .venv) is not the engine checkout: require it be tracked.
+            _git(root, 'ls-files', '--error-unmatch', str(path))
+            observed = _git(root, 'rev-parse', 'HEAD')
+            dirty = bool(_git(root, 'status', '--porcelain', '--untracked-files=no'))
+            facts['engine_revision_source'] = 'git-checkout'
+        except (OSError, subprocess.CalledProcessError):
+            observed = None
+    if observed is None:
+        observed = _installed_vcs_commit(distribution)
+        if observed is not None:
+            facts['engine_revision_source'] = 'pep610-direct-url'
+    facts['observed_engine_revision'] = observed
+    facts['engine_checkout_dirty'] = dirty
+
+    if requested is not None and observed is not None and requested != observed:
+        raise EngineCompatibilityError(
+            f'requested {distribution} upstream_revision {requested} but the executing '
+            f'source is at {observed}'
+        )
+    if dirty:
+        reasons.append(f'{distribution} source checkout has tracked modifications')
+        return None, facts, reasons
+    if requested is not None and observed is None:
+        reasons.append(
+            f'requested {distribution} upstream_revision could not be verified against '
+            'the executing source'
+        )
+        return None, facts, reasons
+    return observed, facts, reasons

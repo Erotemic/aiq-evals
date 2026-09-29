@@ -128,6 +128,12 @@ def make_request(**kwargs):
 def patch_runtime(monkeypatch, runner=FakeRunner):
     monkeypatch.setattr(olmo_adapter, '_native_symbols', lambda: fake_symbols(runner))
     monkeypatch.setattr(olmo_adapter, '_distribution_version', lambda: 'test-version')
+    # Simulate an executing checkout that matches the requested revision.
+    monkeypatch.setattr(
+        olmo_adapter,
+        'verify_engine_revision',
+        lambda requested, **_: (requested, {'observed_engine_revision': requested}, []),
+    )
 
 
 def test_static_validation_does_not_need_native_runtime():

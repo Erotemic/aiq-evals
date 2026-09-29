@@ -87,3 +87,56 @@ def test_request_allows_required_secret_names_but_not_values():
     assert request.engine_options['harness_config']['required_secrets'] == ['SERPER_API_KEY']
     with pytest.raises(RequestValidationError, match='credential-bearing'):
         make_request(engine_options={'harness_config': {'api_key': 'secret-value'}})
+
+
+def test_identity_facts_change_digest_but_informational_facts_do_not():
+    request = make_request()
+    base = {
+        'adapter_version': '0.1',
+        'engine_version': '1.2.3',
+        'native_config': {'task_specs': ['tiny']},
+        'resolved_facts': {'engine_version': '1.2.3', 'engine_revision': 'engine-sha'},
+        'identity_facts': {'task_source_sha256': 'a' * 64, 'adapter_source_sha256': 'b' * 64},
+    }
+    one = build_measurement_identity(request, **base)
+    edited_task = build_measurement_identity(
+        request, **{**base, 'identity_facts': {**base['identity_facts'], 'task_source_sha256': 'c' * 64}}
+    )
+    edited_adapter = build_measurement_identity(
+        request, **{**base, 'identity_facts': {**base['identity_facts'], 'adapter_source_sha256': 'd' * 64}}
+    )
+    moved_checkout = build_measurement_identity(
+        request,
+        **{**base, 'resolved_facts': {**base['resolved_facts'], 'task_source_path': '/elsewhere/task.py'}},
+    )
+    assert one.reusable and edited_task.reusable
+    assert edited_task.digest != one.digest
+    assert edited_adapter.digest != one.digest
+    assert moved_checkout.digest == one.digest
+
+
+def test_task_source_digest_only_counts_when_it_is_an_identity_fact():
+    request = make_request(task_revision=None)
+    kwargs = {
+        'adapter_version': '0.1',
+        'engine_version': '1.2.3',
+        'native_config': {},
+        'resolved_facts': {'engine_version': '1.2.3', 'task_source_sha256': 'a' * 64},
+    }
+    assert not build_measurement_identity(request, **kwargs).reusable
+    assert build_measurement_identity(
+        request, **kwargs, identity_facts={'task_source_sha256': 'a' * 64}
+    ).reusable
+
+
+def test_adapter_source_digest_tracks_package_source(tmp_path, monkeypatch):
+    from aiq_evals.identity import adapter_source_digest
+
+    package = tmp_path / 'fake_adapter_pkg'
+    package.mkdir()
+    (package / '__init__.py').write_text('')
+    (package / 'normalize.py').write_text('X = 1\n')
+    monkeypatch.syspath_prepend(str(tmp_path))
+    before = adapter_source_digest('fake_adapter_pkg')
+    (package / 'normalize.py').write_text('X = 2\n')
+    assert adapter_source_digest('fake_adapter_pkg') != before
