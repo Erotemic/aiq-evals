@@ -1,6 +1,6 @@
 # aiq-evals implementation plan
 
-Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-4 implemented and natively accepted for the tested combinations; public API/schema provisional until phase 6.
+Status: phase 1 closed 2026-09-29 (native evidence in `phase1-evidence.md`); phases 2-5 implemented and natively accepted for the tested combinations; public API/schema provisional until phase 6.
 
 This is the standalone refinement of the earlier MAGNET backend-agnostic
 evaluation plan. It moves generic evaluation execution, import, identity, and
@@ -269,13 +269,17 @@ Verified API target: `inspect-ai==0.3.272`.
 
 ## Phase 5 - HELM adapter
 
-- move/wrap generic HELM compute and import behavior behind the `aiq-evals`
-  adapter contract;
-- preserve native aggregate/per-instance records;
-- preserve unknown coverage when native artifacts cannot establish it;
-- keep existing MAGNET-specific predictor APIs in MAGNET;
-- provide a compatibility seam so current MAGNET HELM recipes continue working
-  during migration.
+Implementation status: PRESENT, EXPERIMENTAL; native acceptance at `crfm-helm==0.5.14`
+recorded in `phase5-evidence.md`.
+
+- [x] move/wrap generic HELM compute and import behavior behind the `aiq-evals`
+  adapter contract (MAGNET-independent reimplementation; native RunSpec resolution);
+- [x] preserve native aggregate/per-instance records;
+- [x] preserve unknown coverage when native artifacts cannot establish it;
+- [x] keep existing MAGNET-specific predictor APIs in MAGNET;
+- [x] provide a compatibility seam so current MAGNET HELM recipes continue working
+  during migration (MAGNET-materialized, symlinked run directories import natively;
+  MAGNET itself is unchanged).
 
 ## Phase 6 - Reuse/ensure semantics and conformance
 

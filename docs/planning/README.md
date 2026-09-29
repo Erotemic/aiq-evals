@@ -10,3 +10,5 @@ evidence, and open gates.
 - `phase1-evidence.md` - canonical phase-1 validation ledger.
 - `phase2-phase3-evidence.md` - phase-2/3 implementation evidence and open acceptance gates.
 - `phase4-evidence.md` - Inspect adapter implementation evidence and native gates.
+- `phase1-capabilities.md` - combination-level native capability matrix.
+- `phase5-evidence.md` - HELM adapter design and native evidence.

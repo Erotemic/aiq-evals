@@ -54,7 +54,10 @@ Implemented now:
 - Inspect multi-log normalization preserving scorer/score/metric/group/reducer identity;
 - Inspect per-epoch samples, epoch reductions, model-role usage, and tool/event trajectories;
 - automatic owned-worker execution for synchronous native runtimes such as Inspect;
-- Inspect `.eval`/JSON import and native model/task-argument validation.
+- Inspect `.eval`/JSON import and native model/task-argument validation;
+- an experimental HELM adapter resolving run entries through HELM's own RunSpec
+  expansion, executing `helm.benchmark.run` in a worker, and importing native
+  (including MAGNET-materialized) run directories.
 
 The implementation is intentionally provisional. Remaining work, including
 reuse/`ensure` semantics and conformance, is tracked in

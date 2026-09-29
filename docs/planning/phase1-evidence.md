@@ -679,3 +679,15 @@ rescore, Docker/OLMo sandboxes, HELM cancellation, and external providers.
   returns `None` for `inspect_ai`, `olmo_eval`, and `helm`.
 - `ruff check .`: passed.
 - Inspect native: 13 passed. OLMo native: 6 passed. HELM native: 3 passed.
+
+### Correction: MAGNET `--require-per-instance-stats` is inert on reuse
+
+The P1-05 record said the derived copy without `per_instance_stats.json`
+"reused only with `--require-per-instance-stats false`". Reading MAGNET
+`7bb105ab` `materialize_helm_run.py` shows that the completeness check in its
+reuse search is commented out. That flag therefore does not affect reuse, and
+the incomplete copy would also have been reused with it set to true. MAGNET
+matches reusable runs by name tokens only: it does no hashing and checks no
+HELM version or model configuration. The aiq-evals HELM adapter (phase 5) does not
+inherit this behavior. See `phase5-evidence.md`; phase-6 reuse must stay
+identity-based.

@@ -2,7 +2,8 @@
 
 Run from the repository root:
 
-* OLMo goldens need no engine: ``python dev/regenerate_native_regressions.py olmo``.
+* OLMo and HELM goldens need no engine:
+  ``python dev/regenerate_native_regressions.py olmo helm``.
 * Inspect needs the pinned runtime, because ``.eval`` entries are zstd-compressed:
   ``/tmp/aiq-inspect-p1/bin/python dev/regenerate_native_regressions.py inspect``.
   This writes each ``.eval`` fixture through Inspect's own JSON log writer to
@@ -27,6 +28,7 @@ from tests.regression.summary import summarize  # noqa: E402
 IDENTITY = MeasurementIdentity(algorithm='regression', digest='0' * 64, reusable=False)
 INSPECT_ROOT = REPO / 'tests' / 'fixtures' / 'inspect-native'
 OLMO_ROOT = REPO / 'tests' / 'fixtures' / 'olmo-native'
+HELM_ROOT = REPO / 'tests' / 'fixtures' / 'helm-native'
 
 # fixture directory -> native tasks the originating request resolved to
 OLMO_FIXTURES = {
@@ -65,7 +67,18 @@ def regenerate_olmo() -> None:
     _write(OLMO_ROOT / 'expected-normalized.json', goldens)
 
 
+def regenerate_helm() -> None:
+    from aiq_evals.backends.helm.normalize import normalize_helm_runs
+
+    goldens = {
+        path.name: summarize(normalize_helm_runs([path], identity=IDENTITY))
+        for path in sorted(HELM_ROOT.iterdir())
+        if (path / 'run_spec.json').is_file()
+    }
+    _write(HELM_ROOT / 'expected-normalized.json', goldens)
+
+
 if __name__ == '__main__':
     targets = sys.argv[1:] or ['olmo']
     for target in targets:
-        {'inspect': regenerate_inspect, 'olmo': regenerate_olmo}[target]()
+        {'inspect': regenerate_inspect, 'olmo': regenerate_olmo, 'helm': regenerate_helm}[target]()

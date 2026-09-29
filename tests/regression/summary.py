@@ -5,6 +5,7 @@ engine environments) and the dependency-free regression tests.
 """
 from __future__ import annotations
 
+import json
 from collections import Counter
 from typing import Any
 
@@ -21,8 +22,11 @@ def summarize(result: EvaluationResult) -> dict[str, Any]:
                 'coverage': record.coverage.to_dict(),
                 'has_error': record.error is not None,
                 'metrics': sorted(
-                    [m.scorer, m.score, m.metric, m.group, m.reducer, m.denominator, round(m.value, 9)]
-                    for m in record.metrics
+                    (
+                        [m.scorer, m.score, m.metric, m.group, m.reducer, m.denominator, round(m.value, 9)]
+                        for m in record.metrics
+                    ),
+                    key=json.dumps,
                 ),
             }
         )

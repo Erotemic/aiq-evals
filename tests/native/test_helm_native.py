@@ -101,3 +101,38 @@ def test_helm_fresh_scored_generation(tmp_path: Path, monkeypatch: pytest.Monkey
     assert len(run.json.per_instance_stats()) == 1
     assert any(stat["name"]["name"] == "exact_match" and stat["count"] == 1 for stat in run.json.stats())
     assert "1 computes" in (output / "helm-run.log").read_text()
+
+
+def test_aiq_evals_imports_magnet_materialized_symlinked_run(tmp_path: Path) -> None:
+    """Phase-5 compatibility seam: MAGNET HELM outputs import through aiq-evals."""
+    from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
+    from aiq_evals.runner import import_evaluation, resolve_evaluation
+
+    precomputed = tmp_path / "precomputed" / "benchmark_output" / "runs" / "source"
+    precomputed.mkdir(parents=True)
+    (precomputed / RUN_NAME).symlink_to(FIXTURE.resolve(), target_is_directory=True)
+    output = tmp_path / "reused"
+    manifest = MaterializeHelmRunConfig.main(
+        [
+            "--run-entry", "mmlu:subject=philosophy,model=openai/gpt2",
+            "--suite", "native-fixture",
+            "--out-dpath", str(output),
+            "--precomputed-root", str(tmp_path / "precomputed"),
+            "--mode", "reuse_only",
+        ]
+    )
+    assert manifest["status"] == "reused"
+    run_dir = output / "benchmark_output" / "runs" / "native-fixture" / RUN_NAME
+    assert run_dir.is_symlink()  # MAGNET's default materialization
+
+    resolved = resolve_evaluation(
+        EvaluationRequest(
+            engine="helm",
+            task="mmlu:subject=philosophy",
+            models=(ModelBinding(role="primary", model="openai/gpt2"),),
+        )
+    )
+    bundle = import_evaluation(resolved, output, ExecutionContext(output_dir=tmp_path / "import"))
+    assert bundle.result.status == "succeeded"
+    assert [record.task for record in bundle.result.records] == [RUN_NAME]
+    assert bundle.result.records[0].coverage.processed == 10

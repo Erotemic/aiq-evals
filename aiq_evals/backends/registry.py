@@ -22,6 +22,11 @@ class BackendRegistration:
 
 
 _BUILTINS = {
+    'helm': BackendRegistration(
+        key='helm',
+        module='aiq_evals.backends.helm',
+        factory='HelmBackend',
+    ),
     'olmo_eval': BackendRegistration(
         key='olmo_eval',
         module='aiq_evals.backends.olmo_eval',

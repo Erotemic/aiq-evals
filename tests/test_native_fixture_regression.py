@@ -78,3 +78,14 @@ def test_captured_non_success_logs_never_publish_success(tmp_path, name, termina
     assert (tmp_path / 'run' / ATTEMPT_TERMINAL).read_text().strip() == terminal
     assert not (tmp_path / 'run' / RUN_COMPLETE).exists()
     assert RunBundle.load(tmp_path / 'run').result.status == terminal
+
+
+HELM_GOLDENS = json.loads((FIXTURES / 'helm-native' / 'expected-normalized.json').read_text())
+
+
+@pytest.mark.parametrize('name', sorted(HELM_GOLDENS))
+def test_helm_fixture_normalization(name):
+    from aiq_evals.backends.helm.normalize import normalize_helm_runs
+
+    result = normalize_helm_runs([FIXTURES / 'helm-native' / name], identity=IDENTITY)
+    assert summarize(result) == HELM_GOLDENS[name]
