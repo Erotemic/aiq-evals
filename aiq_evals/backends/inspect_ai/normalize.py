@@ -98,10 +98,47 @@ def _task_name(log: Any, fallback: str) -> str:
     return str(task if task not in (None, '') else fallback)
 
 
+def _expected_from_spec(log: Any) -> int | None:
+    # Mirrors Inspect's own accounting: len(sliced sample_ids) * epochs.
+    eval_spec = _get(log, 'eval')
+    sample_ids = _get(_get(eval_spec, 'dataset'), 'sample_ids')
+    if not isinstance(sample_ids, Sequence) or isinstance(sample_ids, (str, bytes)):
+        return None
+    epochs = _int_or_none(_get(_get(eval_spec, 'config'), 'epochs')) or 1
+    return len(sample_ids) * epochs
+
+
+def _coverage_without_results(log: Any) -> CoverageFacts:
+    """Coverage for error/cancelled logs, which Inspect writes without results.
+
+    Only logged native sample records are counted; if the log was read without
+    samples, coverage stays unknown rather than being inferred.
+    """
+    samples = _get(log, 'samples')
+    if not isinstance(samples, Sequence):
+        return CoverageFacts(status='unknown', expected=_expected_from_spec(log))
+    expected = _expected_from_spec(log)
+    processed = len(samples)
+    failed = sum(1 for sample in samples if _get(sample, 'error') is not None)
+    if expected is None:
+        status = 'unknown'
+    elif processed >= expected and not failed:
+        status = 'complete'
+    else:
+        status = 'partial'
+    return CoverageFacts(
+        status=status,
+        expected=expected,
+        processed=processed,
+        saved=processed,
+        failed=failed,
+    )
+
+
 def _coverage(log: Any) -> CoverageFacts:
     results = _get(log, 'results')
     if results is None:
-        return CoverageFacts(status='unknown')
+        return _coverage_without_results(log)
     expected = _int_or_none(_get(results, 'total_samples'))
     completed = _int_or_none(_get(results, 'completed_samples'))
     logged = _int_or_none(_get(results, 'logged_samples'))

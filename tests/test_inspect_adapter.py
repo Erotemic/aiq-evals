@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from aiq_evals.backends.inspect_ai import adapter as inspect_adapter
+from aiq_evals.backends.inspect_ai import normalize
 from aiq_evals.backends.inspect_ai.adapter import InspectAIBackend
 from aiq_evals.contracts import EvaluationRequest, ExecutionContext, ModelBinding
 from aiq_evals.errors import ArtifactError, RequestValidationError
@@ -265,6 +266,27 @@ def test_native_error_cancelled_and_started_status_mapping(monkeypatch, tmp_path
         )
         assert result.status == expected
         assert result.records[0].native_status == native_status
+
+
+def test_error_log_without_results_derives_coverage_from_native_samples():
+    # Inspect 0.3.272 writes run-level error/cancelled logs with results=None.
+    log = make_log(status='error')
+    log['results'] = None
+    log['eval']['dataset'] = {'samples': 3, 'sample_ids': [1, 2, 3]}
+    log['eval']['config'] = {'epochs': 1}
+    failed_sample = dict(log['samples'][0], id=2, error={'message': 'boom'}, scores={})
+    log['samples'] = [log['samples'][0], failed_sample]
+    coverage = normalize._coverage(log)
+    assert (coverage.status, coverage.expected, coverage.processed, coverage.failed) == (
+        'partial', 3, 2, 1
+    )
+
+    header_only = dict(log, samples=None)
+    coverage = normalize._coverage(header_only)
+    assert (coverage.status, coverage.expected, coverage.processed) == ('unknown', 3, None)
+
+    del log['eval']['dataset']
+    assert normalize._coverage(log).status == 'unknown'
 
 
 def test_execution_exception_recovers_native_error_log(monkeypatch, tmp_path):

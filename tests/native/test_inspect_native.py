@@ -1,7 +1,12 @@
 """Run only in an environment with the real pinned Inspect runtime installed."""
 
 import asyncio
+import contextlib
+import os
+import signal
+import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -174,3 +179,90 @@ def test_sample_error_is_partial(tmp_path: Path) -> None:
     assert len(bundle.result.records) == 1
     assert bundle.result.records[0].coverage.status == "partial"
     assert bundle.result.records[0].coverage.failed == 1
+
+
+def test_run_level_error_is_failed_with_partial_coverage(tmp_path: Path) -> None:
+    req = EvaluationRequest(
+        engine="inspect_ai",
+        task="python:tests.native.inspect_failure_fixture:run_error_task",
+        models=(ModelBinding(role="primary", model="local", provider="fixture", revision="local-v1"),),
+        engine_options={
+            "registration_modules": ["tests.native.inspect_fixture"],
+            # Serial samples make the pre-error completed sample deterministic.
+            "eval_options": {"max_samples": 1},
+        },
+    )
+    bundle = run_evaluation(
+        req,
+        ExecutionContext(output_dir=tmp_path / "error", worker_python=sys.executable),
+    )
+    assert bundle.result.status == "failed", bundle.result.diagnostics
+    assert (tmp_path / "error" / "ATTEMPT_TERMINAL").read_text().strip() == "failed"
+    assert not (tmp_path / "error" / "RUN_COMPLETE").exists()
+    (record,) = bundle.result.records
+    assert record.native_status == "error"
+    assert "intentional sample failure" in (record.error or "")
+    assert record.metrics == ()
+    assert record.coverage.status == "partial"
+    assert (record.coverage.expected, record.coverage.processed, record.coverage.failed) == (3, 3, 2)
+
+    log = next((tmp_path / "error" / "native" / "inspect_ai" / "logs").glob("*.eval"))
+    imported = import_evaluation(req, log, ExecutionContext(output_dir=tmp_path / "error-import"))
+    assert imported.result.status == "failed"
+    assert imported.result.records[0].coverage == record.coverage
+    assert not (tmp_path / "error-import" / "RUN_COMPLETE").exists()
+
+
+@pytest.mark.parametrize(
+    "sig,native_status,status,processed,failed",
+    [
+        # Inspect handles SIGINT itself and writes a terminal ``cancelled`` log.
+        (signal.SIGINT, "cancelled", "cancelled", 1, 1),
+        # SIGKILL (as when an owner kills the process) leaves a nonterminal log.
+        (signal.SIGKILL, "started", "incomplete", 0, 0),
+    ],
+)
+def test_native_signal_log_imports_without_success(
+    tmp_path: Path, sig: signal.Signals, native_status: str, status: str, processed: int, failed: int
+) -> None:
+    log_dir = tmp_path / "logs"
+    pid_file = tmp_path / "child.pid"
+    driver = (
+        "import tests.native.inspect_fixture\n"
+        "from inspect_ai import eval\n"
+        "from tests.native.inspect_failure_fixture import slow_task\n"
+        f"eval(slow_task(), model='fixture/slow', log_dir={str(log_dir)!r}, display='none')\n"
+    )
+    env = dict(os.environ, AIQ_P1_CHILD_PID_FILE=str(pid_file), PYTHONPATH=str(Path.cwd()))
+    proc = subprocess.Popen([sys.executable, "-c", driver], env=env)
+    try:
+        for _ in range(100):
+            if pid_file.exists() and pid_file.read_text():
+                break
+            time.sleep(0.1)
+        assert pid_file.exists(), "native provider never started its child"
+        proc.send_signal(sig)
+        proc.wait(timeout=60)
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+        if pid_file.exists() and pid_file.read_text():
+            # The sleep child belongs to the fixture provider; this test makes no
+            # claim that Inspect cleans it up.
+            with contextlib.suppress(ProcessLookupError):
+                os.kill(int(pid_file.read_text()), signal.SIGKILL)
+
+    req = EvaluationRequest(
+        engine="inspect_ai",
+        task="python:tests.native.inspect_failure_fixture:slow_task",
+        models=(ModelBinding(role="primary", model="slow", provider="fixture", revision="local-v1"),),
+    )
+    imported = import_evaluation(req, log_dir, ExecutionContext(output_dir=tmp_path / "import"))
+    assert imported.result.status == status
+    assert (tmp_path / "import" / "ATTEMPT_TERMINAL").read_text().strip() == status
+    assert not (tmp_path / "import" / "RUN_COMPLETE").exists()
+    (record,) = imported.result.records
+    assert record.native_status == native_status
+    assert record.metrics == ()
+    assert record.coverage.status == "partial"
+    assert (record.coverage.expected, record.coverage.processed, record.coverage.failed) == (1, processed, failed)

@@ -25,3 +25,24 @@ def partial_task():
         scorer=match(),
         fail_on_error=False,
     )
+
+
+@task
+def run_error_task():
+    # fail_on_error=True: the first sample error aborts the whole native run,
+    # which Inspect records as a top-level ``error`` log without results.
+    return Task(
+        dataset=[
+            Sample(id=1, input="okay", target="4"),
+            Sample(id=2, input="fail", target="4"),
+            Sample(id=3, input="okay", target="4"),
+        ],
+        solver=[fail_one(), generate()],
+        scorer=match(),
+        fail_on_error=True,
+    )
+
+
+@task
+def slow_task():
+    return Task(dataset=[Sample(id=1, input="slow", target="4")], solver=generate(), scorer=match())
