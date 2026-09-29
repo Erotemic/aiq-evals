@@ -28,10 +28,11 @@ its results and decide how a selected metric becomes claim evidence.
 
 ## Current status
 
-Phases 2 and 3 now have an implementation, while the native phase-1 acceptance
+Phases 2, 3, and 4 now have implementations, while the native phase-1 acceptance
 gates remain deliberately open. The OLMo adapter targets the API seam inspected
-at commit `73ade80e24f796af55caeb8fd7b75a7f3fd607fd`; it is not declared a
-supported upstream pin until the native smoke/tool/cancellation fixtures pass.
+at commit `73ade80e24f796af55caeb8fd7b75a7f3fd607fd`. The Inspect adapter targets
+candidate release `inspect-ai==0.3.272` through its public eval/log APIs. Neither
+adapter is declared supported until its native generation/tool/cancellation gates pass.
 
 Implemented now:
 
@@ -47,11 +48,16 @@ Implemented now:
 - an experimental OLMo Eval adapter using `HarnessConfig`, `AsyncEvalRunner.validate()`,
   and `run_async()`;
 - OLMo nested metric/scorer preservation, coverage accounting, predictions/trajectories,
-  hard-failure handling, and native artifact import validation.
+  hard-failure handling, and native artifact import validation;
+- an experimental Inspect adapter using the public `eval()` and log-reader APIs;
+- Inspect multi-log normalization preserving scorer/score/metric/group/reducer identity;
+- Inspect per-epoch samples, epoch reductions, model-role usage, and tool/event trajectories;
+- automatic owned-worker execution for synchronous native runtimes such as Inspect;
+- Inspect `.eval`/JSON import and native model/task-argument validation.
 
-The implementation is intentionally provisional. Native OLMo runtime acceptance,
-OLMo packaging selection, EEE gap analysis, Inspect, HELM, and MAGNET integration
-remain open and are tracked under `docs/planning/`.
+The implementation is intentionally provisional. Native OLMo/Inspect acceptance,
+OLMo packaging selection, EEE gap analysis, HELM, and MAGNET integration remain
+open and are tracked under `docs/planning/`.
 
 ## Bootstrap
 
@@ -89,10 +95,17 @@ in the execution environment rather than the persisted request. For example:
 }
 ```
 
-Static validation does not import OLMo Eval:
+Static validation does not import OLMo Eval or Inspect:
 
 ```bash
 aiq-evals validate request.json
+aiq-evals validate examples/inspect_ai_request.json
+```
+
+To install the candidate Inspect runtime in the same environment:
+
+```bash
+python -m pip install -e '.[inspect]'
 ```
 
 Resolution and execution require the native engine environment. A separate
@@ -122,5 +135,6 @@ fixtures are the next phase-1 acceptance work.
 - `docs/planning/aiq-evals-plan.md`: work owned by this repository.
 - `docs/planning/aiq-magnet-integration-plan.md`: work that belongs in MAGNET.
 - `docs/planning/phase1-evidence.md`: canonical phase-1 native acceptance ledger.
-- `docs/planning/phase2-phase3-evidence.md`: implementation evidence and remaining native gates.
+- `docs/planning/phase2-phase3-evidence.md`: phase-2/3 implementation evidence and remaining native gates.
+- `docs/planning/phase4-evidence.md`: Inspect implementation evidence and remaining native gates.
 - `docs/planning/architecture.md`: package boundary and identity model.

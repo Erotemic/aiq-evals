@@ -305,6 +305,8 @@ class MetricRecord:
     metric: str
     value: float
     scorer: str | None = None
+    score: str | None = None
+    group: str | None = None
     reducer: str | None = None
     denominator: int | None = None
 
@@ -317,7 +319,7 @@ class MetricRecord:
             _nonnegative_int(self.denominator, label='metric denominator')
 
     def to_dict(self) -> dict[str, JSONValue]:
-        return {
+        data: dict[str, JSONValue] = {
             'task': self.task,
             'model_role': self.model_role,
             'metric': self.metric,
@@ -326,12 +328,23 @@ class MetricRecord:
             'value': self.value,
             'denominator': self.denominator,
         }
+        # ``score`` and ``group`` were added during the provisional pre-freeze
+        # contract. Omit them when absent so phase-2 frozen fixtures retain their
+        # byte-derived normalized artifact identity.
+        if self.score is not None:
+            data['score'] = self.score
+        if self.group is not None:
+            data['group'] = self.group
+        return data
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> 'MetricRecord':
         _reject_unknown(
             data,
-            {'task', 'model_role', 'metric', 'scorer', 'reducer', 'value', 'denominator'},
+            {
+                'task', 'model_role', 'metric', 'scorer', 'score', 'group',
+                'reducer', 'value', 'denominator',
+            },
             'metric record',
         )
         return cls(
@@ -339,6 +352,8 @@ class MetricRecord:
             model_role=str(data['model_role']),
             metric=str(data['metric']),
             scorer=None if data.get('scorer') is None else str(data['scorer']),
+            score=None if data.get('score') is None else str(data['score']),
+            group=None if data.get('group') is None else str(data['group']),
             reducer=None if data.get('reducer') is None else str(data['reducer']),
             value=float(data['value']),
             denominator=None if data.get('denominator') is None else int(data['denominator']),

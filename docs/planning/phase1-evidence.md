@@ -81,7 +81,11 @@ Required artifacts:
 
 ### P1-04 - Inspect generation + tool execution
 
-Status: OPEN.
+Status: IMPLEMENTATION PRESENT; NATIVE EVIDENCE OPEN.
+
+The phase-4 adapter targets candidate release `inspect-ai==0.3.272` through the
+public eval/log APIs. Fake-native and owned-worker contract tests are recorded in
+`phase4-evidence.md`; they do not satisfy this native gate.
 
 Required artifacts:
 

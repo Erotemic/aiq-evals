@@ -5,3 +5,4 @@
 - `aiq-magnet-integration-plan.md` - integration work intentionally owned by MAGNET.
 - `phase1-evidence.md` - canonical phase-1 validation ledger.
 - `phase2-phase3-evidence.md` - phase-2/3 implementation evidence and open acceptance gates.
+- `phase4-evidence.md` - Inspect adapter implementation evidence and native gates.

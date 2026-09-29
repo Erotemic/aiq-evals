@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "engine": "inspect_ai",
+  "task": "my_eval.py@my_task",
+  "task_revision": "<immutable-task-revision>",
+  "data_revision": "<immutable-data-revision>",
+  "models": [
+    {
+      "role": "primary",
+      "model": "my-model",
+      "provider": "openai",
+      "revision": "<immutable-model-revision>",
+      "cache_token": null,
+      "provider_options": {}
+    },
+    {
+      "role": "grader",
+      "model": "grader-model",
+      "provider": "openai",
+      "revision": "<immutable-grader-revision>",
+      "cache_token": null,
+      "provider_options": {}
+    }
+  ],
+  "task_options": {},
+  "generation": {
+    "temperature": 0.0
+  },
+  "engine_options": {
+    "log_format": "eval",
+    "eval_options": {
+      "epochs": 1,
+      "turn_limit": 20
+    }
+  }
+}

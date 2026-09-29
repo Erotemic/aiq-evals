@@ -143,8 +143,11 @@ def publish_run(
         native_out = staging / 'native'
         if native_dir is not None:
             source = Path(native_dir).expanduser().resolve()
-            if source.exists():
+            if source.is_dir():
                 shutil.copytree(source, native_out, dirs_exist_ok=True)
+            elif source.is_file():
+                native_out.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, native_out / source.name)
         native_refs = inventory_tree(native_out)
         # Artifacts in result are adapter-declared semantic references; manifest
         # inventory is authoritative for bundle integrity.

@@ -24,6 +24,9 @@ def select_metrics(
     model_role: str | None = None,
     metric: str | None = None,
     scorer: str | None = None,
+    score: str | None = None,
+    group: str | None = None,
+    reducer: str | None = None,
 ) -> list[MetricRecord]:
     rows = []
     for row in iter_metrics(run):
@@ -34,6 +37,12 @@ def select_metrics(
         if metric is not None and row.metric != metric:
             continue
         if scorer is not None and row.scorer != scorer:
+            continue
+        if score is not None and row.score != score:
+            continue
+        if group is not None and row.group != group:
+            continue
+        if reducer is not None and row.reducer != reducer:
             continue
         rows.append(row)
     return rows

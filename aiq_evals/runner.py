@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import signal
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -124,15 +125,23 @@ async def _execute_resolved(
     work_dir: Path,
 ) -> EvaluationResult:
     backend = get_backend(resolved.request.engine)
-    worker_context = ExecutionContext(
+    capabilities = dict(backend.capabilities())
+    requires_worker = bool(capabilities.get('requires_worker_process'))
+    if context.worker_python is not None or requires_worker:
+        worker_context = ExecutionContext(
+            output_dir=context.output_dir,
+            env=context.env,
+            worker_python=context.worker_python or sys.executable,
+            timeout_seconds=context.timeout_seconds,
+        )
+        return await _execute_in_worker(resolved, worker_context, work_dir)
+    direct_context = ExecutionContext(
         output_dir=work_dir,
-        env={} if context.worker_python is not None else context.env,
+        env=context.env,
         worker_python=None,
         timeout_seconds=context.timeout_seconds,
     )
-    if context.worker_python is not None:
-        return await _execute_in_worker(resolved, context, work_dir)
-    return await backend.execute(resolved, worker_context)
+    return await backend.execute(resolved, direct_context)
 
 
 def _redacted_exception_text(ex: BaseException, env: dict[str, str] | Any) -> str:

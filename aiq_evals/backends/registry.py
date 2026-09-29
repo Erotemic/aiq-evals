@@ -27,6 +27,11 @@ _BUILTINS = {
         module='aiq_evals.backends.olmo_eval',
         factory='OlmoEvalBackend',
     ),
+    'inspect_ai': BackendRegistration(
+        key='inspect_ai',
+        module='aiq_evals.backends.inspect_ai',
+        factory='InspectAIBackend',
+    ),
 }
 
 _CACHE: dict[str, EvaluationBackend] = {}

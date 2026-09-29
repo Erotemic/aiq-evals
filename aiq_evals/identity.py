@@ -12,8 +12,8 @@ IDENTITY_ALGORITHM = 'aiq-evals-measurement-v1+sha256'
 
 def _unknown_identity_reasons(request: EvaluationRequest, resolved_facts: Mapping[str, Any]) -> tuple[str, ...]:
     reasons: list[str] = []
-    if not request.task_revision:
-        reasons.append('task revision is unknown')
+    if not request.task_revision and not resolved_facts.get('task_source_sha256'):
+        reasons.append('task revision/source content is unknown')
     if not request.data_revision:
         reasons.append('data revision is unknown')
     for model in request.models:

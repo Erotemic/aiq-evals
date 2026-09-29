@@ -235,17 +235,31 @@ Implementation status: PRESENT, EXPERIMENTAL; native acceptance remains open.
 
 ## Phase 4 - Inspect adapter
 
-- resolve native task references/factories and arguments;
-- bind primary/auxiliary model roles;
-- use supported public evaluation APIs at the selected pin;
-- collect every returned log;
-- preserve scorer-qualified metrics, structured sample scores, epochs/reducers,
-  usage, and trace references;
-- preserve native `.eval`/JSON logs for Inspect tooling;
-- import native logs via Inspect readers while the runtime is available;
-- conservatively map error/cancelled/nonterminal states;
-- support native solver/agent/tool execution without nesting a competing
-  campaign retry scheduler.
+Implementation status: PRESENT, EXPERIMENTAL; native acceptance remains open.
+Candidate API target: `inspect-ai==0.3.272`.
+
+- [x] Resolve native task references and explicit serialized importable factories.
+- [x] Hash concrete local/importable task source when available for measurement identity.
+- [x] Bind primary and auxiliary model roles; keep unsupported per-role provider options explicit.
+- [x] Map task arguments, generation settings, and typed native eval options with protected ownership boundaries.
+- [x] Use the public `inspect_ai.eval()` execution API rather than `eval_set()`.
+- [x] Automatically execute the synchronous Inspect API in an owned aiq-evals worker process.
+- [x] Collect and normalize every returned log.
+- [x] Preserve scorer, score-name, metric, group, reducer, and denominator identity.
+- [x] Preserve structured sample scores, sample IDs, epochs, usage, messages, events, timelines, and tool trajectories.
+- [x] Preserve explicit epoch-reduction records rather than counting epochs as independent aggregate results.
+- [x] Preserve native `.eval`/JSON logs for Inspect tooling.
+- [x] Import native logs through public `list_eval_logs` / `read_eval_log` APIs.
+- [x] Validate recorded model and passed task arguments on native import when present.
+- [x] Conservatively map error/cancelled/nonterminal statuses.
+- [x] Recover diagnostic logs when native execution raises after writing artifacts.
+- [x] Support task-native solver/agent/tool execution and explicit `solver` eval options without nesting an Inspect eval-set scheduler.
+- [ ] Run deterministic generation against the real candidate pin.
+- [ ] Run a real multi-turn solver/agent tool fixture and verify normalized native events.
+- [ ] Run real model-role, multi-log, multi-scorer, and epoch/reducer fixtures.
+- [ ] Verify `.eval` and JSON imports against real Inspect log files.
+- [ ] Verify live cancellation and native sandbox/process cleanup.
+- [ ] Promote a tested Inspect version from candidate to supported only after the native gates pass.
 
 ## Phase 5 - HELM adapter
 
