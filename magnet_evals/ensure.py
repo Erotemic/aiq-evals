@@ -8,7 +8,11 @@
 * With ``import_source`` the caller names specific native artifacts, so the
   result is keyed by the measurement *and* the artifacts' content: the same
   content is reused, different content (even at the same path) is imported.
-  An import never returns results imported from other artifacts.
+  An import never returns results imported from other artifacts, and never
+  becomes the canonical result that a plain (execute-or-reuse) call returns:
+  native artifacts cannot prove the request's revisions (ADR-0012). The source
+  is snapshotted once, so the normalized result and the preserved native files
+  always describe the same bytes.
 
 Acquisition of a reusable identity is single-flight: concurrent callers for
 the same key wait under the store's lock and then reuse what the first caller
@@ -79,6 +83,7 @@ async def ensure_evaluation_async(
     model_endpoints: Mapping[str, str] | None = None,
     verify_checksums: bool = True,
     lock_held: bool = False,
+    expected_import_identity: str | None = None,
 ) -> EnsureOutcome:
     """See the module docstring.
 
@@ -87,6 +92,11 @@ async def ensure_evaluation_async(
     gate that decides under the lock whether an endpoint lease is needed and
     then runs ``ensure`` inside that lease. ``ensure`` then skips taking the
     lock (which that process could never get) but keeps every other check.
+
+    ``expected_import_identity`` pins an import to the native content the
+    caller identified (e.g. at scheduling time): an import of anything else
+    raises :class:`~magnet_evals.errors.ImportIdentityMismatch` before it is
+    normalized or published.
     """
     store = store if isinstance(store, ResultStore) else ResultStore(store)
     # Operational context; output_dir is replaced by the attempt location.
@@ -108,6 +118,7 @@ async def ensure_evaluation_async(
             raise ValueError('lock_held applies to execution; imports acquire their own content lock')
         return await _ensure_import(
             resolved, store, base, import_source, allow_external_symlinks, verify_checksums,
+            expected_import_identity,
         )
 
     decision = store.check_reuse(resolved, verify_checksums=verify_checksums)
@@ -136,15 +147,19 @@ async def _ensure_import(
     import_source: str | Path,
     allow_external_symlinks: bool,
     verify_checksums: bool,
+    expected_import_identity: str | None,
 ) -> EnsureOutcome:
-    source_identity = await asyncio.to_thread(
+    # The content this import is for: the caller's expectation, or the
+    # source's current content. The import itself snapshots the source once
+    # and refuses to publish anything else (ImportIdentityMismatch).
+    source_identity = expected_import_identity or await asyncio.to_thread(
         native_source_identity, import_source, allow_external_symlinks=allow_external_symlinks,
     )
 
     async def import_attempt() -> RunBundle:
         return await import_evaluation_async(
             resolved, import_source, _attempt_context(base, store, resolved),
-            allow_external_symlinks=allow_external_symlinks,
+            allow_external_symlinks=allow_external_symlinks, expected_native_identity=source_identity,
         )
 
     if not resolved.identity.reusable:
@@ -164,15 +179,11 @@ async def _ensure_import(
         attempt = await import_attempt()
         run = attempt
         if attempt.result.status == 'succeeded':
+            # Only the import slot: an import never becomes the canonical
+            # (executed) result of the measurement, because native artifacts
+            # cannot prove the request's task/data/model revisions (ADR-0012).
             run = await _finish_in_thread(store.promote_import, attempt)
-            # The first valid result also seeds the canonical run; canonical
-            # publication always happens under the measurement's own lock.
-            async with store.acquisition_lock(digest):
-                await _finish_in_thread(store.seed_canonical, attempt)
-    # The files may have changed between hashing and copying; report what was
-    # actually imported.
-    imported_identity = str(attempt.manifest.get('native_artifact_identity') or source_identity)
-    return EnsureOutcome('imported', run, resolved, attempt, decision.reason, imported_identity, lock.waited)
+    return EnsureOutcome('imported', run, resolved, attempt, decision.reason, source_identity, lock.waited)
 
 
 @contextlib.asynccontextmanager

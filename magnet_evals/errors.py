@@ -35,3 +35,7 @@ class ArtifactError(AiqEvalsError):
 
 class PublicationError(ArtifactError):
     """Atomic run publication could not be completed safely."""
+
+
+class ImportIdentityMismatch(ArtifactError):
+    """Native artifacts to import differ from the content the caller identified."""

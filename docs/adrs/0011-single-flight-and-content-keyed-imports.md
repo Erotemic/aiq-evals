@@ -1,6 +1,7 @@
 # ADR-0011: Single-flight acquisition and content-keyed imports
 
-Status: Accepted (2026-09-29). Refines ADR-0002 and ADR-0006.
+Status: Accepted (2026-09-29). Refines ADR-0002 and ADR-0006. The rule that the
+first valid import seeds the canonical run is superseded by ADR-0012.
 
 ## Context
 
@@ -34,9 +35,8 @@ only then executes or imports. Waiters poll, so waiting stays cancellable.
   cancelled while publishing. Otherwise a waiter would find nothing and
   execute again.
 - Canonical runs are only published under the measurement's lock. An import
-  publishes its own slot under its (measurement, content) lock, then seeds the
-  canonical run under the measurement lock. The lock order is always import
-  then measurement, so the two cannot deadlock.
+  publishes only its own slot, under its (measurement, content) lock
+  (ADR-0012: imports never seed the canonical run).
 - A caller that waited for a *failed* acquisition makes its own attempt, as
   if it had arrived afterwards. There is no shared failure and no retry loop:
   ADR-0006 still forbids a nested retry policy.

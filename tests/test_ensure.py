@@ -111,7 +111,8 @@ def test_import_then_reuse_and_changed_artifact_identity(tmp_path):
     (source / 'value.txt').write_text('0.5\n')
     imported = ensure_evaluation(make_request('imp'), store, import_source=source)
     assert imported.action == 'imported' and imported.run.result.records[0].metrics[0].value == 0.5
-    assert ensure_evaluation(make_request('imp'), store).reused
+    # An import never stands in for executing the measurement (ADR-0012).
+    assert ensure_evaluation(make_request('imp'), store).action == 'executed'
     other = tmp_path / 'native-b'
     other.mkdir()
     (other / 'value.txt').write_text('0.7\n')

@@ -14,10 +14,11 @@ Only a validated successful attempt is ever promoted to ``runs/`` or
 ``attempts/`` and can neither occupy nor hide a published slot. Each attempt
 is a separate bundle, so retries never merge or inflate sample records.
 
-The canonical run answers "the result of this measurement": the first valid
-result, executed or imported. An import is also published under its native
-content identity (ADR-0011), so importing different native artifacts for the
-same measurement never silently returns the earlier ones.
+The canonical run answers "the result of executing this measurement": only
+executed results are promoted there. An import is published only under its
+native content identity (ADR-0011, ADR-0012): importing different native
+artifacts never silently returns earlier ones, and no import stands in for an
+execution.
 
 ``acquisition_lock`` makes acquiring one reusable measurement single-flight
 across threads and processes sharing the store (ADR-0011): concurrent callers
@@ -321,9 +322,8 @@ class ResultStore:
     def promote_import(self, attempt: RunBundle) -> RunBundle:
         """Publish a successful import under its native content identity.
 
-        Returns the import of *this* content, never an earlier one. Seeding the
-        measurement's canonical run from it is :meth:`seed_canonical`, which
-        ``ensure`` calls under the measurement's own acquisition lock.
+        Returns the import of *this* content, never an earlier one. An import
+        is never also published as the measurement's canonical run (ADR-0012).
         """
         resolved = attempt.resolved
         if not resolved.identity.reusable or attempt.result.status != 'succeeded':
@@ -335,19 +335,6 @@ class ResultStore:
             lambda: self.check_import_reuse(resolved, native_identity).bundle,
             **self._promotion_kwargs(attempt, path),
         )
-
-    def seed_canonical(self, attempt: RunBundle) -> RunBundle | None:
-        """Make a successful attempt the canonical run if the measurement has none.
-
-        The first valid result of a measurement, executed or imported, becomes
-        canonical, so an import can satisfy later execute-or-reuse requests. An
-        existing valid canonical run is kept. Returns the canonical run, or
-        ``None`` if publication lost a race it could not resolve.
-        """
-        try:
-            return self.promote(attempt)
-        except PublicationError:
-            return self.lookup(attempt.resolved)
 
 
 def _relative_or_none(path: Path, root: Path) -> str | None:

@@ -176,9 +176,9 @@ def test_different_native_content_is_imported_not_reused(tmp_path):
     again_b = ensure_evaluation(make_request('imp'), store, import_source=tmp_path / 'b')
     assert (again_a.action, _value(again_a)) == ('reused', 0.5)
     assert (again_b.action, _value(again_b)) == ('reused', 0.7)
-    # The first valid result is the measurement's canonical run.
+    # Imports never become the canonical (executed) result (ADR-0012).
     plain = ensure_evaluation(make_request('imp'), store)
-    assert (plain.action, _value(plain)) == ('reused', 0.5)
+    assert (plain.action, _value(plain)) == ('executed', 1.0)
 
 
 def test_editing_native_content_at_the_same_path_reimports(tmp_path):
@@ -315,7 +315,7 @@ def test_concurrent_imports_of_different_content_all_succeed(tmp_path):
         outcomes = asyncio.run(many())
         assert [o.action for o in outcomes] == ['imported'] * 4
         assert [round(_value(o), 1) for o in outcomes] == [0.1, 0.2, 0.3, 0.4]
-        assert store.lookup(outcomes[0].resolved) is not None
+        assert store.lookup(outcomes[0].resolved) is None  # imports are never canonical
 
 
 def test_publication_race_on_one_path_resolves_to_the_winner(tmp_path):
@@ -336,7 +336,7 @@ def test_publication_race_on_one_path_resolves_to_the_winner(tmp_path):
         def seed(attempt):
             barrier.wait()
             try:
-                store.seed_canonical(attempt)
+                store.promote(attempt)
             except Exception as ex:  # pragma: no cover - the regression
                 errors.append(ex)
 
@@ -416,3 +416,36 @@ def test_lock_held_lets_the_lock_holders_delegate_execute(tmp_path):
     assert ensure_evaluation(resolved, store).reused
     with pytest.raises(ValueError, match='lock_held applies to execution'):
         ensure_evaluation(resolved, store, lock_held=True, import_source=_native(tmp_path / 'n', 0.5))
+
+
+def test_an_import_normalizes_and_preserves_the_same_bytes(tmp_path, monkeypatch):
+    # The reviewer's race: the source changes while it is being imported. The
+    # import reads one snapshot, so the normalized value and the bundled native
+    # file agree (and identify the content that was actually imported).
+    store = ResultStore(tmp_path / 'store')
+    source = _native(tmp_path / 'n', 0.25)
+    real_import = fake_backend.FakeBackend.import_results
+
+    def racing_import(self, resolved, snapshot, context):
+        result = real_import(self, resolved, snapshot, context)
+        (source / 'value.txt').write_text('0.75\n')  # changes after reading, before publishing
+        return result
+
+    monkeypatch.setattr(fake_backend.FakeBackend, 'import_results', racing_import)
+    outcome = ensure_evaluation(make_request('imp'), store, import_source=source)
+    assert _value(outcome) == 0.25
+    assert (outcome.run.path / 'native' / 'value.txt').read_text() == '0.25\n'
+    assert outcome.run.manifest['native_artifact_identity'] == outcome.import_identity
+
+
+def test_an_import_of_other_content_than_expected_publishes_nothing(tmp_path):
+    from magnet_evals.errors import ImportIdentityMismatch
+
+    store = ResultStore(tmp_path / 'store')
+    source = _native(tmp_path / 'n', 0.5)
+    with pytest.raises(ImportIdentityMismatch, match='changed since'):
+        ensure_evaluation(make_request('imp'), store, import_source=source, expected_import_identity='0' * 64)
+    assert not (store.root / 'imports').exists()
+    ok = ensure_evaluation(make_request('imp'), store, import_source=source,
+                           expected_import_identity=native_source_identity(source))
+    assert ok.action == 'imported'

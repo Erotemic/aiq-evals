@@ -14,7 +14,12 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from magnet_evals import errors as errors_module
-from magnet_evals.artifacts import RunBundle, publish_run
+from magnet_evals.artifacts import (
+    RunBundle,
+    copy_native_tree,
+    native_source_identity,
+    publish_run,
+)
 from magnet_evals.backends.registry import get_backend
 from magnet_evals.contracts import (
     EvaluationRequest,
@@ -501,14 +506,57 @@ def run_evaluation(
     )
 
 
+def snapshot_native_source(
+    source: str | Path, staging: Path, *, allow_external_symlinks: bool = False,
+) -> tuple[Path, dict[str, list[str]]]:
+    """Copy native artifacts once into ``staging`` and return the copy.
+
+    An import reads its source exactly once: identity, normalization, and the
+    published native files all come from this snapshot, so they describe the
+    same bytes even if the source changes meanwhile. A single file is copied
+    as ``staging/native/<name>``; a directory as ``staging/native``, with links
+    that leave it refused unless ``allow_external_symlinks`` (followed links
+    are listed in the returned manifest notes).
+    """
+    source_path = Path(source).expanduser().absolute()
+    native = staging / 'native'
+    if source_path.is_file():
+        native.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path.resolve(), native / source_path.name)
+        return native / source_path.name, {}
+    if not source_path.is_dir():
+        raise errors_module.ArtifactError(f'native artifact source does not exist: {source_path}')
+    notes = copy_native_tree(
+        source_path, native, external_symlinks='follow' if allow_external_symlinks else 'raise',
+    )
+    return native, notes
+
+
+def _replace_text(value: Any, old: str, new: str) -> Any:
+    if isinstance(value, str):
+        return value.replace(old, new)
+    if isinstance(value, Mapping):
+        return {str(key).replace(old, new): _replace_text(child, old, new) for key, child in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_replace_text(child, old, new) for child in value]
+    return value
+
+
 async def import_evaluation_async(
     request_or_resolved: EvaluationRequest | ResolvedEvaluation,
     source: str | Path,
     context: ExecutionContext,
     *,
     allow_external_symlinks: bool = False,
+    expected_native_identity: str | None = None,
 ) -> RunBundle:
     """Import native artifacts and atomically publish an engine-free run bundle.
+
+    The source is snapshotted once (:func:`snapshot_native_source`); the
+    adapter normalizes the snapshot and the bundle preserves the same snapshot.
+    With ``expected_native_identity`` the snapshot must have exactly that
+    content identity, or :class:`~magnet_evals.errors.ImportIdentityMismatch`
+    is raised before anything is normalized or published.
 
     Resolution and native reading happen in ``context.worker_python`` when given,
     so an engine-free caller can import, e.g., Inspect ``.eval`` logs. Symlinks in
@@ -521,20 +569,37 @@ async def import_evaluation_async(
         resolved = request_or_resolved
         check_required_secrets(resolved.request, context)
     secrets = effective_secrets(resolved.request, context)
-    source_path = Path(source).expanduser().resolve()
-    if context.worker_python is None:
-        backend = get_backend(resolved.request.engine)
-        result = backend.import_results(resolved, str(source_path), context)
-    else:
-        result = await _import_in_worker(resolved, source_path, context, secrets)
-    return publish_run(
-        context.output_dir,
-        resolved=resolved,
-        result=_redact_result(result, secrets),
-        context=context,
-        native_dir=source,
-        external_symlinks='follow' if allow_external_symlinks else 'raise',
-    )
+    source_path = Path(source).expanduser().absolute()
+    context.output_dir.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix='.aiq-evals-import-', dir=context.output_dir.parent))
+    try:
+        snapshot, link_notes = await asyncio.to_thread(
+            snapshot_native_source, source_path, staging, allow_external_symlinks=allow_external_symlinks,
+        )
+        if expected_native_identity is not None:
+            actual = await asyncio.to_thread(native_source_identity, snapshot)
+            if actual != expected_native_identity:
+                raise errors_module.ImportIdentityMismatch(
+                    f'native artifacts at {source_path} have content identity {actual}, '
+                    f'expected {expected_native_identity} (they changed since they were identified)'
+                )
+        if context.worker_python is None:
+            backend = get_backend(resolved.request.engine)
+            result = backend.import_results(resolved, str(snapshot), context)
+        else:
+            result = await _import_in_worker(resolved, snapshot, context, secrets)
+        # Diagnostics name the caller's source, not the private snapshot.
+        result = EvaluationResult.from_dict(_replace_text(result.to_dict(), str(snapshot), str(source_path)))
+        return publish_run(
+            context.output_dir,
+            resolved=resolved,
+            result=_redact_result(result, secrets),
+            context=context,
+            native_dir=snapshot,
+            manifest_notes=link_notes,
+        )
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)
 
 
 async def _import_in_worker(
@@ -577,6 +642,7 @@ def import_evaluation(
     context: ExecutionContext,
     *,
     allow_external_symlinks: bool = False,
+    expected_native_identity: str | None = None,
 ) -> RunBundle:
     """Synchronous facade for :func:`import_evaluation_async`."""
     try:
@@ -584,7 +650,8 @@ def import_evaluation(
     except RuntimeError:
         return asyncio.run(
             import_evaluation_async(
-                request_or_resolved, source, context, allow_external_symlinks=allow_external_symlinks
+                request_or_resolved, source, context, allow_external_symlinks=allow_external_symlinks,
+                expected_native_identity=expected_native_identity,
             )
         )
     raise ActiveEventLoopError(
