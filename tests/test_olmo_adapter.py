@@ -345,3 +345,23 @@ def test_endpoint_url_is_not_a_measurement_input(monkeypatch):
     a, b = with_url('http://a/v1'), with_url('http://b/v1')
     assert a.identity == b.identity
     assert a.native_config['harness_config']['provider']['base_url'] == 'http://a/v1'
+
+
+def test_harness_endpoint_url_is_not_a_measurement_input(monkeypatch):
+    # OLMo accepts the endpoint in the model binding or in harness_config; both
+    # locations are operational.
+    patch_runtime(monkeypatch)
+    backend = OlmoEvalBackend()
+
+    def with_harness_url(url):
+        return backend.resolve(make_request(engine_options={
+            'upstream_revision': 'e' * 40, 'harness_config': {'provider': {'base_url': url}},
+        }))
+
+    a, b = with_harness_url('http://a/v1'), with_harness_url('http://b/v1')
+    assert a.identity == b.identity
+    via_binding = backend.resolve(make_request(
+        models=(ModelBinding(role='primary', model='model-a', provider='mock', revision='model-rev',
+                             provider_options={'base_url': 'http://c/v1'}),),
+    ))
+    assert via_binding.identity == a.identity  # both locations measure the same thing

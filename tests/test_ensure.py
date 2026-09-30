@@ -154,13 +154,31 @@ def test_declared_secret_inherited_from_environment_is_redacted(tmp_path, monkey
 
 
 def test_secret_preflight_runs_before_resolution(tmp_path, monkeypatch):
+    from magnet_evals.contracts import ExecutionContext
     from magnet_evals.errors import RequestValidationError
+    from magnet_evals.runner import run_evaluation
 
     monkeypatch.delenv('AIQ_DECLARED_TOKEN', raising=False)
     request = make_request('ok', engine_options={'required_secrets': ['AIQ_DECLARED_TOKEN']})
+    # Direct execution checks before any task code runs.
+    with pytest.raises(RequestValidationError, match='AIQ_DECLARED_TOKEN'):
+        run_evaluation(request, ExecutionContext(output_dir=tmp_path / 'run'))
+    assert fake_backend.RESOLUTIONS['ok'] == 0
+    # ensure() resolves without credentials (they are operational), and checks
+    # them only when it must execute: never for a reuse.
     with pytest.raises(RequestValidationError, match='AIQ_DECLARED_TOKEN'):
         ensure_evaluation(request, ResultStore(tmp_path / 'store'))
-    assert fake_backend.RESOLUTIONS['ok'] == 0
+    assert fake_backend.EXECUTIONS['ok'] == 0
+
+
+def test_reuse_does_not_need_the_credentials_execution_needed(tmp_path, monkeypatch):
+    store = ResultStore(tmp_path / 'store')
+    request = make_request('ok', engine_options={'required_secrets': ['AIQ_DECLARED_TOKEN']})
+    monkeypatch.setenv('AIQ_DECLARED_TOKEN', 'declared-token-value')
+    assert ensure_evaluation(request, store).action == 'executed'
+    monkeypatch.delenv('AIQ_DECLARED_TOKEN')
+    assert ensure_evaluation(request, store).reused
+    assert fake_backend.EXECUTIONS['ok'] == 1
 
 
 def test_in_process_timeout_is_enforced(tmp_path):
@@ -175,7 +193,7 @@ def test_run_and_import_resolve_through_the_worker_when_given(tmp_path, monkeypa
 
     seen = []
 
-    async def fake_resolve(request, context=None):
+    async def fake_resolve(request, context=None, **kwargs):
         seen.append(context.worker_python if context else None)
         return fake_backend.FakeBackend().resolve(request)
 

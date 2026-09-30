@@ -7,7 +7,12 @@ from pathlib import Path
 from typing import Any
 
 from magnet_evals.contracts import EvaluationRequest, MeasurementIdentity
-from magnet_evals.jsonutil import normalize_json_object, sha256_file, sha256_json
+from magnet_evals.jsonutil import (
+    SECRET_NAME_FIELDS,
+    normalize_json_object,
+    sha256_file,
+    sha256_json,
+)
 
 # v2: resolved content digests (``identity_facts``) and adapter source identity
 # participate in the digest; v1 hashed neither.
@@ -29,19 +34,50 @@ def _without_path(value: Any, path: Sequence[str]) -> Any:
     return copied
 
 
-def identity_request(request: EvaluationRequest) -> dict[str, Any]:
+def _without_empty_mappings(value: Any) -> Any:
+    """Drop empty mappings at any depth: an empty option block and an absent one
+    configure the same thing (e.g. after an endpoint URL was stripped)."""
+    if isinstance(value, Mapping):
+        pruned = {key: _without_empty_mappings(item) for key, item in value.items()}
+        return {key: item for key, item in pruned.items() if not (isinstance(item, Mapping) and not item)}
+    if isinstance(value, (list, tuple)):
+        return [_without_empty_mappings(item) for item in value]
+    return value
+
+
+def _without_secret_names(value: Any) -> Any:
+    """``value`` without any credential-name list (``required_secrets``), at any depth."""
+    if isinstance(value, Mapping):
+        return {
+            key: _without_secret_names(item)
+            for key, item in value.items() if str(key) not in SECRET_NAME_FIELDS
+        }
+    if isinstance(value, (list, tuple)):
+        return [_without_secret_names(item) for item in value]
+    return value
+
+
+def identity_request(
+    request: EvaluationRequest, operational_request_paths: Sequence[Sequence[str]] = (),
+) -> dict[str, Any]:
     """The request as a measurement input, without its operational fields.
 
-    ``engine_options.required_secrets`` names credentials the run needs, and a
-    model binding's ``provider_options.base_url`` says where an endpoint is
-    reached. Neither changes what is measured: the model's identity is its
-    ``revision``/``cache_token``, which a reusable identity requires anyway.
+    Credential names (every ``required_secrets`` list, wherever the request
+    allows one) say which credentials a run needs, and endpoint URLs say where
+    a model is reached: a model binding's ``provider_options.base_url``, plus
+    any engine-specific location an adapter declares in
+    ``operational_request_paths`` (e.g. OLMo's
+    ``engine_options.harness_config.provider.base_url``). None of them changes
+    what is measured: the model's identity is its ``revision``/``cache_token``,
+    which a reusable identity requires anyway.
     """
-    data = _without_path(request.to_dict(), ('engine_options', 'required_secrets'))
+    data = _without_secret_names(request.to_dict())
     data['models'] = [
         _without_path(binding, ('provider_options', 'base_url')) for binding in data['models']
     ]
-    return data
+    for path in operational_request_paths:
+        data = _without_path(data, tuple(path))
+    return _without_empty_mappings(data)
 
 
 def adapter_source_digest(package: str | None) -> str:
@@ -96,6 +132,7 @@ def measurement_inputs(
     resolved_facts: Mapping[str, Any],
     identity_facts: Mapping[str, Any] | None = None,
     operational_native_paths: Sequence[Sequence[str]] = (),
+    operational_request_paths: Sequence[Sequence[str]] = (),
 ) -> dict[str, Any]:
     """Build the canonical scientific inputs to the measurement.
 
@@ -118,7 +155,7 @@ def measurement_inputs(
             'adapter_version': adapter_version,
             'engine_version': engine_version,
             'engine_revision': resolved_facts.get('engine_revision'),
-            'request': identity_request(request),
+            'request': identity_request(request, operational_request_paths),
             'native_config': dict(native_config),
             'identity_facts': dict(identity_facts or {}),
         }
@@ -134,6 +171,7 @@ def build_measurement_identity(
     resolved_facts: Mapping[str, Any],
     identity_facts: Mapping[str, Any] | None = None,
     operational_native_paths: Sequence[Sequence[str]] = (),
+    operational_request_paths: Sequence[Sequence[str]] = (),
 ) -> MeasurementIdentity:
     inputs = measurement_inputs(
         request,
@@ -143,6 +181,7 @@ def build_measurement_identity(
         resolved_facts=resolved_facts,
         identity_facts=identity_facts,
         operational_native_paths=operational_native_paths,
+        operational_request_paths=operational_request_paths,
     )
     reasons = _unknown_identity_reasons(request, resolved_facts, identity_facts or {})
     return MeasurementIdentity(

@@ -190,3 +190,13 @@ def test_operational_request_fields_do_not_change_the_measurement():
     identity = build_measurement_identity(make_request(), adapter_version='a', engine_version='1',
                                           native_config={}, resolved_facts={})
     assert identity.algorithm == 'aiq-evals-measurement-v3+sha256'
+
+
+def test_nested_secret_names_do_not_change_the_measurement():
+    # required_secrets is recognized at any depth (e.g. inside a harness config).
+    def digest(names):
+        request = make_request(engine_options={'harness_config': {'provider': {'required_secrets': names}}})
+        return build_measurement_identity(request, adapter_version='a', engine_version='1',
+                                          native_config={}, resolved_facts={}).digest
+
+    assert digest(['KEY_A']) == digest(['KEY_B'])

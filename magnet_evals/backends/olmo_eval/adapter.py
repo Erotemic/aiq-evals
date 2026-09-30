@@ -382,6 +382,7 @@ class OlmoEvalBackend:
             resolved_facts=resolved_facts,
             identity_facts=identity_facts,
             operational_native_paths=[('harness_config', 'provider', 'base_url')],
+            operational_request_paths=[('engine_options', 'harness_config', 'provider', 'base_url')],
         )
         return ResolvedEvaluation(
             request=request,

@@ -563,11 +563,12 @@ async def import_evaluation_async(
     ``source`` that leave it are refused unless ``allow_external_symlinks`` is set
     for a trusted source; followed links are listed in the manifest.
     """
+    # Reading native artifacts needs no credentials, so declared secrets are
+    # not required here (they are scrubbed from the result if present).
     if isinstance(request_or_resolved, EvaluationRequest):
-        resolved = await resolve_evaluation_async(request_or_resolved, context)
+        resolved = await resolve_evaluation_async(request_or_resolved, context, require_secrets=False)
     else:
         resolved = request_or_resolved
-        check_required_secrets(resolved.request, context)
     secrets = effective_secrets(resolved.request, context)
     source_path = Path(source).expanduser().absolute()
     context.output_dir.parent.mkdir(parents=True, exist_ok=True)

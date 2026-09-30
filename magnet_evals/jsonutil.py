@@ -26,7 +26,7 @@ _SECRET_FRAGMENTS = (
 )
 
 # These fields contain *names* of environment variables, not credential values.
-_SECRET_NAME_FIELDS = {'required_secrets'}
+SECRET_NAME_FIELDS = {'required_secrets'}
 
 
 def normalize_json(value: Any, *, path: str = '$') -> JSONValue:
@@ -106,7 +106,7 @@ def find_secret_paths(value: Any, *, path: str = '$') -> list[str]:
         for key, item in value.items():
             key_text = str(key).lower().replace('-', '_')
             child = f'{path}.{key}'
-            if key_text not in _SECRET_NAME_FIELDS:
+            if key_text not in SECRET_NAME_FIELDS:
                 if any(fragment in key_text for fragment in _SECRET_FRAGMENTS):
                     found.append(child)
                 found.extend(find_secret_paths(item, path=child))
@@ -137,7 +137,7 @@ def required_secret_names(value: Any) -> list[str]:
     names: list[str] = []
     if isinstance(value, Mapping):
         for key, item in value.items():
-            if str(key) in _SECRET_NAME_FIELDS and isinstance(item, Sequence) and not isinstance(item, str):
+            if str(key) in SECRET_NAME_FIELDS and isinstance(item, Sequence) and not isinstance(item, str):
                 names.extend(str(name) for name in item)
             else:
                 names.extend(required_secret_names(item))

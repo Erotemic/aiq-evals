@@ -33,9 +33,14 @@ Secrets are never identity inputs. Secret *names* or required capabilities may
 be persisted where needed; secret values may not.
 
 Operational request fields are not identity inputs either (identity algorithm
-v3, 2026-09-29): `engine_options.required_secrets` (which credentials a run
-needs) and a model binding's `provider_options.base_url` (where an endpoint is
-reached), including an adapter's copy of that URL in its native config. The
+v3, 2026-09-29): every `required_secrets` list, at any depth (which
+credentials a run needs), and endpoint URLs (where a model is reached): a
+model binding's `provider_options.base_url`, the engine-specific locations an
+adapter declares (OLMo's `engine_options.harness_config.provider.base_url`),
+and adapters' copies of the URL in native config. Empty option blocks left
+behind compare equal to absent ones. Because credentials are operational,
+`ensure` does not need them to reuse a stored result; only execution checks
+them, and an import (which only reads native files) never does. The
 model's identity is its `revision`/`cache_token`, which a reusable identity
 requires. Every other provider option still counts.
 

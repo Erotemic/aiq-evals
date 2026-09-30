@@ -107,10 +107,13 @@ async def ensure_evaluation_async(
         timeout_seconds=timeout_seconds,
         model_endpoints=dict(model_endpoints or {}),
     )
+    # Credentials are operational (identity v3): reusing a stored result must
+    # not need them. Execution checks them (run_evaluation_async); reading
+    # native artifacts for an import needs none.
     resolved = (
         request
         if isinstance(request, ResolvedEvaluation)
-        else await resolve_evaluation_async(request, base)
+        else await resolve_evaluation_async(request, base, require_secrets=False)
     )
 
     if import_source is not None:
