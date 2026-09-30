@@ -365,3 +365,20 @@ def test_harness_endpoint_url_is_not_a_measurement_input(monkeypatch):
                              provider_options={'base_url': 'http://c/v1'}),),
     ))
     assert via_binding.identity == a.identity  # both locations measure the same thing
+
+
+def test_nested_secret_names_in_the_harness_are_not_measurement_inputs(monkeypatch):
+    # OLMo copies harness_config into native_config; a credential-name list
+    # there must not change the measurement either (identity v3).
+    patch_runtime(monkeypatch)
+    backend = OlmoEvalBackend()
+
+    def with_secret(name):
+        return backend.resolve(make_request(engine_options={
+            'upstream_revision': 'e' * 40,
+            'harness_config': {'provider': {'required_secrets': [name]}},
+        }))
+
+    a, b = with_secret('KEY_A'), with_secret('KEY_B')
+    assert a.identity == b.identity
+    assert a.native_config['harness_config']['provider']['required_secrets'] == ['KEY_A']

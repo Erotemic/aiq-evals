@@ -146,8 +146,13 @@ def measurement_inputs(
     keys of ``native_config`` that carry operational request fields (e.g. an
     adapter's copy of the endpoint URL); they are left out like the request's.
     """
+    # Adapters may copy request parts verbatim (OLMo keeps harness_config), so
+    # the same operational rules apply to native_config: no credential-name
+    # list at any depth, no declared endpoint copies, no emptied blocks.
+    native_config = _without_secret_names(native_config)
     for path in operational_native_paths:
         native_config = _without_path(native_config, tuple(path))
+    native_config = _without_empty_mappings(native_config)
     return normalize_json_object(
         {
             'identity_schema': 3,
