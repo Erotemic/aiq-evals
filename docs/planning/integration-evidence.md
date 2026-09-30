@@ -90,6 +90,15 @@ identity v3) and MAGNET:
 | container + lease lost the served-model check | `INFER_STACK_ENDPOINT_<ALIAS>` forwarded into the container for each leased alias; a missing variable is an error, never assumed | `test_leasing_is_decided_by_a_gate_when_the_node_runs`; live `test_a_leased_container_verifies_the_served_model` (alias `example-lease` serves `gpt-4o-mini`; fails with forwarding disabled) |
 | operational fields in the identity | identity v3 drops `required_secrets` and `provider_options.base_url` (and adapter copies) | `test_operational_request_fields_do_not_change_the_measurement`, `test_endpoint_url_is_not_a_measurement_input` (Inspect, OLMo) |
 
+A fourth review found, and this fixed (aiq-magnet-evals `5d55369`, MAGNET's
+following commit):
+
+| Finding | Fix | Test |
+| --- | --- | --- |
+| MAGNET required raw request equality, so identity-v3 reuse after only an endpoint or credential-name change started a lease or looked invalid | a run pinned by measurement digest is accepted on identity and slot; `evaluation.json` must still record the scheduled request | `test_reuse_across_operational_request_changes_is_valid_evidence`; live: endpoint-only change reuses with no new lease |
+| nested `required_secrets` and OLMo's `harness_config.provider.base_url` still changed the digest | all secret-name lists removed at any depth; adapters declare request-level endpoint paths; empty blocks pruned | `test_nested_secret_names_do_not_change_the_measurement`, `test_harness_endpoint_url_is_not_a_measurement_input` |
+| reuse required credentials | `ensure` resolves without the secret check; execution checks; imports never need them | `test_reuse_does_not_need_the_credentials_execution_needed` |
+
 The review's plan-accounting points are now explicit scope revisions R1-R4 in
 `aiq-evals-plan.md`: OLMo sandboxing, OLMo judge errors, release smoke checks
 (release gate G10), and the MAGNET M1 migration.
@@ -106,7 +115,7 @@ Two further defects found and fixed during this pass:
 
 MAGNET's full suite, with every integration prerequisite required
 (`PATH=<helm-venv>/bin:$PATH MAGNET_REQUIRE_AIQ_EVALS=1 MAGNET_TEST_DOCKER=1 ... python -m pytest -q magnet tests`,
-Docker group): 470 passed, 16 skipped (MAGNET's own optional skips), 0 failed.
+Docker group): 471 passed, 16 skipped (MAGNET's own optional skips), 0 failed.
 The legacy evaluator, HELM loaders/materialization, predictor, and llama/theory
 card tests are unchanged and pass. (Card nodes run a bare `python`, so the venv
 must be on `PATH`; without it, 4 card tests fail on `main` too.)
@@ -226,7 +235,7 @@ evaluation, `NOT_EVALUATED`), `test_static_errors_surface_in_a_dry_run`, and
 | dashboard/card compatibility | `test_one_helm_evaluation_becomes_one_claim_row`: `card.yaml`, log, `results/*/verdict.json` with concrete symbols, `verdict.json` (the eval-card-viz upload contract; the viewer itself was not run) |
 | HELM legacy regression | E-M1 |
 
-Run: `python -m pytest -q tests/test_aiq_evals_integration.py` gives 37 passed;
+Run: `python -m pytest -q tests/test_aiq_evals_integration.py` gives 38 passed;
 `tests/test_aiq_evals_examples.py` gives 19 passed; the container test gives
 1 passed (Docker group); `tests/test_aiq_evals_lease.py` gives 3 passed.
 
@@ -244,9 +253,9 @@ reproduction".
 
 `AIQ_MAGNET_EVALS_DIR=<aiq-magnet-evals checkout> dev/ci/aiq_evals_integration.sh <fresh dir>`
 (run with Docker group access) builds all four environments from scratch and
-runs the four files with `MAGNET_REQUIRE_AIQ_EVALS=1`: 60 passed, 0 skipped
-(37 integration, 19 examples, 1 container, 3 live leases), exit 0, with
-aiq-magnet-evals `ece89b4`.
+runs the four files with `MAGNET_REQUIRE_AIQ_EVALS=1`: 61 passed, 0 skipped
+(38 integration, 19 examples, 1 container, 3 live leases), exit 0, with
+aiq-magnet-evals `5d55369`.
 
 ## Open
 
