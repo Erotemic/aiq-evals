@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-import argparse
 import asyncio
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+import kwconf
+
+from magnet_evals._version import __version__
 from magnet_evals.backends.registry import registrations
 from magnet_evals.contracts import EvaluationRequest, ExecutionContext
 from magnet_evals.engines import ENGINE_SPECS
@@ -23,88 +25,6 @@ from magnet_evals.runner import (
     run_evaluation,
     validate_request,
 )
-
-
-def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog='aiq-magnet-evals',
-        description='Backend-agnostic evaluation runtime and artifact tooling.',
-    )
-    sub = parser.add_subparsers(dest='command', required=True)
-
-    status = sub.add_parser('phase1-status', help='Show the refined phase-1 checklist.')
-    status.add_argument('--json', action='store_true', help='Emit JSON instead of text.')
-
-    probe = sub.add_parser(
-        'phase1-probe',
-        help='Capture local package/source facts without executing native evaluations.',
-    )
-    probe.add_argument(
-        '--checkout',
-        action='append',
-        default=[],
-        metavar='ENGINE=PATH',
-        help='Inspect an upstream checkout; may be repeated.',
-    )
-    probe.add_argument('--output', type=Path, help='Write a JSON probe report here.')
-
-    engines = sub.add_parser('engines', help='Show phase-1 engine research metadata.')
-    engines.add_argument('--json', action='store_true')
-
-    backends = sub.add_parser('backends', help='Show implemented lazy backend adapters.')
-    backends.add_argument('--json', action='store_true')
-
-    validate = sub.add_parser(
-        'validate',
-        help='Statically validate a request without importing the native engine.',
-    )
-    validate.add_argument('request', type=Path)
-
-    resolve = sub.add_parser(
-        'resolve',
-        help='Resolve a request in the native engine environment and print its identity.',
-    )
-    resolve.add_argument('request', type=Path)
-    resolve.add_argument('--output', type=Path)
-    resolve.add_argument('--worker-python', help='Resolve inside this engine interpreter.')
-
-    ensure = sub.add_parser(
-        'ensure',
-        help='Reuse a validated stored result, or import/execute and publish one.',
-    )
-    ensure.add_argument('request', type=Path)
-    ensure.add_argument('--store', type=Path, required=True)
-    ensure.add_argument('--worker-python')
-    ensure.add_argument('--timeout', type=float)
-    ensure.add_argument('--import-source', type=Path, help='Import these native artifacts instead of executing.')
-    ensure.add_argument(
-        '--allow-external-symlinks', action='store_true',
-        help='Follow symlinks leaving the import source (trusted sources only).',
-    )
-
-    run = sub.add_parser('run', help='Execute a request and atomically publish a run bundle.')
-    run.add_argument('request', type=Path)
-    run.add_argument('--output', type=Path, required=True)
-    run.add_argument('--worker-python')
-    run.add_argument('--timeout', type=float)
-
-    imp = sub.add_parser(
-        'import-native',
-        help='Import native engine artifacts into an engine-free run bundle.',
-    )
-    imp.add_argument('request', type=Path)
-    imp.add_argument('source', type=Path)
-    imp.add_argument('--output', type=Path, required=True)
-    imp.add_argument('--worker-python', help='Resolve and read native artifacts in this engine interpreter.')
-    imp.add_argument(
-        '--allow-external-symlinks', action='store_true',
-        help='Follow symlinks leaving the import source (trusted sources only).',
-    )
-
-    show = sub.add_parser('show', help='Inspect a published run without engine dependencies.')
-    show.add_argument('run_dir', type=Path)
-    show.add_argument('--no-verify', action='store_true')
-    return parser
 
 
 def _load_request(path: Path) -> EvaluationRequest:
@@ -162,10 +82,10 @@ def _backends(as_json: bool) -> int:
     return 0
 
 
-def _phase1_probe(args: argparse.Namespace) -> int:
+def _phase1_probe(args) -> int:
     records = probe_all_engine_imports()
     records.extend(probe_all_api_surfaces())
-    for engine, path in _parse_checkouts(args.checkout).items():
+    for engine, path in _parse_checkouts(list(args.checkout or [])).items():
         records.extend(inspect_checkout(engine, path))
     report = ProbeReport(
         schema_version=1,
@@ -174,7 +94,7 @@ def _phase1_probe(args: argparse.Namespace) -> int:
         records=records,
     )
     if args.output:
-        path = report.write_json(args.output)
+        path = report.write_json(Path(args.output))
         print(path)
     else:
         print(json.dumps(report.to_dict(), indent=2, sort_keys=True))
@@ -205,9 +125,9 @@ def _resolve(path: Path, output: Path | None, worker_python: str | None = None) 
     return 0
 
 
-def _ensure(args: argparse.Namespace) -> int:
+def _ensure(args) -> int:
     outcome = ensure_evaluation(
-        _load_request(args.request),
+        _load_request(Path(args.request)),
         args.store,
         worker_python=args.worker_python,
         timeout_seconds=args.timeout,
@@ -227,10 +147,10 @@ def _ensure(args: argparse.Namespace) -> int:
     return 0 if outcome.run.result.status == 'succeeded' else 2
 
 
-def _run(args: argparse.Namespace) -> int:
-    request = _load_request(args.request)
+def _run(args) -> int:
+    request = _load_request(Path(args.request))
     context = ExecutionContext(
-        output_dir=args.output,
+        output_dir=Path(args.output),
         worker_python=args.worker_python,
         timeout_seconds=args.timeout,
     )
@@ -239,9 +159,9 @@ def _run(args: argparse.Namespace) -> int:
     return 0 if bundle.result.status == 'succeeded' else 2
 
 
-def _import_native(args: argparse.Namespace) -> int:
-    request = _load_request(args.request)
-    context = ExecutionContext(output_dir=args.output, worker_python=args.worker_python)
+def _import_native(args) -> int:
+    request = _load_request(Path(args.request))
+    context = ExecutionContext(output_dir=Path(args.output), worker_python=args.worker_python)
     bundle = import_evaluation(
         request, args.source, context, allow_external_symlinks=args.allow_external_symlinks
     )
@@ -249,7 +169,7 @@ def _import_native(args: argparse.Namespace) -> int:
     return 0 if bundle.result.status == 'succeeded' else 2
 
 
-def _show(args: argparse.Namespace) -> int:
+def _show(args) -> int:
     bundle = load_run(args.run_dir, verify_checksums=not args.no_verify)
     payload = {
         'path': str(bundle.path),
@@ -265,26 +185,159 @@ def _show(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cli_args(cls, argv, kwargs):
+    return cls.cli(argv=argv, data=kwargs, strict=True, special_options=False)
+
+
+class Phase1StatusCLI(kwconf.Config):
+    """Show the refined phase-1 checklist."""
+
+    emit_json = kwconf.Value(False, isflag=True, alias=['json'], help='Emit JSON instead of text.')
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _phase1_status(_cli_args(cls, argv, kwargs).emit_json)
+
+
+class Phase1ProbeCLI(kwconf.Config):
+    """Capture local package/source facts without executing native evaluations."""
+
+    checkout = kwconf.Value(
+        [], nargs='*', parser=str,
+        help='Upstream checkouts to inspect, as ENGINE=PATH (several may follow one --checkout).',
+    )
+    output = kwconf.Value(None, parser=str, help='Write a JSON probe report here.')
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _phase1_probe(_cli_args(cls, argv, kwargs))
+
+
+class EnginesCLI(kwconf.Config):
+    """Show phase-1 engine research metadata."""
+
+    emit_json = kwconf.Value(False, isflag=True, alias=['json'], help='Emit JSON instead of text.')
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _engines(_cli_args(cls, argv, kwargs).emit_json)
+
+
+class BackendsCLI(kwconf.Config):
+    """Show implemented lazy backend adapters."""
+
+    emit_json = kwconf.Value(False, isflag=True, alias=['json'], help='Emit JSON instead of text.')
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _backends(_cli_args(cls, argv, kwargs).emit_json)
+
+
+class ValidateCLI(kwconf.Config):
+    """Statically validate a request without importing the native engine."""
+
+    request = kwconf.Value(None, position=1, required=True, parser=str, help='Request JSON file.')
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _validate(Path(_cli_args(cls, argv, kwargs).request))
+
+
+class ResolveCLI(kwconf.Config):
+    """Resolve a request in the native engine environment and print its identity."""
+
+    request = kwconf.Value(None, position=1, required=True, parser=str, help='Request JSON file.')
+    output = kwconf.Value(None, parser=str, help='Write the resolved request here.')
+    worker_python = kwconf.Value(None, parser=str, help='Resolve inside this engine interpreter.')
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        args = _cli_args(cls, argv, kwargs)
+        output = None if args.output is None else Path(args.output)
+        return _resolve(Path(args.request), output, args.worker_python)
+
+
+class EnsureCLI(kwconf.Config):
+    """Reuse a validated stored result, or import/execute and publish one."""
+
+    request = kwconf.Value(None, position=1, required=True, parser=str, help='Request JSON file.')
+    store = kwconf.Value(None, required=True, parser=str, help='Result store directory.')
+    worker_python = kwconf.Value(None, parser=str, help='Engine worker interpreter.')
+    timeout = kwconf.Value(None, type=float, help='Execution timeout in seconds.')
+    import_source = kwconf.Value(None, parser=str, help='Import these native artifacts instead of executing.')
+    allow_external_symlinks = kwconf.Value(
+        False, isflag=True, help='Follow symlinks leaving the import source (trusted sources only).',
+    )
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _ensure(_cli_args(cls, argv, kwargs))
+
+
+class RunCLI(kwconf.Config):
+    """Execute a request and atomically publish a run bundle."""
+
+    request = kwconf.Value(None, position=1, required=True, parser=str, help='Request JSON file.')
+    output = kwconf.Value(None, required=True, parser=str, help='Run bundle directory to publish.')
+    worker_python = kwconf.Value(None, parser=str, help='Engine worker interpreter.')
+    timeout = kwconf.Value(None, type=float, help='Execution timeout in seconds.')
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _run(_cli_args(cls, argv, kwargs))
+
+
+class ImportNativeCLI(kwconf.Config):
+    """Import native engine artifacts into an engine-free run bundle."""
+
+    request = kwconf.Value(None, position=1, required=True, parser=str, help='Request JSON file.')
+    source = kwconf.Value(None, position=2, required=True, parser=str, help='Native artifacts to import.')
+    output = kwconf.Value(None, required=True, parser=str, help='Run bundle directory to publish.')
+    worker_python = kwconf.Value(
+        None, parser=str, help='Resolve and read native artifacts in this engine interpreter.',
+    )
+    allow_external_symlinks = kwconf.Value(
+        False, isflag=True, help='Follow symlinks leaving the import source (trusted sources only).',
+    )
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _import_native(_cli_args(cls, argv, kwargs))
+
+
+class ShowCLI(kwconf.Config):
+    """Inspect a published run without engine dependencies."""
+
+    run_dir = kwconf.Value(None, position=1, required=True, parser=str, help='Run bundle directory.')
+    no_verify = kwconf.Value(False, isflag=True, help='Skip checksum verification.')
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _show(_cli_args(cls, argv, kwargs))
+
+
+class AiqMagnetEvalsCLI(kwconf.ModalCLI):
+    """Backend-agnostic evaluation runtime and artifact tooling."""
+
+    __prog__ = 'aiq-magnet-evals'
+    __version__ = __version__
+
+
+for _command, _cli in (
+    ('phase1-status', Phase1StatusCLI),
+    ('phase1-probe', Phase1ProbeCLI),
+    ('engines', EnginesCLI),
+    ('backends', BackendsCLI),
+    ('validate', ValidateCLI),
+    ('resolve', ResolveCLI),
+    ('ensure', EnsureCLI),
+    ('run', RunCLI),
+    ('import-native', ImportNativeCLI),
+    ('show', ShowCLI),
+):
+    AiqMagnetEvalsCLI.register(_cli, command=_command)
+
+
 def main(argv: list[str] | None = None) -> int:
-    args = _parser().parse_args(argv)
-    if args.command == 'phase1-status':
-        return _phase1_status(args.json)
-    if args.command == 'phase1-probe':
-        return _phase1_probe(args)
-    if args.command == 'engines':
-        return _engines(args.json)
-    if args.command == 'backends':
-        return _backends(args.json)
-    if args.command == 'validate':
-        return _validate(args.request)
-    if args.command == 'resolve':
-        return _resolve(args.request, args.output, args.worker_python)
-    if args.command == 'ensure':
-        return _ensure(args)
-    if args.command == 'run':
-        return _run(args)
-    if args.command == 'import-native':
-        return _import_native(args)
-    if args.command == 'show':
-        return _show(args)
-    raise AssertionError(args.command)
+    """Console entry point (``aiq-magnet-evals``); returns the exit status."""
+    return AiqMagnetEvalsCLI.main(argv=argv)

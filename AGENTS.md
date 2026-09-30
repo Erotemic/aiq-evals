@@ -65,12 +65,17 @@ normalization changes, regenerate them with
 ## Dependency rule
 
 Core must remain Python >=3.11 and import without any evaluation engine
-installed. Heavy/conflicting engines may run in isolated, pinned worker
+installed. Its only runtime dependency is kwconf (for the CLIs). Heavy/conflicting engines may run in isolated, pinned worker
 checkouts/environments.
 
 ## Style
 
 - Never use `import *`.
+- Every CLI uses kwconf (`kwconf.Config`, `kwconf.ModalCLI` for subcommands),
+  never argparse. kwconf is core's only runtime dependency (pure Python, no
+  dependencies); import it only where a CLI needs it, so `import magnet_evals`
+  and modules used inside engine environments work without it. Workers get it
+  from the caller through `worker_package_path`.
 - Prefer explicit small dataclasses/protocols over framework-heavy abstractions.
 - Keep engine imports lazy.
 - Preserve native artifacts instead of fabricating missing provenance.

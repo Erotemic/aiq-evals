@@ -76,14 +76,24 @@ def chat_server(tool_name: str = "double"):
         DeterministicChatHandler.tool_name = "double"
 
 
-if __name__ == "__main__":
-    # Standalone use (dev/walkthrough.sh): serve until killed, writing the port.
-    import argparse
-    import pathlib
+class ChatServerCLI:
+    """Standalone use: serve until killed, writing the port (kwconf CLI)."""
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--port-file", required=True)
-    args = parser.parse_args()
-    with chat_server() as port:
-        pathlib.Path(args.port_file).write_text(str(port))
-        threading.Event().wait()
+    @staticmethod
+    def main(argv=True) -> int:
+        import pathlib
+
+        import kwconf
+
+        class Config(kwconf.Config):
+            port_file = kwconf.Value(None, required=True, parser=str, help="Write the bound port here.")
+
+        args = Config.cli(argv=argv, strict=True, special_options=False)
+        with chat_server() as port:
+            pathlib.Path(args.port_file).write_text(str(port))
+            threading.Event().wait()
+        return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(ChatServerCLI.main())

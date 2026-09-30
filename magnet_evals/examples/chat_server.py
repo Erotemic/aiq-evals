@@ -7,15 +7,14 @@ once a tool result is present it answers "4".
 
 Run it standalone::
 
-    python -m magnet_evals.examples.chat_server --port-file port.txt \\
-        [--port 0] [--tool-name aiq_example_double]
+    python -m magnet_evals.examples.chat_server --port_file port.txt \\
+        [--port 0] [--tool_name aiq_example_double]
 
 and point a model binding's ``provider_options.base_url`` at
 ``http://127.0.0.1:<port>/v1``.
 """
 from __future__ import annotations
 
-import argparse
 import contextlib
 import json
 import threading
@@ -83,15 +82,29 @@ def chat_server(tool_name: str = DEFAULT_TOOL, port: int = 0) -> Iterator[int]:
         thread.join()
 
 
+def _cli_class():
+    # kwconf is imported only for the CLI: engine environments import this
+    # module for chat_server() without it.
+    import kwconf
+
+    class ChatServerCLI(kwconf.Config):
+        """Serve the deterministic OpenAI-compatible example endpoint."""
+
+        __prog__ = 'python -m magnet_evals.examples.chat_server'
+
+        port_file = kwconf.Value(None, parser=str, help='Write the bound port here once serving.')
+        port = kwconf.Value(0, type=int, help='Port to bind (0 picks a free one).')
+        tool_name = kwconf.Value(DEFAULT_TOOL, parser=str, help='Tool the first reply asks to call.')
+
+    return ChatServerCLI
+
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog='python -m magnet_evals.examples.chat_server')
-    parser.add_argument('--port-file', type=Path, help='write the bound port here once serving')
-    parser.add_argument('--port', type=int, default=0)
-    parser.add_argument('--tool-name', default=DEFAULT_TOOL)
-    args = parser.parse_args(argv)
+    cls = _cli_class()
+    args = cls.cli(argv=True if argv is None else argv, strict=True, special_options=False)
     with chat_server(args.tool_name, args.port) as port:
         if args.port_file is not None:
-            args.port_file.write_text(str(port))
+            Path(args.port_file).write_text(str(port))
         print(f'serving on http://127.0.0.1:{port}/v1', flush=True)
         try:
             threading.Event().wait()

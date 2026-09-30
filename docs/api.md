@@ -34,7 +34,11 @@ Errors derive from `magnet_evals.errors.AiqEvalsError`. The main ones are
 `RequestValidationError`, `MissingDependencyError`, `EngineCompatibilityError`,
 `ExecutionError`, `ArtifactError`, and `ActiveEventLoopError`.
 
-## CLI (`aiq-magnet-evals`)
+## CLI (`aiq-magnet-evals`, alias `aiq-evals`)
+
+Built with kwconf (`aiq-magnet-evals <command> --help`). Options accept
+`--name value`, `--name=value`, and dashed or underscored spellings.
+`phase1-probe --checkout` takes several `ENGINE=PATH` values after one flag.
 
 | Command | Purpose |
 | --- | --- |

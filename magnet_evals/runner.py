@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import importlib.util
 import json
 import os
 import secrets
@@ -115,44 +116,56 @@ def _worker_result_path(work_dir: Path) -> Path:
     return work_dir / '.aiq-evals-worker' / 'result.json'
 
 
-_WORKER_PATH_CACHE: dict[Path, str] = {}
+_WORKER_PATH_CACHE: dict[tuple, str] = {}
+
+
+#: Packages a worker imports from the caller: magnet_evals itself and its one
+#: runtime dependency (kwconf, pure Python, no dependencies of its own).
+WORKER_PACKAGES = ('magnet_evals', 'kwconf')
+
+
+def _package_dir(name: str) -> Path:
+    spec = importlib.util.find_spec(name)
+    if spec is None or not spec.submodule_search_locations:
+        raise errors_module.MissingDependencyError(f'{name!r} must be importable to start a worker')
+    return Path(next(iter(spec.submodule_search_locations))).resolve()
 
 
 def worker_package_path() -> str:
-    """A directory that exposes exactly this ``magnet_evals`` package to a worker.
+    """A directory that exposes exactly the packages a worker needs.
 
     Engine workers run in their own environments, which need not have
     ``magnet_evals`` installed. Putting the parent of this package on their
     path would also expose everything installed beside it: for a wheel that is
     the caller's whole ``site-packages``, which would shadow the engine's own
     dependencies (possibly built for another Python). Instead a private
-    directory holds one symlink, ``magnet_evals``, to this package. It goes on
-    ``PYTHONPATH`` so engine-spawned children inherit it too.
+    directory holds one symlink per package in :data:`WORKER_PACKAGES`. It
+    goes on ``PYTHONPATH`` so engine-spawned children inherit it too.
     """
-    package = Path(__file__).resolve().parent
-    cached = _WORKER_PATH_CACHE.get(package)
-    if cached is not None and (Path(cached) / 'magnet_evals').resolve() == package:
+    packages = {name: _package_dir(name) for name in WORKER_PACKAGES}
+    key = tuple(sorted((name, str(path)) for name, path in packages.items()))
+    cached = _WORKER_PATH_CACHE.get(key)
+    if cached is not None and all((Path(cached) / n).resolve() == p for n, p in packages.items()):
         return cached
-    digest = hashlib.sha256(str(package).encode()).hexdigest()[:16]
+    digest = hashlib.sha256(repr(key).encode()).hexdigest()[:16]
     cache_home = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache')
-    candidates = [cache_home / 'magnet_evals' / 'worker-path' / digest]
-    for root in candidates:
-        try:
-            root.mkdir(parents=True, exist_ok=True, mode=0o700)
-            link = root / 'magnet_evals'
-            if not link.is_symlink() or link.resolve() != package:
-                staged = root / f'.magnet_evals.{os.getpid()}.{secrets.token_hex(4)}'
-                staged.symlink_to(package, target_is_directory=True)
+    root = cache_home / 'magnet_evals' / 'worker-path' / digest
+    try:
+        root.mkdir(parents=True, exist_ok=True, mode=0o700)
+        for name, target in packages.items():
+            link = root / name
+            if not link.is_symlink() or link.resolve() != target:
+                staged = root / f'.{name}.{os.getpid()}.{secrets.token_hex(4)}'
+                staged.symlink_to(target, target_is_directory=True)
                 os.replace(staged, link)  # atomic for concurrent workers
-            if root.stat().st_uid == os.getuid() and link.resolve() == package:
-                _WORKER_PATH_CACHE[package] = str(root)
-                return str(root)
-        except OSError:
-            continue
-    # Unwritable cache: a private per-process directory.
-    root = Path(tempfile.mkdtemp(prefix='magnet-evals-worker-path-'))
-    (root / 'magnet_evals').symlink_to(package, target_is_directory=True)
-    _WORKER_PATH_CACHE[package] = str(root)
+        if root.stat().st_uid != os.getuid():
+            raise OSError('worker path directory is not ours')
+    except OSError:
+        # Unwritable cache: a private per-process directory.
+        root = Path(tempfile.mkdtemp(prefix='magnet-evals-worker-path-'))
+        for name, target in packages.items():
+            (root / name).symlink_to(target, target_is_directory=True)
+    _WORKER_PATH_CACHE[key] = str(root)
     return str(root)
 
 

@@ -138,9 +138,7 @@ To inspect exact upstream source checkouts without importing them:
 
 ```bash
 aiq-magnet-evals phase1-probe \
-    --checkout olmo_eval=/path/to/olmo-eval \
-    --checkout inspect_ai=/path/to/inspect_ai \
-    --checkout helm=/path/to/helm \
+    --checkout olmo_eval=/path/to/olmo-eval inspect_ai=/path/to/inspect_ai helm=/path/to/helm \
     --output phase1-artifacts/local-probe.json
 ```
 

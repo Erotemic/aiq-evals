@@ -1,10 +1,11 @@
 """Private subprocess protocol for isolated native engine execution."""
 from __future__ import annotations
 
-import argparse
 import asyncio
 import json
 from pathlib import Path
+
+import kwconf
 
 from magnet_evals.backends.registry import get_backend
 from magnet_evals.contracts import (
@@ -15,27 +16,8 @@ from magnet_evals.contracts import (
 from magnet_evals.errors import AiqEvalsError
 
 
-def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog='python -m magnet_evals.worker')
-    sub = parser.add_subparsers(dest='command', required=True)
-    execute = sub.add_parser('execute')
-    execute.add_argument('--resolved', type=Path, required=True)
-    execute.add_argument('--output-dir', type=Path, required=True)
-    execute.add_argument('--result', type=Path, required=True)
-    execute.add_argument('--model-endpoints', default='{}')
-    imp = sub.add_parser('import')
-    imp.add_argument('--resolved', type=Path, required=True)
-    imp.add_argument('--source', type=Path, required=True)
-    imp.add_argument('--output-dir', type=Path, required=True)
-    imp.add_argument('--result', type=Path, required=True)
-    resolve = sub.add_parser('resolve')
-    resolve.add_argument('--request', type=Path, required=True)
-    resolve.add_argument('--result', type=Path, required=True)
-    return parser
-
-
-def _resolve(args: argparse.Namespace) -> int:
-    request = EvaluationRequest.from_dict(json.loads(args.request.read_text()))
+def _resolve(args) -> int:
+    request = EvaluationRequest.from_dict(json.loads(Path(args.request).read_text()))
     try:
         backend = get_backend(request.engine)
         backend.validate_request(request)
@@ -43,27 +25,27 @@ def _resolve(args: argparse.Namespace) -> int:
     except AiqEvalsError as ex:
         # Typed errors cross the process boundary; anything else is a crash.
         payload = {'error': {'type': type(ex).__name__, 'message': str(ex)}}
-    args.result.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+    Path(args.result).write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
     return 0
 
 
-def _import(args: argparse.Namespace) -> int:
-    resolved = ResolvedEvaluation.from_dict(json.loads(args.resolved.read_text()))
+def _import(args) -> int:
+    resolved = ResolvedEvaluation.from_dict(json.loads(Path(args.resolved).read_text()))
     try:
         backend = get_backend(resolved.request.engine)
-        result = backend.import_results(resolved, str(args.source), ExecutionContext(output_dir=args.output_dir))
+        result = backend.import_results(resolved, str(args.source), ExecutionContext(output_dir=Path(args.output_dir)))
         payload = {'result': result.to_dict()}
     except AiqEvalsError as ex:
         payload = {'error': {'type': type(ex).__name__, 'message': str(ex)}}
-    args.result.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+    Path(args.result).write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
     return 0
 
 
-def _execute(args: argparse.Namespace) -> int:
-    resolved = ResolvedEvaluation.from_dict(json.loads(args.resolved.read_text()))
+def _execute(args) -> int:
+    resolved = ResolvedEvaluation.from_dict(json.loads(Path(args.resolved).read_text()))
     backend = get_backend(resolved.request.engine)
     context = ExecutionContext(
-        output_dir=args.output_dir, model_endpoints=json.loads(args.model_endpoints)
+        output_dir=Path(args.output_dir), model_endpoints=json.loads(args.model_endpoints)
     )
     blocking = getattr(backend, 'execute_blocking', None)
     if callable(blocking):
@@ -74,20 +56,66 @@ def _execute(args: argparse.Namespace) -> int:
         # asyncio.run turns SIGINT into cancellation of this task, so native
         # async runners get their finally/cleanup paths.
         result = asyncio.run(backend.execute(resolved, context))
-    args.result.parent.mkdir(parents=True, exist_ok=True)
-    args.result.write_text(json.dumps(result.to_dict(), indent=2, sort_keys=True) + '\n')
+    result_path = Path(args.result)
+    result_path.parent.mkdir(parents=True, exist_ok=True)
+    result_path.write_text(json.dumps(result.to_dict(), indent=2, sort_keys=True) + '\n')
     return 0
 
 
+def _args(cls, argv, kwargs):
+    return cls.cli(argv=argv, data=kwargs, strict=True, special_options=False)
+
+
+class ExecuteCLI(kwconf.Config):
+    """Execute a resolved evaluation and write its result protocol file."""
+
+    resolved = kwconf.Value(None, required=True, parser=str)
+    output_dir = kwconf.Value(None, required=True, parser=str)
+    result = kwconf.Value(None, required=True, parser=str)
+    model_endpoints = kwconf.Value('{}', parser=str, help='JSON {role: base_url}')
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _execute(_args(cls, argv, kwargs))
+
+
+class ImportCLI(kwconf.Config):
+    """Read native artifacts for a resolved evaluation."""
+
+    resolved = kwconf.Value(None, required=True, parser=str)
+    source = kwconf.Value(None, required=True, parser=str)
+    output_dir = kwconf.Value(None, required=True, parser=str)
+    result = kwconf.Value(None, required=True, parser=str)
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _import(_args(cls, argv, kwargs))
+
+
+class ResolveCLI(kwconf.Config):
+    """Resolve a request in this engine environment."""
+
+    request = kwconf.Value(None, required=True, parser=str)
+    result = kwconf.Value(None, required=True, parser=str)
+
+    @classmethod
+    def main(cls, argv=True, **kwargs) -> int:
+        return _resolve(_args(cls, argv, kwargs))
+
+
+class WorkerCLI(kwconf.ModalCLI):
+    """Private subprocess protocol for isolated native engine execution."""
+
+    __prog__ = 'python -m magnet_evals.worker'
+
+
+WorkerCLI.register(ExecuteCLI, command='execute')
+WorkerCLI.register(ImportCLI, command='import')
+WorkerCLI.register(ResolveCLI, command='resolve')
+
+
 def main(argv: list[str] | None = None) -> int:
-    args = _parser().parse_args(argv)
-    if args.command == 'execute':
-        return _execute(args)
-    if args.command == 'import':
-        return _import(args)
-    if args.command == 'resolve':
-        return _resolve(args)
-    raise AssertionError(args.command)
+    return WorkerCLI.main(argv=argv)
 
 
 if __name__ == '__main__':

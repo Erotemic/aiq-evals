@@ -16,6 +16,6 @@ for attempt in 1 2 3; do
   [ "$attempt" = 3 ] && { echo 'external: uv sync failed 3 times' >&2; exit 1; }
   sleep $((attempt * 10))
 done
-uv pip install -q --python "$CHECKOUT/.venv/bin/python" pytest
+uv pip install -q --python "$CHECKOUT/.venv/bin/python" pytest kwconf  # the tests are the caller: magnet_evals needs kwconf
 PYTHONPATH="$PWD" "$CHECKOUT/.venv/bin/python" -m pytest -q \
   tests/native/test_olmo_native.py tests/native/test_conformance.py tests/native/test_examples_native.py

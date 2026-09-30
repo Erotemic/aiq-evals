@@ -189,6 +189,9 @@ wheels = [
 name = "aiq-magnet-evals"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "kwconf" },
+]
 
 [package.optional-dependencies]
 dev = [
@@ -210,6 +213,7 @@ tests = [
 requires-dist = [
     { name = "aiq-magnet-evals", extras = ["tests"], marker = "extra == 'dev'" },
     { name = "inspect-ai", marker = "extra == 'inspect'", specifier = "==0.3.272" },
+    { name = "kwconf", specifier = ">=0.12.0" },
     { name = "pytest", marker = "extra == 'tests'", specifier = ">=8.1.1" },
     { name = "pytest-cov", marker = "extra == 'tests'", specifier = ">=5" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9" },
@@ -1025,6 +1029,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/19/74/a633ee74eb36c44aa6d1095e7cc5569bebf04342ee146178e2d36600708b/jsonschema_specifications-2025.9.1.tar.gz", hash = "sha256:b540987f239e745613c7a9176f3edb72b832a4ac465cf02712288397832b5e8d", size = 32855, upload-time = "2025-09-08T01:34:59.186Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl", hash = "sha256:98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe", size = 18437, upload-time = "2025-09-08T01:34:57.871Z" },
+]
+
+[[package]]
+name = "kwconf"
+version = "0.12.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a4/a8/b49b210a85a785fa0cf6c849896c23b2286c7c3d01a8c7bd6d43e55751f6/kwconf-0.12.0.tar.gz", hash = "sha256:036437d556358ab5cb04d1d0f91185b9538b7abbc253cd58b662d46dc45fa4dd", size = 189608, upload-time = "2026-09-20T00:50:05.718Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7c/5f/d1f5f2771e807b41dfecc27753d3d96718d564c7abee6dcc30da928a61cd/kwconf-0.12.0-py3-none-any.whl", hash = "sha256:a78f9709618d6affe8f64988ed5b14592d4716883bb3f4cec6dedc0c955c7d2e", size = 121219, upload-time = "2026-09-20T00:50:03.95Z" },
 ]
 
 [[package]]
