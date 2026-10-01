@@ -220,6 +220,12 @@ comparison (two distinct measurement identities, `comparable: true`).
   inside the container. Preflight and executed digests agree. A second
   schedule re-resolves in the container and reuses the node.
 - Scheduler independence: serial throughout, and tmux in the concurrency test.
+- Real GPU serving: MAGNET's `dev/ci/aiq_evals_real_gpu.sh` and
+  `tests/test_aiq_evals_real_gpu.py` cover Inspect one-shot evaluation,
+  Inspect agentic tool execution, and OLMo agentic tool execution against a
+  GPU-served infer-stack endpoint. Canonical OLMo publication and reuse without
+  another leased command are covered separately by the mounted-worker/null-serving
+  regression in `tests/test_aiq_evals_lease.py`.
 
 ## E-M9 Dry run
 
@@ -273,10 +279,6 @@ aiq-magnet-evals `23ad474`.
 - **Hosted CI (G8)** has not run for either repository.
 - **M1 migration** of MAGNET's legacy HELM internals onto aiq-magnet-evals is
   deferred (see the plan).
-- **GPU-served leases.** Real `infer-stack run` leases are exercised with the
-  null serving backend (bookkeeping, environment, coalescing, release) against
-  the example endpoint. A lease that starts a real model (compose/kubeai
-  backends, GPUs) is not exercised here.
 - **Per-role endpoints** reach OLMo Eval's primary role only (it rejects
   auxiliary role bindings) and are unsupported for HELM (registry deployments).
 - **Untested capabilities** stay untested: OLMo sandboxes, log probabilities,
