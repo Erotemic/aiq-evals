@@ -143,15 +143,22 @@ def verify_engine_revision(
     dirty = False
     if module_file:
         path = Path(module_file).resolve()
+        # Operational diagnostics only: measurement_inputs excludes these paths.
+        facts['engine_module_file'] = str(path)
         try:
             root = Path(_git(path.parent, 'rev-parse', '--show-toplevel'))
+            facts['engine_checkout'] = str(root)
             # A site-packages install inside an unrelated repository (e.g. a
             # project .venv) is not the engine checkout: require it be tracked.
             _git(root, 'ls-files', '--error-unmatch', str(path))
             observed = _git(root, 'rev-parse', 'HEAD')
             dirty = bool(_git(root, 'status', '--porcelain', '--untracked-files=no'))
             facts['engine_revision_source'] = 'git-checkout'
-        except (OSError, subprocess.CalledProcessError):
+        except (OSError, subprocess.CalledProcessError) as ex:
+            facts['engine_checkout_probe_error'] = (
+                ex.stderr.strip() if isinstance(ex, subprocess.CalledProcessError)
+                else str(ex)
+            )
             observed = None
     if observed is None:
         observed = _installed_vcs_commit(distribution)

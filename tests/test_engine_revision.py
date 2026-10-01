@@ -65,3 +65,28 @@ def test_untracked_install_inside_other_repo_is_not_a_checkout(checkout):
         None, module_file=str(installed), distribution='definitely-not-installed'
     )
     assert revision is None and facts['observed_engine_revision'] is None
+
+
+def test_editable_worker_without_git_cannot_prove_revision(checkout, monkeypatch):
+    import importlib.metadata
+    from types import SimpleNamespace
+
+    _root, module, head = checkout
+    # uv sync's editable direct_url has dir_info, not vcs_info.commit_id.
+    monkeypatch.setattr(
+        importlib.metadata, 'distribution',
+        lambda distribution: SimpleNamespace(read_text=lambda name: (
+            '{"url":"file:///mounted/olmo","dir_info":{"editable":true}}'
+        )),
+    )
+    monkeypatch.setenv('PATH', '')
+    revision, facts, reasons = verify_engine_revision(
+        head, module_file=str(module), distribution='olmo-eval',
+    )
+    assert revision is None
+    assert facts['observed_engine_revision'] is None
+    assert facts['engine_module_file'] == str(module)
+    assert 'git' in facts['engine_checkout_probe_error']
+    assert reasons == [
+        'requested olmo-eval upstream_revision could not be verified against the executing source'
+    ]
