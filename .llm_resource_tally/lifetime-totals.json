@@ -19,16 +19,16 @@
     "non_committing_work": "requires_reconcile",
     "compaction_usage": "measured_signals_only_when_runtime_omits_usage"
   },
-  "through": "2026-09-30T02:16:28.675395+00:00",
-  "ledger_rows": 58,
-  "commits_accounted": 57,
-  "turns": 1197,
+  "through": "2026-10-01T20:28:10.242326+00:00",
+  "ledger_rows": 61,
+  "commits_accounted": 59,
+  "turns": 1235,
   "tokens": {
-    "input": 397324,
-    "cache_write": 3351781,
-    "cache_read": 408962269,
-    "output": 1028784,
-    "billable_input": 412711374
+    "input": 627172,
+    "cache_write": 3353778,
+    "cache_read": 412358471,
+    "output": 1047411,
+    "billable_input": 416339421
   },
   "by_model": {
     "gpt-6-sol": {
@@ -38,32 +38,38 @@
       "output": 78928
     },
     "claude-opus-5-5": {
-      "input": 1752,
-      "cache_write": 3351781,
-      "cache_read": 368387037,
-      "output": 949856
+      "input": 1754,
+      "cache_write": 3353778,
+      "cache_read": 369269575,
+      "output": 950571
+    },
+    "gpt-6.1-sol": {
+      "input": 229846,
+      "cache_write": 0,
+      "cache_read": 2513664,
+      "output": 17912
     }
   },
   "by_activity": {
     "unlabeled": {
-      "input": 397324,
-      "cache_write": 3351781,
-      "cache_read": 408962269,
-      "output": 1028784
+      "input": 627172,
+      "cache_write": 3353778,
+      "cache_read": 412358471,
+      "output": 1047411
     }
   },
   "by_agent": {
     "codex": {
-      "input": 395572,
+      "input": 625418,
       "cache_write": 0,
-      "cache_read": 40575232,
-      "output": 78928
+      "cache_read": 43088896,
+      "output": 96840
     },
     "claude-code": {
-      "input": 1752,
-      "cache_write": 3351781,
-      "cache_read": 368387037,
-      "output": 949856
+      "input": 1754,
+      "cache_write": 3353778,
+      "cache_read": 369269575,
+      "output": 950571
     }
   },
   "server_tool_calls": {
@@ -71,7 +77,7 @@
     "web_fetch": 0
   },
   "time": {
-    "wall_clock_s": 33438.3
+    "wall_clock_s": 43961.8
   },
   "compaction_signals": {
     "events": 0,
